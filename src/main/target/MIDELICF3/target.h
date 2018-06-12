@@ -154,3 +154,4 @@
 
 #define USABLE_TIMER_CHANNEL_COUNT 6
 #define USED_TIMERS             (TIM_N(1) | TIM_N(2) | TIM_N(3) | TIM_N(8) | TIM_N(15))
+#undef USE_RC_SMOOTHING_FILTER
