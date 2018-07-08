@@ -124,8 +124,8 @@
 #define USE_BRUSHED_ESC_AUTODETECT  // Detect if brushed motors are connected and set defaults appropriately to avoid motors spinning on boot
 #define USE_CLI
 #define USE_GYRO_REGISTER_DUMP  // Adds gyroregisters command to cli to dump configured register values
-#define USE_PPM
-#define USE_PWM
+//#define USE_PPM
+//#define USE_PWM
 #define USE_SERIAL_RX
 #define USE_SERIALRX_CRSF       // Team Black Sheep Crossfire protocol
 #define USE_SERIALRX_IBUS       // FlySky and Turnigy receivers
@@ -144,7 +144,8 @@
 #endif
 
 #if (FLASH_SIZE > 64)
-#define USE_ACRO_TRAINER
+//#define USE_ACRO_TRAINER
+#define USE_ABSOLUTE_CONTROL
 #define USE_BLACKBOX
 #define USE_LED_STRIP
 #define USE_RESOURCE_MGMT
@@ -172,7 +173,7 @@
 #define USE_RCDEVICE
 #define USE_RTC_TIME
 #define USE_RX_MSP
-#define USE_SERIALRX_FPORT      // FrSky FPort
+//#define USE_SERIALRX_FPORT      // FrSky FPort
 #define USE_TELEMETRY_CRSF
 #define USE_TELEMETRY_SRXL
 #define USE_VIRTUAL_CURRENT_METER
