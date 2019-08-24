@@ -104,7 +104,6 @@ typedef enum {
 #define CONTROL_RATE_CONFIG_RATE_MAX  255
 
 #define CONTROL_RATE_CONFIG_TPA_MAX   100
-#define CONTROL_RATE_CONFIG_SPA_MAX   250
 
 extern float rcCommand[4];
 

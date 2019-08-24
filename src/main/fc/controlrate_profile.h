@@ -48,9 +48,6 @@ typedef struct controlRateConfig_s {
     uint8_t dynThrI;
     uint8_t dynThrD;
     uint16_t tpa_breakpoint;                // Breakpoint where TPA is activated
-    uint8_t dynSetpP;
-    uint8_t dynSetpI;
-    uint8_t dynSetpD;
     uint8_t throttle_limit_type;            // Sets the throttle limiting type - off, scale or clip
     uint8_t throttle_limit_percent;         // Sets the maximum pilot commanded throttle limit
 

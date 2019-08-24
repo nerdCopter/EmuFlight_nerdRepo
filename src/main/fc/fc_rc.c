@@ -70,9 +70,6 @@ static volatile uint32_t setpointRateInt[3];
 static float throttlePAttenuation;
 static float throttleIAttenuation;
 static float throttleDAttenuation;
-static float setpointPAttenuation;
-static float setpointIAttenuation;
-static float setpointDAttenuation;
 static bool reverseMotors = false;
 static applyRatesFn *applyRates;
 
@@ -136,21 +133,6 @@ float getThrottleDAttenuation(void)
     return throttleDAttenuation;
 }
 
-float getSetpointPAttenuation(void)
-{
-    return setpointPAttenuation;
-}
-
-float getSetpointIAttenuation(void)
-{
-    return setpointIAttenuation;
-}
-
-float getSetpointDAttenuation(void)
-{
-    return setpointDAttenuation;
-}
-
 #define THROTTLE_LOOKUP_LENGTH 12
 static int16_t lookupThrottleRC[THROTTLE_LOOKUP_LENGTH];    // lookup table for expo & mid THROTTLE
 
@@ -194,27 +176,6 @@ float applyRaceFlightRates(const int axis, float rcCommandf, const float rcComma
 
     return angleRate;
 }
-
-int32_t maxRate(int axis);
-#ifdef RATES_TYPE_BETAFLIGHT // calculate the max rate
-    const float expof = currentControlRateProfile->rcExpo[axis] / 100.0f;
-    rcCommandf = 500 * power3(500) * expof + 500 * (1 - expof);
-    float rcRate = currentControlRateProfile->rcRates[axis] / 100.0f;
-    rcRate += RC_RATE_INCREMENTAL * (rcRate - 2.0f);
-    float maxRate = 200.0f * rcRate * rcCommandf;
-    const float rcSuperfactor = 1.0f / (constrainf(1.0f - (rcCommandf * (currentControlRateProfile->rates[axis] / 100.0f)), 0.01f, 1.00f));
-    maxRate *= rcSuperfactor;
-
-    return = maxRate;
-#endif
-
-#ifdef RATES_TYPE_RACEFLIGHT // calculate the max rate
-    rcCommandf = ((1.0f + 0.01f * currentControlRateProfile->rcExpo[axis] * (500 * 500 - 1.0f)) * 500);
-    float angleRate = 10.0f * currentControlRateProfile->rcRates[axis] * rcCommandf;
-    angleRate = angleRate * (1 + 500 * (float)currentControlRateProfile->rates[axis] * 0.01f);
-
-    return maxRate;
-#endif
 
 static void calculateSetpointRate(int axis)
 {
@@ -719,44 +680,6 @@ FAST_CODE FAST_CODE_NOINLINE void updateRcCommands(void)
                     throttleDAttenuation = propD / 100.0f;
         }
 
-    int32_t rateP;
-       if (rcCommand == 0){
-          rateP=100;
-          setpointPAttenuation = 1.0f;
-       } else {
-           if (currentControlRateProfile->dynSetpP > 100){
-              rateP = 100 + ((uint16_t)currentControlRateProfile->dynSetpP - 100) * (getSetpointRateInt / maxRate);
-           } else {
-              rateP = 100 - (100 - (uint16_t)currentControlRateProfile->dynSetpP) * (getSetpointRateInt / maxRate);
-           }
-                    setpointPAttenuation = rateP / 100.0f;
-    }
-
-    int32_t rateI;
-       if (rcCommand == 0){
-          rateI=100;
-          setpointIAttenuation = 1.0f;
-       } else {
-           if (currentControlRateProfile->dynSetpI > 100){
-              rateI = 100 + ((uint16_t)currentControlRateProfile->dynSetpI - 100) * (getSetpointRateInt / maxRate);
-           } else {
-              rateI = 100 - (100 - (uint16_t)currentControlRateProfile->dynSetpI) * (getSetpointRateInt / maxRate);
-           }
-                    setpointIAttenuation = rateI / 100.0f;
-    }
-
-    int32_t rateD;
-        if (rcCommand == 0){
-          rateP=100;
-          setpointPAttenuation = 1.0f;
-       } else {
-          if (currentControlRateProfile->dynSetpD > 100){
-              rateD = 100 + ((uint16_t)currentControlRateProfile->dynSetpD - 100) * (getSetpointRateInt / maxRate);
-           } else {
-              rateD = 100 - (100 - (uint16_t)currentControlRateProfile->dynSetpD) * (getSetpointRateInt / maxRate);
-           }
-                    setpointDAttenuation = rateD / 100.0f;
-    }
 
     for (int axis = 0; axis < 3; axis++) {
         // non coupled PID reduction scaler used in PID controller 1 and PID controller 2.
