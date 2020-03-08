@@ -80,6 +80,10 @@ typedef struct pidf_s {
 
 } pidf_t;
 
+typedef struct dFilter_s {
+    uint8_t smartSmoothing;
+} dFilter_t;
+
 typedef enum {
     ANTI_GRAVITY_SMOOTH,
     ANTI_GRAVITY_STEP
@@ -105,6 +109,7 @@ typedef struct pidProfile_s {
     uint16_t dterm_notch_cutoff;            // Biquad dterm notch low cutoff
 
     pidf_t  pid[PID_ITEM_COUNT];
+    dFilter_t dFilter[3];
 
     uint8_t dterm_filter_type;              // Filter selection for dterm
     uint8_t itermWindupPointPercent;        // Experimental ITerm windup threshold, percent motor saturation

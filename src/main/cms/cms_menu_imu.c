@@ -588,7 +588,9 @@ static CMS_Menu cmsx_menuImuf = {
 static uint16_t cmsx_dterm_notch_hz;
 static uint16_t cmsx_dterm_notch_cutoff;
 static uint16_t cmsx_yaw_lowpass_hz;
-static uint8_t cmsx_smart_dterm_smoothing;
+static uint8_t cmsx_smart_dterm_smoothing_roll;
+static uint8_t cmsx_smart_dterm_smoothing_pitch;
+static uint8_t cmsx_smart_dterm_smoothing_yaw;
 
 static long cmsx_FilterPerProfileRead(void)
 {
@@ -601,7 +603,10 @@ static long cmsx_FilterPerProfileRead(void)
     cmsx_dterm_notch_hz     = pidProfile->dterm_notch_hz;
     cmsx_dterm_notch_cutoff = pidProfile->dterm_notch_cutoff;
     cmsx_yaw_lowpass_hz     = pidProfile->yaw_lowpass_hz;
-    cmsx_smart_dterm_smoothing     = pidProfile->smart_dterm_smoothing;
+
+    cmsx_smart_dterm_smoothing_roll   = pidProfile->dFilter[ROLL].smartSmoothing;
+    cmsx_smart_dterm_smoothing_pitch  = pidProfile->dFilter[PITCH].smartSmoothing;
+    cmsx_smart_dterm_smoothing_yaw    = pidProfile->dFilter[YAW].smartSmoothing;
     return 0;
 }
 
@@ -620,7 +625,10 @@ static long cmsx_FilterPerProfileWriteback(const OSD_Entry *self)
     pidProfile->dterm_notch_hz     = cmsx_dterm_notch_hz;
     pidProfile->dterm_notch_cutoff = cmsx_dterm_notch_cutoff;
     pidProfile->yaw_lowpass_hz     = cmsx_yaw_lowpass_hz;
-    pidProfile->smart_dterm_smoothing     = cmsx_smart_dterm_smoothing;
+
+    pidProfile->dFilter[ROLL].smartSmoothing   = cmsx_smart_dterm_smoothing_roll;
+    pidProfile->dFilter[PITCH].smartSmoothing  = cmsx_smart_dterm_smoothing_pitch;
+    pidProfile->dFilter[YAW].smartSmoothing    = cmsx_smart_dterm_smoothing_yaw;
     return 0;
 }
 
@@ -633,7 +641,11 @@ static OSD_Entry cmsx_menuFilterPerProfileEntries[] =
     { "DTERM NF",   OME_UINT16, NULL, &(OSD_UINT16_t){ &cmsx_dterm_notch_hz,       0, 500, 1 }, 0 },
     { "DTERM NFCO", OME_UINT16, NULL, &(OSD_UINT16_t){ &cmsx_dterm_notch_cutoff,   0, 500, 1 }, 0 },
     { "YAW LPF",    OME_UINT16, NULL, &(OSD_UINT16_t){ &cmsx_yaw_lowpass_hz,       0, 500, 1 }, 0 },
-    { "SMART SMOOTHING",    OME_UINT8, NULL, &(OSD_UINT8_t){ &cmsx_smart_dterm_smoothing,       1, 250, 1 }, 0 },
+
+    { "SMART SMOOTHING ROLL",    OME_UINT8, NULL, &(OSD_UINT8_t){ &cmsx_smart_dterm_smoothing_roll,       1, 250, 1 }, 0 },
+    { "SMART SMOOTHING PITCH",    OME_UINT8, NULL, &(OSD_UINT8_t){ &cmsx_smart_dterm_smoothing_pitch,       1, 250, 1 }, 0 },
+    { "SMART SMOOTHING YAW",    OME_UINT8, NULL, &(OSD_UINT8_t){ &cmsx_smart_dterm_smoothing_yaw,       1, 250, 1 }, 0 },
+
     { "ROLL WITCHCRAFT",    OME_UINT8, NULL, &(OSD_UINT8_t){ &tempPidWc[PID_ROLL], 0, 10, 1 }, 0 },
     { "PITCH WITCHCRAFT",   OME_UINT8, NULL, &(OSD_UINT8_t){ &tempPidWc[PID_PITCH], 0, 10, 1 }, 0 },
     { "YAW WITCHCRAFT",     OME_UINT8, NULL, &(OSD_UINT8_t){ &tempPidWc[PID_YAW], 0, 10, 1 }, 0 },
