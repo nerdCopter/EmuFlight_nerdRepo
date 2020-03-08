@@ -135,7 +135,7 @@ void resetPidProfile(pidProfile_t *pidProfile)
             [PID_ROLL] =  DEFAULT_PIDS_ROLL,
             [PID_PITCH] = DEFAULT_PIDS_PITCH,
             [PID_YAW] =   DEFAULT_PIDS_YAW,
-            [PID_LEVEL_LOW] = { 100, 50, 10, 40, 0},
+            [PID_LEVEL_LOW] = { 100, 0, 10, 40, 0},
             [PID_LEVEL_HIGH] = { 35, 0, 1, 0, 0},
             [PID_MAG] =   { 40, 0, 0, 0, 0},
         },
@@ -152,8 +152,8 @@ void resetPidProfile(pidProfile_t *pidProfile)
         .itermWindupPointPercent = 50,
         .vbatPidCompensation = 0,
         .pidAtMinThrottle = PID_STABILISATION_ON,
-        .levelAngleLimit = 65,
-        .angleExpo = 30,
+        .levelAngleLimit = 45,
+        .angleExpo = 10,
         .feedForwardTransition = 0,
         .setPointPTransition = 110,
         .setPointITransition =  75,
@@ -388,7 +388,7 @@ static FAST_RAM_ZERO_INIT float setPointDTransition;
 static FAST_RAM_ZERO_INIT float setPointPTransitionYaw;
 static FAST_RAM_ZERO_INIT float setPointITransitionYaw;
 static FAST_RAM_ZERO_INIT float setPointDTransitionYaw;
-static FAST_RAM_ZERO_INIT float P_angle_low, I_angle_low, D_angle_low, P_angle_high, I_angle_high, D_angle_high, F_angle, horizonTransition, horizonCutoffDegrees, horizonFactorRatio;
+static FAST_RAM_ZERO_INIT float P_angle_low, D_angle_low, P_angle_high, D_angle_high, F_angle, horizonTransition, horizonCutoffDegrees, horizonFactorRatio;
 static FAST_RAM_ZERO_INIT float ITermWindupPointInv;
 static FAST_RAM_ZERO_INIT timeDelta_t crashTimeLimitUs;
 static FAST_RAM_ZERO_INIT timeDelta_t crashTimeDelayUs;
@@ -470,10 +470,8 @@ void pidInitConfig(const pidProfile_t *pidProfile)
     setPointITransitionYaw = pidProfile->setPointITransitionYaw / 100.0f;
     setPointDTransitionYaw = pidProfile->setPointDTransitionYaw / 100.0f;
     P_angle_low = pidProfile->pid[PID_LEVEL_LOW].P * 0.1f;
-    I_angle_low = pidProfile->pid[PID_LEVEL_LOW].I * 0.76f;
     D_angle_low = pidProfile->pid[PID_LEVEL_LOW].D * 0.00017f;
     P_angle_high = pidProfile->pid[PID_LEVEL_HIGH].P * 0.1f;
-    I_angle_high = pidProfile->pid[PID_LEVEL_HIGH].I * 0.76f;
     D_angle_high = pidProfile->pid[PID_LEVEL_HIGH].D * 0.00017f;
     F_angle = pidProfile->pid[PID_LEVEL_LOW].F * 0.00000125f;
     horizonTransition = (float)pidProfile->horizonTransition;
@@ -591,7 +589,7 @@ return constrainf(horizonLevelStrength, 0, 1);
 static float pidLevel(int axis, const pidProfile_t *pidProfile, const rollAndPitchTrims_t *angleTrim, float currentPidSetpoint, const float deltaT) {
     // calculate error angle and limit the angle to the max inclination
     // rcDeflection is in range [-1.0, 1.0]
-    static float i_term[2], attitudePrevious[2], previousAngle[2];
+    static float attitudePrevious[2], previousAngle[2];
     float p_term_low, p_term_high, d_term_low, d_term_high, f_term_low;
 
     float angle = pidProfile->levelAngleLimit * getRcDeflection(axis);
@@ -616,23 +614,11 @@ static float pidLevel(int axis, const pidProfile_t *pidProfile, const rollAndPit
     p_term_low = (1 - fabsf(errorAnglePercent)) * errorAngle * P_angle_low;
     p_term_high = fabsf(errorAnglePercent) * errorAngle * P_angle_high;
 
-    float i_new_low = (1 - fabsf(errorAnglePercent)) * errorAngle * deltaT * I_angle_low;
-    float i_new_high = fabsf(errorAnglePercent) * errorAngle * deltaT * I_angle_high;
-    if (i_new_low != 0.0f)
-{
-    if (SIGN(i_term[axis]) != SIGN(i_new_low))
-    {
-      i_term[axis] *= 0.70f;
-    }
-}
-    i_term[axis] += i_new_low + i_new_high;
-
     d_term_low = (1 - fabsf(errorAnglePercent)) * (attitudePrevious[axis] - attitude.raw[axis]) * 0.1f * D_angle_low;
     d_term_high = fabsf(errorAnglePercent) * (attitudePrevious[axis] - attitude.raw[axis]) * 0.1f * D_angle_high;
     attitudePrevious[axis] = attitude.raw[axis];
 
     currentPidSetpoint = p_term_low + p_term_high;
-    currentPidSetpoint += i_term[axis];
     currentPidSetpoint += d_term_low + d_term_high;
     currentPidSetpoint += f_term_low;
 
