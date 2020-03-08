@@ -161,7 +161,7 @@ void resetPidProfile(pidProfile_t *pidProfile)
         .setPointPTransitionYaw = 130,
         .setPointITransitionYaw =  45,
         .setPointDTransitionYaw = 130,
-        .feathered_pids = 100,
+        .feathered_pids = 60,
         .i_decay = 4,
         .r_weight = 67,
         .errorBoost = 15,
