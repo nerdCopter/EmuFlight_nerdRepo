@@ -1355,13 +1355,13 @@ static bool blackboxWriteSysinfo(void)
         BLACKBOX_PRINT_HEADER_LINE("pidsum_limit", "%d",                    currentPidProfile->pidSumLimit);
         BLACKBOX_PRINT_HEADER_LINE("pidsum_limit_yaw", "%d",                currentPidProfile->pidSumLimitYaw);
 
-        BLACKBOX_PRINT_HEADER_LINE("smart_dterm_smoothing", "%d,%d,%d",     currentPidProfile->dFilter[ROLL].smartSmoothing,
-        																	currentPidProfile->dFilter[PITCH].smartSmoothing,
-        																	currentPidProfile->dFilter[YAW].smartSmoothing);
+        //BLACKBOX_PRINT_HEADER_LINE("smart_dterm_smoothing", "%d,%d,%d",     currentPidProfile->dFilter[ROLL].smartSmoothing,
+        //																	currentPidProfile->dFilter[PITCH].smartSmoothing,
+        //																	currentPidProfile->dFilter[YAW].smartSmoothing);
 
-        BLACKBOX_PRINT_HEADER_LINE("witchcraft", "%d,%d,%d",        		currentPidProfile->pid[PID_ROLL].Wc,
-                                                                            currentPidProfile->pid[PID_PITCH].Wc,
-                                                                            currentPidProfile->pid[PID_YAW].Wc);
+        //BLACKBOX_PRINT_HEADER_LINE("witchcraft", "%d,%d,%d",        		currentPidProfile->pid[PID_ROLL].Wc,
+        //                                                                    currentPidProfile->pid[PID_PITCH].Wc,
+        //                                                                    currentPidProfile->pid[PID_YAW].Wc);
         // End of EmuFlight controller parameters
 
         BLACKBOX_PRINT_HEADER_LINE("deadband", "%d",                        rcControlsConfig()->deadband);
