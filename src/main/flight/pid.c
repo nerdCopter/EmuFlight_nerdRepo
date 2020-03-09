@@ -142,8 +142,8 @@ void resetPidProfile(pidProfile_t *pidProfile)
 
         //nerdC smart_dterm_smoothing defaults
         .dFilter = {
-            [PID_ROLL] = { 3 },
-            [PID_PITCH] = { 7 },
+            [PID_ROLL] = { 30 },
+            [PID_PITCH] = { 70 },
             [PID_YAW] = { 0 },
         },
 
