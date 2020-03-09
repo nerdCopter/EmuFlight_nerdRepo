@@ -103,7 +103,7 @@ PG_REGISTER_WITH_RESET_TEMPLATE(pidConfig_t, pidConfig, PG_PID_CONFIG, 2);
 #endif //DEFAULT_PIDS_PITCH
 
 #ifndef DEFAULT_PIDS_YAW
-#define DEFAULT_PIDS_YAW { 90, 65, 10, 0, 0 }
+#define DEFAULT_PIDS_YAW { 60, 65, 5, 0, 0 }
 #endif //DEFAULT_PIDS_YAW
 
 #ifdef USE_RUNAWAY_TAKEOFF
@@ -142,7 +142,7 @@ void resetPidProfile(pidProfile_t *pidProfile)
 
         //nerdC smart_dterm_smoothing defaults
         .dFilter = {
-            [PID_ROLL] = { 30 },
+            [PID_ROLL] = { 40 },
             [PID_PITCH] = { 70 },
             [PID_YAW] = { 0 },
         },
@@ -167,7 +167,7 @@ void resetPidProfile(pidProfile_t *pidProfile)
         .setPointPTransitionYaw = 130,
         .setPointITransitionYaw =  45,
         .setPointDTransitionYaw = 130,
-        .feathered_pids = 60,
+        .feathered_pids = 70,
         .i_decay = 4,
         .r_weight = 67,
         .errorBoost = 15,
