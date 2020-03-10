@@ -5,7 +5,8 @@
 
 #define MAX_KALMAN_WINDOW_SIZE 512
 
-float r_weight = 0.67f;
+//float r_weight = 0.67f;
+#define r_weight 0.67f
 
 typedef struct variance
 {

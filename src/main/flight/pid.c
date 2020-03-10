@@ -56,9 +56,6 @@
 #include "sensors/acceleration.h"
 #include "sensors/battery.h"
 
-
-extern float r_weight;
-
 #define ITERM_RELAX_SETPOINT_THRESHOLD 30.0f
 
 const char pidNames[] =
@@ -169,7 +166,6 @@ void resetPidProfile(pidProfile_t *pidProfile)
         .setPointDTransitionYaw = 95,
         .feathered_pids = 70,
         .i_decay = 4,
-        .r_weight = 67,
         .errorBoost = 15,
         .errorBoostYaw = 40,
         .errorBoostLimit = 20,
@@ -283,7 +279,7 @@ void pidInitFilters(const pidProfile_t *pidProfile)
     dtermLowpassApplyFn = nullFilterApply;
     const uint32_t pidFrequencyNyquist = pidFrequency / 2; // No rounding needed
 
-    r_weight = (float) pidProfile->r_weight / 100.0f;
+//    r_weight = (float) pidProfile->r_weight / 100.0f;
 
     uint16_t dTermNotchHz;
     if (pidProfile->dterm_notch_hz <= pidFrequencyNyquist) {
@@ -1094,10 +1090,6 @@ static FAST_RAM_ZERO_INIT timeUs_t previousTimeUs;
                 //filter the dterm
                 dDelta = dtermLowpassApplyFn((filter_t *) &dtermLowpass[axis], dDelta);
 
-                float dDeltaMultiplier = constrainf(fabsf(dDelta + previousdDelta[axis]) / (2 * smart_dterm_smoothing[axis]), 0.0f, 1.0f);
-                dDelta = dDelta * dDeltaMultiplier;
-                previousdDelta[axis] = dDelta;
-
             if (pidProfile->pid[axis].Wc > 1)
               {
                 kdRingBuffer[axis][kdRingBufferPoint[axis]++] = dDelta;
@@ -1110,6 +1102,16 @@ static FAST_RAM_ZERO_INIT timeUs_t previousTimeUs;
                 dDelta = (float)(kdRingBufferSum[axis] / (float) (pidProfile->pid[axis].Wc));
                 kdRingBufferSum[axis] -= kdRingBuffer[axis][kdRingBufferPoint[axis]];
               }
+
+
+              float dDeltaMultiplier;
+
+              if (smart_dterm_smoothing[axis] > 0) {
+                  dDeltaMultiplier = constrainf(fabsf(dDelta + previousdDelta[axis]) / (2 * smart_dterm_smoothing[axis]), 0.0f, 1.0f);
+                  dDelta = dDelta * dDeltaMultiplier;
+                  previousdDelta[axis] = dDelta;
+              }
+
 
         if (pidCoefficient[axis].Kd > 0) {
                 // Divide rate change by dT to get differential (ie dr/dt).

@@ -126,7 +126,6 @@ typedef struct gyroConfig_s {
     uint16_t imuf_roll_q;
     uint16_t imuf_yaw_q;
     uint16_t imuf_w;
-    uint8_t r_weight;
 } gyroConfig_t;
 
 PG_DECLARE(gyroConfig_t, gyroConfig);
