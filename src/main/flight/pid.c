@@ -140,7 +140,7 @@ void resetPidProfile(pidProfile_t *pidProfile)
             [PID_MAG] =   { 40, 0, 0, 0, 0},
         },
 
-        //nerdC smart_dterm_smoothing defaults
+        //smart_dterm_smoothing per axis defaults
         .dFilter = {
             [PID_ROLL] = { 40 },
             [PID_PITCH] = { 70 },
@@ -165,7 +165,7 @@ void resetPidProfile(pidProfile_t *pidProfile)
         .setPointITransition =  75,
         .setPointDTransition = 110,
         .setPointPTransitionYaw = 110,
-        .setPointITransitionYaw =  45,
+        .setPointITransitionYaw =  50,
         .setPointDTransitionYaw = 95,
         .feathered_pids = 70,
         .i_decay = 4,
