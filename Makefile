@@ -1,3 +1,4 @@
+
 ###############################################################################
 # "THE BEER-WARE LICENSE" (Revision 42):
 # <msmith@FreeBSD.ORG> wrote this file. As long as you retain this notice you
@@ -344,9 +345,6 @@ all_with_unsupported: $(VALID_TARGETS)
 
 ## unsupported : Build unsupported targets
 unsupported: $(UNSUPPORTED_TARGETS)
-
-## official          : Build all official (travis) targets
-official: $(OFFICIAL_TARGETS)
 
 ## targets-group-1   : build some targets
 targets-group-1: $(GROUP_1_TARGETS)
