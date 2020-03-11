@@ -262,6 +262,8 @@ static FAST_RAM_ZERO_INIT uint8_t itermRelaxType;
 static FAST_RAM_ZERO_INIT uint8_t itermRelaxCutoff;
 #endif
 
+static FAST_RAM_ZERO_INIT float iDecay;
+
 #ifdef USE_RC_SMOOTHING_FILTER
 static FAST_RAM_ZERO_INIT pt1Filter_t setpointDerivativePt1[XYZ_AXIS_COUNT];
 static FAST_RAM_ZERO_INIT biquadFilter_t setpointDerivativeBiquad[XYZ_AXIS_COUNT];
@@ -533,6 +535,9 @@ void pidInitConfig(const pidProfile_t *pidProfile)
     useIntegratedYaw = pidProfile->use_integrated_yaw;
     integratedYawRelax = pidProfile->integrated_yaw_relax;
 #endif
+
+    iDecay = (float)pidProfile->i_decay;
+
 }
 
 void pidInit(const pidProfile_t *pidProfile)
@@ -869,8 +874,45 @@ static FAST_RAM_ZERO_INIT uint16_t kdRingBufferPoint[XYZ_AXIS_COUNT];
 static FAST_RAM_ZERO_INIT timeUs_t crashDetectedAtUs;
 static FAST_RAM_ZERO_INIT timeUs_t previousTimeUs;
 
-    void pidController(const pidProfile_t *pidProfile, const rollAndPitchTrims_t *angleTrim, timeUs_t currentTimeUs)
+static void processIterm(
+    uint8_t axis,
+    float previousIterm,
+    float errorRate,
+    float itermErrorRate,
+    float dynCi
+) {
+
+    /*
+     * If Iterm is getting lower/closer to ZERO (new I has a different sign than the accumulated)
+     * allow for the new I to be boosted by multiplying by i_decay
+     */
+    float ITermNew = pidCoefficient[axis].Ki * itermErrorRate * dynCi;
+    if (SIGN(previousIterm) != SIGN(ITermNew))
     {
+        const float newVal = ITermNew * iDecay;
+        if (fabsf(previousIterm) > fabsf(newVal))
+        {
+            ITermNew = newVal;
+        }
+    }
+
+    /*
+     * Accumulate and limit
+     */
+    ITermNew = constrainf(previousIterm + ITermNew, -itermLimit, itermLimit);
+
+    /*
+     * allow growing of Iterm only if motor output is not saturated or Iterm is starting to shrink
+     */
+    if (mixerIsOutputSaturated(axis, errorRate) == false || ABS(ITermNew) < ABS(previousIterm))
+    {
+        // Only increase ITerm if output is not saturated
+        pidData[axis].I = ITermNew;
+    }
+}
+
+void pidController(const pidProfile_t *pidProfile, const rollAndPitchTrims_t *angleTrim, timeUs_t currentTimeUs)
+{
     const float deltaT = (currentTimeUs - previousTimeUs) * 1e-6f;
     previousTimeUs = currentTimeUs;
     // calculate actual deltaT in seconds
@@ -1054,28 +1096,19 @@ static FAST_RAM_ZERO_INIT timeUs_t previousTimeUs;
             }
         #endif
 
-                // -----calculate P component and add Dynamic Part based on stick input
+            // -----calculate P component and add Dynamic Part based on stick input
             pidData[axis].P = (pidCoefficient[axis].Kp * (boostedErrorRate + errorRate));
-            // -----calculate I component
-            float ITermNew = pidCoefficient[axis].Ki * itermErrorRate * dynCi;
-            if (ITermNew != 0.0f)
-            {
-                if (SIGN(ITerm) != SIGN(ITermNew))
-                {
-                	const float newVal = ITermNew * (float)pidProfile->i_decay;
-                	if (fabsf(ITerm) > fabsf(newVal))
-                	{
-                		ITermNew = newVal;
-                	}
-                }
-            }
-            ITermNew = constrainf(ITerm + ITermNew, -itermLimit, itermLimit);
 
-            const bool outputSaturated = mixerIsOutputSaturated(axis, errorRate);
-            if (outputSaturated == false || ABS(ITermNew) < ABS(ITerm)) {
-                // Only increase ITerm if output is not saturated
-                pidData[axis].I = ITermNew;
-            }
+            /*
+             * Process Iterm with I-decay function
+             */
+            processIterm(
+                axis,
+                ITerm,
+                errorRate,
+                itermErrorRate,
+                dynCi
+            );
 
             // -----calculate D component
             float gyroRateFiltered = dtermNotchApplyFn((filter_t *) &dtermNotch[axis], gyroRate);
