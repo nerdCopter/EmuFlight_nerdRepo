@@ -41,14 +41,6 @@ typedef struct biquadFilter_s {
     float x1, x2, y1, y2;
 } biquadFilter_t;
 
-typedef struct laggedMovingAverage_s {
-    uint16_t movingWindowIndex;
-    uint16_t windowSize;
-    float movingSum;
-    float *buf;
-    bool primed;
-} laggedMovingAverage_t;
-
 typedef enum {
     FILTER_PT1 = 0,
     FILTER_BIQUAD,
@@ -59,7 +51,6 @@ typedef enum {
     FILTER_NOTCH,
     FILTER_BPF,
 } biquadFilterType_e;
-
 
 typedef float (*filterApplyFnPtr)(filter_t *filter, float input);
 
