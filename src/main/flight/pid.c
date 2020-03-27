@@ -140,6 +140,13 @@ void resetPidProfile(pidProfile_t *pidProfile)
             [PID_MAG] =   { 40, 0, 0, 0, 0},
         },
 
+        //nerdC smart_dterm_smoothing defaults
+        .dFilter = {
+            [PID_ROLL] = { 40 },
+            [PID_PITCH] = { 70 },
+            [PID_YAW] = { 0 },
+        },
+
         .pidSumLimit = PIDSUM_LIMIT_MAX,
         .pidSumLimitYaw = PIDSUM_LIMIT_YAW,
         .yaw_lowpass_hz = 0,
@@ -148,7 +155,6 @@ void resetPidProfile(pidProfile_t *pidProfile)
         .dterm_notch_hz = 0,
         .dterm_notch_cutoff = 0,
         .dterm_filter_type = FILTER_PT1,
-        .smart_dterm_smoothing = 50,
         .itermWindupPointPercent = 50,
         .vbatPidCompensation = 0,
         .pidAtMinThrottle = PID_STABILISATION_ON,
@@ -381,7 +387,7 @@ static FAST_RAM_ZERO_INIT float feedForwardTransition;
 static FAST_RAM_ZERO_INIT float feathered_pids;
 static FAST_RAM_ZERO_INIT uint8_t nfe_racermode;
 static FAST_RAM_ZERO_INIT uint8_t cinematic_setpoint;
-static FAST_RAM_ZERO_INIT float smart_dterm_smoothing;
+static FAST_RAM_ZERO_INIT float smart_dterm_smoothing[XYZ_AXIS_COUNT];
 static FAST_RAM_ZERO_INIT float setPointPTransition;
 static FAST_RAM_ZERO_INIT float setPointITransition;
 static FAST_RAM_ZERO_INIT float setPointDTransition;
@@ -457,12 +463,12 @@ void pidInitConfig(const pidProfile_t *pidProfile)
         pidCoefficient[axis].Ki = ITERM_SCALE * pidProfile->pid[axis].I;
         pidCoefficient[axis].Kd = DTERM_SCALE * pidProfile->pid[axis].D;
         pidCoefficient[axis].Kf = FEEDFORWARD_SCALE * (pidProfile->pid[axis].F / 100.0f);
+        smart_dterm_smoothing[axis] = pidProfile->dFilter[axis].smartSmoothing;
     }
 
     feathered_pids = pidProfile->feathered_pids / 100.0f;
     nfe_racermode = pidProfile->nfe_racermode;
     cinematic_setpoint = pidProfile->cinematic_setpoint;
-    smart_dterm_smoothing = pidProfile->smart_dterm_smoothing;
     setPointPTransition = pidProfile->setPointPTransition / 100.0f;
     setPointITransition = pidProfile->setPointITransition / 100.0f;
     setPointDTransition = pidProfile->setPointDTransition / 100.0f;
@@ -1087,9 +1093,12 @@ static FAST_RAM_ZERO_INIT timeUs_t previousTimeUs;
                 //filter the dterm
                 dDelta = dtermLowpassApplyFn((filter_t *) &dtermLowpass[axis], dDelta);
 
-                float dDeltaMultiplier = constrainf(fabsf(dDelta + previousdDelta[axis]) / (2 * smart_dterm_smoothing), 0.0f, 1.0f);
-                dDelta = dDelta * dDeltaMultiplier;
-                previousdDelta[axis] = dDelta;
+              float dDeltaMultiplier;
+              if (smart_dterm_smoothing[axis] > 0) {
+                  dDeltaMultiplier = constrainf(fabsf(dDelta + previousdDelta[axis]) / (2 * smart_dterm_smoothing[axis]), 0.0f, 1.0f);
+                  dDelta = dDelta * dDeltaMultiplier;
+                  previousdDelta[axis] = dDelta;
+              }
 
             if (pidProfile->pid[axis].Wc > 1)
               {
