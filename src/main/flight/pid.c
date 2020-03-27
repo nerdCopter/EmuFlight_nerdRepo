@@ -56,9 +56,6 @@
 #include "sensors/acceleration.h"
 #include "sensors/battery.h"
 
-
-extern float r_weight;
-
 #define ITERM_RELAX_SETPOINT_THRESHOLD 30.0f
 
 const char pidNames[] =
@@ -169,7 +166,6 @@ void resetPidProfile(pidProfile_t *pidProfile)
         .setPointDTransitionYaw = 100,
         .feathered_pids = 100,
         .i_decay = 4,
-        .r_weight = 67,
         .errorBoost = 15,
         .errorBoostYaw = 40,
         .errorBoostLimit = 20,
@@ -282,8 +278,6 @@ void pidInitFilters(const pidProfile_t *pidProfile)
     dtermNotchApplyFn = nullFilterApply;
     dtermLowpassApplyFn = nullFilterApply;
     const uint32_t pidFrequencyNyquist = pidFrequency / 2; // No rounding needed
-
-    r_weight = (float) pidProfile->r_weight / 100.0f;
 
     uint16_t dTermNotchHz;
     if (pidProfile->dterm_notch_hz <= pidFrequencyNyquist) {
