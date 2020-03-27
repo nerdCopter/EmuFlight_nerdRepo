@@ -23,9 +23,6 @@
 #include "common/axis.h"
 #include "common/time.h"
 #include "common/maths.h"
-#ifndef USE_GYRO_IMUF9001
-#include "common/kalman.h"
-#endif
 #include "pg/pg.h"
 #include "drivers/bus.h"
 #include "drivers/sensor.h"
@@ -133,10 +130,6 @@ PG_DECLARE(gyroConfig_t, gyroConfig);
 bool gyroInit(void);
 
 void gyroInitFilters(void);
-
-#ifndef USE_GYRO_IMUF9001
-void gyroDynLpfUpdate(void);
-#endif
 
 #ifdef USE_DMA_SPI_DEVICE
 void gyroDmaSpiFinishRead(void);
