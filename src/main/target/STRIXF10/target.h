@@ -197,8 +197,8 @@
  #define IMUF_DEFAULT_LPF_HZ   90.0f
  #define IMUF_DEFAULT_ACC_LPF_HZ   40.0f
 
- #define DEFAULT_PIDS_ROLL   {45, 70, 20, 0, 3}
- #define DEFAULT_PIDS_PITCH  {45, 70, 20, 0, 3}
- #define DEFAULT_PIDS_YAW    {45, 70, 20, 0, 3}
+ #define DEFAULT_PIDS_ROLL   {45, 60, 20, 0}
+ #define DEFAULT_PIDS_PITCH  {45, 60, 20, 0}
+ #define DEFAULT_PIDS_YAW    {60, 60, 10, 0}
 
  // #define USE_QUAD_MIXER_ONLY
