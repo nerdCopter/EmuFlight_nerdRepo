@@ -92,15 +92,15 @@ PG_REGISTER_WITH_RESET_TEMPLATE(pidConfig_t, pidConfig, PG_PID_CONFIG, 2);
 #endif
 
 #ifndef DEFAULT_PIDS_ROLL
-#define DEFAULT_PIDS_ROLL { 50, 65, 28, 0 }
+#define DEFAULT_PIDS_ROLL { 50, 60, 28, 0 }
 #endif //DEFAULT_PIDS_ROLL
 
 #ifndef DEFAULT_PIDS_PITCH
-#define DEFAULT_PIDS_PITCH { 58, 65, 30, 0 }
+#define DEFAULT_PIDS_PITCH { 58, 60, 30, 0 }
 #endif //DEFAULT_PIDS_PITCH
 
 #ifndef DEFAULT_PIDS_YAW
-#define DEFAULT_PIDS_YAW { 55, 65, 5, 0 }
+#define DEFAULT_PIDS_YAW { 60, 60, 5, 0 }
 #endif //DEFAULT_PIDS_YAW
 
 #ifdef USE_RUNAWAY_TAKEOFF
@@ -158,13 +158,13 @@ void resetPidProfile(pidProfile_t *pidProfile)
         .levelAngleLimit = 45,
         .angleExpo = 10,
         .feedForwardTransition = 0,
-        .setPointPTransition = 100,
-        .setPointITransition = 100,
-        .setPointDTransition = 100,
-        .setPointPTransitionYaw = 100,
-        .setPointITransitionYaw = 100,
-        .setPointDTransitionYaw = 100,
-        .feathered_pids = 100,
+        .setPointPTransition = 110,
+        .setPointITransition = 85,
+        .setPointDTransition = 110,
+        .setPointPTransitionYaw = 110,
+        .setPointITransitionYaw = 85,
+        .setPointDTransitionYaw = 95,
+        .feathered_pids = 70,
         .i_decay = 4,
         .errorBoost = 15,
         .errorBoostYaw = 40,
