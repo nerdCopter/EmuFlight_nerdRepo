@@ -184,7 +184,6 @@ void resetPidProfile(pidProfile_t *pidProfile)
         .crash_recovery = PID_CRASH_RECOVERY_OFF, // off by default
         .horizon_tilt_effect = 130,
         .nfe_racermode = 0,
-        .cinematic_setpoint = 0,
         .crash_limit_yaw = 200,
         .itermLimit = 400,
         .throttle_boost = 5,
@@ -382,7 +381,6 @@ static FAST_RAM_ZERO_INIT float maxVelocity[XYZ_AXIS_COUNT];
 static FAST_RAM_ZERO_INIT float feedForwardTransition;
 static FAST_RAM_ZERO_INIT float feathered_pids;
 static FAST_RAM_ZERO_INIT uint8_t nfe_racermode;
-static FAST_RAM_ZERO_INIT uint8_t cinematic_setpoint;
 static FAST_RAM_ZERO_INIT float smart_dterm_smoothing[XYZ_AXIS_COUNT];
 static FAST_RAM_ZERO_INIT float setPointPTransition;
 static FAST_RAM_ZERO_INIT float setPointITransition;
@@ -464,7 +462,6 @@ void pidInitConfig(const pidProfile_t *pidProfile)
 
     feathered_pids = pidProfile->feathered_pids / 100.0f;
     nfe_racermode = pidProfile->nfe_racermode;
-    cinematic_setpoint = pidProfile->cinematic_setpoint;
     setPointPTransition = pidProfile->setPointPTransition / 100.0f;
     setPointITransition = pidProfile->setPointITransition / 100.0f;
     setPointDTransition = pidProfile->setPointDTransition / 100.0f;
@@ -605,7 +602,7 @@ static float pidLevel(int axis, const pidProfile_t *pidProfile, const rollAndPit
     angle += gpsRescueAngle[axis] / 100; // ANGLE IS IN CENTIDEGREES
 #endif
 
-    f_term_low = (angle - previousAngle[axis]) * F_angle * pidFrequency;
+    f_term_low = (angle - previousAngle[axis]) * F_angle  / deltaT;
     previousAngle[axis] = angle;
 
     angle = constrainf(angle, -pidProfile->levelAngleLimit, pidProfile->levelAngleLimit);
@@ -940,39 +937,6 @@ void pidController(const pidProfile_t *pidProfile, const rollAndPitchTrims_t *an
             currentPidSetpoint = pidLevel(axis, pidProfile, angleTrim, currentPidSetpoint, deltaT);
         }
 
-        // -----calculate feedforward component
-        // Use angle feedforward for angle mode and level feedforward for pitch/roll or roll if in nfe_racermode
-        float feedforwardGain;
-
-        if (!FLIGHT_MODE(GPS_RESCUE_MODE)) {
-        feedforwardGain = pidCoefficient[axis].Kf;
-      } else {
-        feedforwardGain = 0;
-      }
-
-
-            float pidSetpointDelta = currentPidSetpoint - previousPidSetpoint[axis];
-
-#ifdef USE_RC_SMOOTHING_FILTER
-            pidSetpointDelta = applyRcSmoothingDerivativeFilter(axis, pidSetpointDelta);
-#endif // USE_RC_SMOOTHING_FILTER
-            float transition = 1.0f;
-
-                //calculate the cinematic_setpoint code and apply change to the setPoint
-            if (cinematic_setpoint) {
-               transition = MAX(4 - (4 * (currentPidSetpoint / 1000.0f)), 1.0f);
-               float setpointSmoother = MIN(.95f,((pidSetpointDelta * 0.041262f) / 1000.0f) * transition);
-               currentPidSetpoint = currentPidSetpoint - (pidSetpointDelta * setpointSmoother);
-               pidData[axis].F = 0;
-            } else if (feedforwardGain > 0) {
-            // no transition if feedForwardTransition == 0 or cinematic_setpoint is enabled
-            transition = MIN(1.0f, getRcDeflectionAbs(axis) * feedForwardTransition);
-            pidData[axis].F = feedforwardGain * transition * pidSetpointDelta * iDT;
-          }
-
-        previousPidSetpoint[axis] = currentPidSetpoint;
-
-
 #ifdef USE_ACRO_TRAINER
         if ((axis != FD_YAW) && acroTrainerActive && !inCrashRecoveryMode) {
             currentPidSetpoint = applyAcroTrainer(axis, angleTrim, currentPidSetpoint);
@@ -1150,8 +1114,36 @@ void pidController(const pidProfile_t *pidProfile, const rollAndPitchTrims_t *an
                 pidProfile->crash_recovery, angleTrim, axis, currentTimeUs, errorRate,
                 &currentPidSetpoint, &errorRate);
 
-
             detectAndSetCrashRecovery(pidProfile->crash_recovery, axis, currentTimeUs, dDelta, errorRate);
+
+        // -----calculate feedforward component
+        // Use angle feedforward for angle mode and level feedforward for pitch/roll or roll if in nfe_racermode
+        float feedforwardGain;
+
+        if (!FLIGHT_MODE(GPS_RESCUE_MODE))
+        {
+            feedforwardGain = pidCoefficient[axis].Kf;
+        }
+        else
+        {
+            feedforwardGain = 0;
+        }
+
+        if (feedforwardGain > 0) {
+
+        // no transition if feedForwardTransition == 0
+            float transition = feedForwardTransition > 0 ? MIN(1.f, getRcDeflectionAbs(axis) * feedForwardTransition) : 1;
+            float pidSetpointDelta = currentPidSetpoint - previousPidSetpoint[axis];
+
+#ifdef USE_RC_SMOOTHING_FILTER
+        pidSetpointDelta = applyRcSmoothingDerivativeFilter(axis, pidSetpointDelta);
+#endif // USE_RC_SMOOTHING_FILTER
+
+            pidData[axis].F = feedforwardGain * transition * pidSetpointDelta * pidFrequency;
+        } else {
+            pidData[axis].F = 0;
+        }
+        previousPidSetpoint[axis] = currentPidSetpoint;
 
            // calculate SPA
            float setPointPAttenuation;
