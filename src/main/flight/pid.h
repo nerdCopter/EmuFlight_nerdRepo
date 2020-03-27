@@ -81,6 +81,7 @@ typedef struct pidf_s {
 } pidf_t;
 
 typedef struct dFilter_s {
+    uint8_t Wc;
     uint8_t smartSmoothing;
 } dFilter_t;
 

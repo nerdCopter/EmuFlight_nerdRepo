@@ -596,7 +596,7 @@ static long cmsx_FilterPerProfileRead(void)
 {
     const pidProfile_t *pidProfile = pidProfiles(pidProfileIndex);
     for (uint8_t i = 0; i < 3; i++) {
-        tempPidWc[i] = pidProfile->pid[i].Wc;
+        tempPidWc[i] = pidProfile->dFilter[i].Wc;
     }
     cmsx_dterm_lowpass_hz   = pidProfile->dterm_lowpass_hz;
     cmsx_dterm_lowpass2_hz  = pidProfile->dterm_lowpass2_hz;
@@ -617,7 +617,7 @@ static long cmsx_FilterPerProfileWriteback(const OSD_Entry *self)
     pidProfile_t *pidProfile = currentPidProfile;
 
     for (uint8_t i = 0; i < 3; i++) {
-        pidProfile->pid[i].Wc = tempPidWc[i];
+        pidProfile->dFilter[i].Wc = tempPidWc[i];
     }
 
     pidProfile->dterm_lowpass_hz   = cmsx_dterm_lowpass_hz;

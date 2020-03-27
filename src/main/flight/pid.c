@@ -95,15 +95,15 @@ PG_REGISTER_WITH_RESET_TEMPLATE(pidConfig_t, pidConfig, PG_PID_CONFIG, 2);
 #endif
 
 #ifndef DEFAULT_PIDS_ROLL
-#define DEFAULT_PIDS_ROLL { 50, 65, 28, 0, 3 }
+#define DEFAULT_PIDS_ROLL { 50, 65, 28, 0 }
 #endif //DEFAULT_PIDS_ROLL
 
 #ifndef DEFAULT_PIDS_PITCH
-#define DEFAULT_PIDS_PITCH { 58, 65, 30, 0, 3 }
+#define DEFAULT_PIDS_PITCH { 58, 65, 30, 0 }
 #endif //DEFAULT_PIDS_PITCH
 
 #ifndef DEFAULT_PIDS_YAW
-#define DEFAULT_PIDS_YAW { 55, 65, 5, 0, 3 }
+#define DEFAULT_PIDS_YAW { 55, 65, 5, 0 }
 #endif //DEFAULT_PIDS_YAW
 
 #ifdef USE_RUNAWAY_TAKEOFF
@@ -140,11 +140,11 @@ void resetPidProfile(pidProfile_t *pidProfile)
             [PID_MAG] =   { 40, 0, 0, 0, 0},
         },
 
-        //nerdC smart_dterm_smoothing defaults
+        //WitchCraft, Smart_DTerm_Smoothing Defaults
         .dFilter = {
-            [PID_ROLL] = { 40 },
-            [PID_PITCH] = { 70 },
-            [PID_YAW] = { 0 },
+            [PID_ROLL] = { 3, 40 },     // wC, smartSmoothing
+            [PID_PITCH] = { 3, 70 },    // wC, smartSmoothing
+            [PID_YAW] = { 0, 0 },       // wC, smartSmoothing
         },
 
         .pidSumLimit = PIDSUM_LIMIT_MAX,
@@ -1100,16 +1100,16 @@ static FAST_RAM_ZERO_INIT timeUs_t previousTimeUs;
                   previousdDelta[axis] = dDelta;
               }
 
-            if (pidProfile->pid[axis].Wc > 1)
+            if (pidProfile->dFilter[axis].Wc > 1)
               {
                 kdRingBuffer[axis][kdRingBufferPoint[axis]++] = dDelta;
                 kdRingBufferSum[axis] += dDelta;
 
-                if (kdRingBufferPoint[axis] == pidProfile->pid[axis].Wc) {
+                if (kdRingBufferPoint[axis] == pidProfile->dFilter[axis].Wc) {
                 kdRingBufferPoint[axis] = 0;
                 }
 
-                dDelta = (float)(kdRingBufferSum[axis] / (float) (pidProfile->pid[axis].Wc));
+                dDelta = (float)(kdRingBufferSum[axis] / (float)(pidProfile->dFilter[axis].Wc));
                 kdRingBufferSum[axis] -= kdRingBuffer[axis][kdRingBufferPoint[axis]];
               }
 
