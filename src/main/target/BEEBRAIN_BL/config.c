@@ -182,8 +182,6 @@ void targetConfiguration(void)
     pidProfilesMutable(0)->dterm_filter_type = FILTER_BIQUAD;
     pidProfilesMutable(0)->dterm_lowpass_hz = 200;
     pidProfilesMutable(0)->dterm_lowpass2_hz = 0;
-    pidProfilesMutable(0)->dterm_notch_cutoff = 0;
-    pidProfilesMutable(0)->vbatPidCompensation = true;
     pidProfilesMutable(0)->itermThrottleThreshold = 200;
     pidProfilesMutable(0)->yawRateAccelLimit = 0;
     pidProfilesMutable(0)->iterm_relax = ITERM_RELAX_RP;
