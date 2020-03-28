@@ -39,6 +39,8 @@
 #include "drivers/sound_beeper.h"
 #include "drivers/time.h"
 
+#include "fc/controlrate_profile.h"
+
 #include "fc/fc_core.h"
 #include "fc/fc_rc.h"
 
@@ -86,7 +88,7 @@ PG_REGISTER_WITH_RESET_TEMPLATE(pidConfig_t, pidConfig, PG_PID_CONFIG, 2);
 #ifdef STM32F10X
 #define PID_PROCESS_DENOM_DEFAULT       1
 #elif defined(USE_GYRO_SPI_MPU6000) || defined(USE_GYRO_SPI_MPU6500)  || defined(USE_GYRO_SPI_ICM20689)
-#define PID_PROCESS_DENOM_DEFAULT       4
+#define PID_PROCESS_DENOM_DEFAULT       1
 #else
 #define PID_PROCESS_DENOM_DEFAULT       2
 #endif
@@ -250,11 +252,11 @@ typedef union dtermLowpass_u {
 
 static FAST_RAM_ZERO_INIT float previousPidSetpoint[XYZ_AXIS_COUNT];
 static FAST_RAM filterApplyFnPtr dtermNotchApplyFn = nullFilterApply;
-static FAST_RAM_ZERO_INIT biquadFilter_t dtermNotch[3];
+static FAST_RAM_ZERO_INIT biquadFilter_t dtermNotch[XYZ_AXIS_COUNT];
 static FAST_RAM filterApplyFnPtr dtermLowpassApplyFn = nullFilterApply;
-static FAST_RAM_ZERO_INIT dtermLowpass_t dtermLowpass[3];
+static FAST_RAM_ZERO_INIT dtermLowpass_t dtermLowpass[XYZ_AXIS_COUNT];
 static FAST_RAM filterApplyFnPtr dtermLowpass2ApplyFn = nullFilterApply;
-static FAST_RAM_ZERO_INIT dtermLowpass_t dtermLowpass2[3];
+static FAST_RAM_ZERO_INIT dtermLowpass_t dtermLowpass2[XYZ_AXIS_COUNT];
 
 #if defined(USE_ITERM_RELAX)
 static FAST_RAM_ZERO_INIT pt1Filter_t windupLpf[XYZ_AXIS_COUNT];
@@ -281,6 +283,7 @@ void pidInitFilters(const pidProfile_t *pidProfile)
     dtermNotchApplyFn = nullFilterApply;
     dtermLowpassApplyFn = nullFilterApply;
     dtermLowpass2ApplyFn = nullFilterApply;
+    BUILD_BUG_ON(FD_YAW != 2);                             // ensure yaw axis is 2
     const uint32_t pidFrequencyNyquist = pidFrequency / 2; // No rounding needed
 
     uint16_t dTermNotchHz;
@@ -337,6 +340,13 @@ void pidInitFilters(const pidProfile_t *pidProfile)
             }
         }
 
+#ifdef USE_ITERM_RELAX
+        /*
+         * windupLpf can be initiated even if Iterm relax is not enabled. Memory is already alocated
+         * state check happens later in the code and having more ifs is not greatest idea ever
+         */
+        pt1FilterInit(&windupLpf[axis], pt1FilterGain(itermRelaxCutoff, dT));
+#endif
     }
 
 #if defined(USE_THROTTLE_BOOST)
@@ -876,7 +886,7 @@ static FAST_RAM_ZERO_INIT float previousMeasurement[XYZ_AXIS_COUNT];
 static FAST_RAM_ZERO_INIT float previousdDelta[XYZ_AXIS_COUNT];
 static FAST_RAM_ZERO_INIT float kdRingBuffer[XYZ_AXIS_COUNT][KD_RING_BUFFER_SIZE];
 static FAST_RAM_ZERO_INIT float kdRingBufferSum[XYZ_AXIS_COUNT];
-static FAST_RAM_ZERO_INIT uint16_t kdRingBufferPoint[XYZ_AXIS_COUNT];
+static FAST_RAM_ZERO_INIT uint8_t kdRingBufferPoint[XYZ_AXIS_COUNT];
 static FAST_RAM_ZERO_INIT timeUs_t crashDetectedAtUs;
 static FAST_RAM_ZERO_INIT timeUs_t previousTimeUs;
 
@@ -919,7 +929,7 @@ void pidController(const pidProfile_t *pidProfile, const rollAndPitchTrims_t *an
     const float deltaT = (currentTimeUs - previousTimeUs) * 1e-6f;
     previousTimeUs = currentTimeUs;
     // calculate actual deltaT in seconds
-    const float iDT = 1.0f/deltaT; //divide once
+    const float iDT = 1.0f / deltaT; //divide once
     // calculate actual deltaT in seconds
     // Dynamic i component,
     if ((antiGravityMode == ANTI_GRAVITY_SMOOTH) && antiGravityEnabled) {
@@ -1080,6 +1090,7 @@ void pidController(const pidProfile_t *pidProfile, const rollAndPitchTrims_t *an
             );
 
             // -----calculate D component
+            if (pidCoefficient[axis].Kd > 0) {
             float gyroRateFiltered = dtermNotchApplyFn((filter_t *) &dtermNotch[axis], gyroRate);
 
                 //filter Kd properly, no setpoint filtering
@@ -1112,8 +1123,6 @@ void pidController(const pidProfile_t *pidProfile, const rollAndPitchTrims_t *an
                 dDelta = (float)(kdRingBufferSum[axis] / (float)(pidProfile->dFilter[axis].Wc));
                 kdRingBufferSum[axis] -= kdRingBuffer[axis][kdRingBufferPoint[axis]];
               }
-
-        if (pidCoefficient[axis].Kd > 0) {
                 // Divide rate change by dT to get differential (ie dr/dt).
                 // dT is fixed and calculated from the target PID loop time
                 // This is done to avoid DTerm spikes that occur with dynamically
@@ -1128,7 +1137,7 @@ void pidController(const pidProfile_t *pidProfile, const rollAndPitchTrims_t *an
                 pidProfile->crash_recovery, angleTrim, axis, currentTimeUs, errorRate,
                 &currentPidSetpoint, &errorRate);
 
-            detectAndSetCrashRecovery(pidProfile->crash_recovery, axis, currentTimeUs, dDelta, errorRate);
+            detectAndSetCrashRecovery(pidProfile->crash_recovery, axis, currentTimeUs, pidData[axis].D, errorRate);
 
         // -----calculate feedforward component
         // Use angle feedforward for angle mode and level feedforward for pitch/roll or roll if in nfe_racermode

@@ -76,8 +76,6 @@ typedef struct pidf_s {
     uint8_t I;
     uint8_t D;
     uint16_t F;
-    uint8_t Wc; //adding witchCraft so it can be set per axis :) might put future dterm filters in here to set them per axis :) go emu!
-
 } pidf_t;
 
 typedef struct dFilter_s {
