@@ -1,123 +1,80 @@
-![EmuFlight](docs/assets/images/EmuFlight.png)
+![EmuFlight](docs/assets/images/EmuClassic.png)
 
-EmuFlight is flight controller software (firmware) used to fly multi-rotor craft.
+# This is Unsanctioned, Unofficial and Unsupported.
 
-This fork differs from Baseflight, Cleanflight and Betaflight in that it focuses on flight performance, innovative filtering, leading-edge feature additions, and wide target support.
+* You should probably wait for the official release of 0.3.0.
+* This is custom branch of back-ported bug-fixes and optimizations from [EmuFlight code-base](https://github.com/emuflight/EmuFlight).
+* It might always report 0.2.22 for compatibility and will not be adding additional *features*.
+* Back-porting bug-fixes or optimizations will be as needed; However, this branch will soon stabilize and cease modification as efforts toward official EmuFlight 0.3.0 continues.
+* Use at your own risk.
+* ***Do NOT report issues to Official EmuFlight.***
 
-## News
 
-Currently working on the first official release of EmuFlight. The Pegasus configurator will also be our official configurator in the coming months.
+### Introduction & Notes
+
+* While far from complete, [EmuFlight Wiki](https://github.com/emuflight/EmuFlight/wiki/What-makes-EmuFlight-different%3F) does have more information than historically.
+* Please save a `diff all` and `dump all` prior to upgrading.  Helio/Strix/Flux users may upgrade to IMUF 224 if desired.  Please note that IMUF flashing may corrupt existing configurations, so please upgrade firmware ***after*** saving your data and flashing an [IMUF Release](https://github.com/emuflight/imu-f/releases). Please do read the IMUF Release Notes.
+* Firmware flashing must be done with ***Full Chip Erase*** enabled for a clean configuration, free of corruption.
+* Please use [EmuConfigurator](https://github.com/emuflight/EmuConfigurator/releases/) version [0.2.12-RC2](https://github.com/emuflight/EmuConfigurator/releases/tag/0.2.12rc2) or newer. Please do read the Configurator Release Notes.
+* Please upload the new version 2 fonts using the EmuConfigurator 0.2.12-RC2 or newer.  Note that some flight controllers require being powered from battery to successfully save the fonts.
+
+### Defaults and Presets
+
+* ***Defaults are default.  This should be considered a generic starting point.  Although we feel them to be comfortably safe, please know that tuning your quad is still required, including lowpass filters and possibly notches. Do not flash and "rip", or risk R.I.P.  The same is true for our community-provided presets.  Members of @EmuTestBandits have been using higher than historic dTerm values; However, please be diligent in testing motor-heat in incremental test-hovers of 10, 20, and 30 or more second intervals.  EmuFlight/EmuClassic is provided free as-is without warranty of any kind.***
+
+### Tuning
+
+* Tuning should be done very similarly to Betaflight 3.5.x tuning methods; However, you should also use the [Tuning Flowchart](https://github.com/emuflight/EmuFlight/wiki/IMUF) presented on the Wiki.
+
+#### This version specifically contains:
+
+* Classic Gyro and dTerm LPF's (Gyro LPF1 & LPF2; dTerm LPF1 & LPF2)
+* SPA Roll/Pitch Mixed and SPA Yaw
+* Working Dynamic Notch (Gyro)
+* [Angle/NFE-Racer](https://github.com/emuflight/EmuFlight/wiki/Angle-and-NFE-Racer-modes) mode PID controller (from Silverware)
+* [Smart dTerm Smoothing](https://github.com/emuflight/EmuFlight/wiki/smart-dTerm-smoothing) (CLI Only)
+* [WitchCraft](https://github.com/emuflight/EmuFlight/wiki/WitchCraft) (from RaceFlight) (CLI Only)
+
+#### This version specifically does not contain:
+
+* Gyro and dTerm LPF's per-axis  (Gyro Roll/Pitch/Yaw LPF1 & R/P/Y LPF2; dTerm R/P/Y LPF1 & R/P/Y LPF2)
+* Stick-PIDs (Replaces Cinematic SetPoint)
+* Cinematic SetPoint (Neither does Official)
+* IMUF Sharpness
 
 
-To get the latest updates as well as support from us, you can join our discord at <https://discord.gg/gdP9CwE>.
+### *Huge Thank You to:*
+ * DevTeam
+ * TestBandits
+ * Contributors
+ * Community
+ * & Especially to ThoseWeRideTheCoatTailsOf.
 
-## Features
 
-EmuFlight has some of the following features:
+### Compiling
 
-* Multi-color RGB LED strip support (each LED can be a different color using variable length WS2811 Addressable RGB strips - use for Orientation Indicators, Low Battery Warning, Flight Mode Status, Initialization Troubleshooting, etc)
-* DShot (150, 300, 600 and 1200), Multishot, and Oneshot (125 and 42) motor protocol support
-* Blackbox flight recorder logging (to onboard flash or external microSD card where equipped)
-* Support for targets that use the STM32 F7, F4 and F3 processors
-* PWM, PPM, and Serial (SBus, SumH, SumD, Spektrum 1024/2048, XBus, etc) RX connection with failsafe detection
-* Multiple telemetry protocols (CSRF, FrSky, HoTT smart-port, MSP, etc)
-* RSSI via ADC - Uses ADC to read PWM RSSI signals, tested with FrSky D4R-II, X8R, X4R-SB, & XSR
-* OSD support & configuration without needing third-party OSD software/firmware/comm devices
-* OLED Displays - Display information on: Battery voltage/current/mAh, profile, rate profile, mode, version, sensors, etc
-* In-flight manual PID tuning and rate adjustment
-* Rate profiles and in-flight selection of them
-* Configurable serial ports for Serial RX, Telemetry, ESC telemetry, MSP, GPS, OSD, Sonar, etc - Use most devices on any port, softserial included
-* VTX support for Unify Pro and IRC Tramp
-* Latest IMUF filtering technology
-* and MUCH, MUCH more.
+#### Debian/Ubuntu Prerequisites
+```shell
+sudo apt install git build-essential
+```
 
-## Installation & Documentation
+#### Fedora/RHEL/CentOS  Prerequisites
+```
+sudo yum groupinstall "Development Tools" "Development Libraries"
+## or
+## dnf install @development-tools
+```
 
-See: https://github.com/emuflight/EmuFlight/wiki
+#### Cloning and Building
+```shell
+git clone --shallow-since="Mar 26 2020" https://github.com/nerdCopter/EmuClassic_nerdCopter.git
+cd EmuClassic_nerdCopter
 
-## Support and Developers Channel
+## as needed upon arm_sdk updates:
+make arm_sdk_install --always-make
 
-There's a dedicated Discord chat channel here:
-
-https://discord.gg/gdP9CwE
-
-Etiquette: Don't ask to ask and please wait around long enough for a reply - sometimes people are out flying, asleep or at work and can't answer immediately.
-
-## Configuration Tool
-
-To configure Betaflight you should use the Betaflight-configurator GUI tool (Windows/OSX/Linux) which can be found here:
-
-https://github.com/emuflight/EmuConfigurator
-
-## Contributing
-
-Contributions are welcome and encouraged. You can contribute in many ways:
-
-* Documentation updates and corrections.
-* How-To guides - received help? Help others!
-* Bug reporting & fixes.
-* New feature ideas & suggestions.
-
-The best place to start is the EmuFlight Discord (registration [here](https://discord.gg/fXPP49e). Next place is the github issue tracker:
-
-https://github.com/emuflight/EmuFlight/issues
-
-https://github.com/emuflight/EmuConfigurator/issues
-
-Before creating new issues please check to see if there is an existing one, search first otherwise you waste peoples time when they could be coding instead!
-
-If you want to contribute to our efforts financially, please consider making a donation to us through PayPal (Not yet setup).
-
-If you want to contribute financially on an ongoing basis, you should consider becoming a patron for us on Patreon (Not yet setup).
-
-## Developers
-
-Contribution of bugfixes and new features is encouraged. Please be aware that we have a thorough review process for pull requests, and be prepared to explain what you want to achieve with your pull request.
-Before starting to write code, please read our [development guidelines](docs/development/Development.md ) and [coding style definition](docs/development/CodingStyle.md).
-
-## EmuFlight Releases
-
-[![Build Status](https://travis-ci.org/emuflight/EmuFlight.svg?branch=Main)](https://travis-ci.org/emuflight/EmuFlight) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/eb2d3be37a4247a19814014ee22e1170)](https://www.codacy.com/manual/EmuFlight/EmuFlight?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=emuflight/EmuFlight&amp;utm_campaign=Badge_Grade)
-
-https://github.com/emuflight/EmuFlight/releases
-
-## Open Source / Contributors
-
-EmuFlight is software that is **open source** and is available free of charge without warranty to all users.
-
-EmuFlight is forked from Betaflight, so thanks goes to all those whom have contributed to Cleanflight, Betaflight, Butterflight and their origins.
-
-Origins for this fork (Thanks!):
-* **Alexinparis** (for MultiWii),
-* **timecop** (for Baseflight),
-* **Dominic Clifton** (for Cleanflight),
-* **borisbstyle** (for Betaflight),
-* **Sambas** (for the original STM32F4 port), and
-* **Marinus** (for forking IMUF thus beginning EmuFlight).
-
-The EmuFlight Configurator is forked from Betaflight Configurator and its origins.
-
-Origins for EmuFlight Configurator:
-* **Dominic Clifton** (for Cleanflight configurator), and
-* **ctn** (for the original Configurator).
-
-Big thanks to current and past contributors:
-* Budden, Martin (martinbudden)
-* Bardwell, Joshua (joshuabardwell)
-* Blackman, Jason (blckmn)
-* ctzsnooze
-* Höglund, Anders (andershoglund)
-* Ledvina, Petr (ledvinap) - **IO code awesomeness!**
-* kc10kevin
-* Keeble, Gary (MadmanK)
-* Keller, Michael (mikeller) - **Configurator brilliance**
-* Kravcov, Albert (skaman82) - **Configurator brilliance**
-* MJ666
-* Nathan (nathantsoi)
-* ravnav
-* sambas - **bringing us the F4**
-* savaga
-* Stålheim, Anton (KiteAnton)
-* Tim Sweet, Kaylin Doerr, Shawn Loftin - **Filtering improvements, IMUF**
-
-And many many others who haven't been mentioned....
+## building: make [all | target [target] ... [target] [--always-make] [--keep-going]
+## e.g. make all --always-make --keep-going
+## where --always-make will force build all dependencies & --keep-going will continue upon a target error
+make HELIOSPRING FOXEERF405
+```
