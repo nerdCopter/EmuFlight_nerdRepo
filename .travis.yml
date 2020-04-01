@@ -20,6 +20,8 @@ git:
   quiet: true # save on logfiles
 
 addons:
+#  artifacts: true
+  artifacts: false
   apt:
     packages:
       - build-essential
@@ -52,37 +54,37 @@ script:
   - ./.travis.sh # main
   - ccache --show-stats
 
-deploy:
-  - provider: releases
-    edge: true
-    token: "${GITHUB_TOKEN}"
-    name: "${TRAVIS_TAG}"
-    #body: "${CHANGELOG}" # broken as of 14.03.2020
-    tag_name: "${TRAVIS_TAG}"
-    target_commitish: "${TRAVIS_COMMIT}"
-    file_glob: true
-    file:
-      - obj/*.hex
-    cleanup: false # do not delete what has just been built
-    draft: true
-    prerelease: true
-    overwrite: true
-    on:
-      tags: true
-  - provider: bintray
-    user: "${BINTRAY_USER}"
-    key: "${BINTRAY_API_KEY}"
-    file: bintray-conf.json
-    skip_cleanup: true # do not delete what has just been built
-    on:
-      all_branches: true
-      #tags: true
+#deploy:
+#  - provider: releases
+#    edge: true
+#    token: "${GITHUB_TOKEN}"
+#    name: "${TRAVIS_TAG}"
+#    #body: "${CHANGELOG}" # broken as of 14.03.2020
+#    tag_name: "${TRAVIS_TAG}"
+#    target_commitish: "${TRAVIS_COMMIT}"
+#    file_glob: true
+#    file:
+#      - obj/*.hex
+#    cleanup: false # do not delete what has just been built
+#    draft: true
+#    prerelease: true
+#    overwrite: true
+#    on:
+#      tags: true
+##  - provider: bintray
+##    user: "${BINTRAY_USER}"
+##    key: "${BINTRAY_API_KEY}"
+##    file: bintray-conf.json
+#    skip_cleanup: true # do not delete what has just been built
+#    on:
+#      all_branches: true
+#      #tags: true
 
-after_deploy:
-  - wget https://raw.githubusercontent.com/DiscordHooks/travis-ci-discord-webhook/master/send.sh
-  - chmod +x send.sh
-  - ./send.sh success $WEBHOOK_URL
-after_failure:
-  - wget https://raw.githubusercontent.com/DiscordHooks/travis-ci-discord-webhook/master/send.sh
-  - chmod +x send.sh
-  - ./send.sh failure $WEBHOOK_URL
+#after_deploy:
+#  - wget https://raw.githubusercontent.com/DiscordHooks/travis-ci-discord-webhook/master/send.sh
+#  - chmod +x send.sh
+#  - ./send.sh success $WEBHOOK_URL
+#after_failure:
+#  - wget https://raw.githubusercontent.com/DiscordHooks/travis-ci-discord-webhook/master/send.sh
+#  - chmod +x send.sh
+#  - ./send.sh failure $WEBHOOK_URL
