@@ -1109,6 +1109,7 @@ void pidController(const pidProfile_t *pidProfile, const rollAndPitchTrims_t *an
                   dDeltaMultiplier = constrainf(fabsf(dDelta + previousdDelta[axis]) / (2 * smart_dterm_smoothing[axis]), 0.0f, 1.0f);
                   dDelta = dDelta * dDeltaMultiplier;
                   previousdDelta[axis] = dDelta;
+                  DEBUG_SET(DEBUG_SMART_SMOOTHING, axis, dDeltaMultiplier * 1000.0f);
               }
 
             if (pidProfile->dFilter[axis].Wc > 1)
