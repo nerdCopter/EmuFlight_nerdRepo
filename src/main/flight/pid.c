@@ -141,8 +141,8 @@ void resetPidProfile(pidProfile_t *pidProfile)
 
         //WitchCraft, Smart_DTerm_Smoothing Defaults
         .dFilter = {
-            [PID_ROLL] = { 3, 40 },     // wC, smartSmoothing
-            [PID_PITCH] = { 3, 70 },    // wC, smartSmoothing
+            [PID_ROLL] = { 2, 5 },     // wC, smartSmoothing
+            [PID_PITCH] = { 2, 5 },    // wC, smartSmoothing
             [PID_YAW] = { 0, 0 },       // wC, smartSmoothing
         },
 
@@ -1104,9 +1104,11 @@ void pidController(const pidProfile_t *pidProfile, const rollAndPitchTrims_t *an
                 dDelta = dtermLowpassApplyFn((filter_t *)&dtermLowpass[axis], dDelta);
                 dDelta = dtermLowpass2ApplyFn((filter_t *)&dtermLowpass2[axis], dDelta);
 
+                dDelta = pidCoefficient[axis].Kd * dDelta;
+
               float dDeltaMultiplier;
               if (smart_dterm_smoothing[axis] > 0) {
-                  dDeltaMultiplier = constrainf(fabsf(dDelta + previousdDelta[axis]) / (2 * smart_dterm_smoothing[axis]), 0.0f, 1.0f);
+                  dDeltaMultiplier = constrainf(fabsf(dDelta + previousdDelta[axis]) / (2 * smart_dterm_smoothing[axis]), 0.5f, 1.0f);
                   dDelta = dDelta * dDeltaMultiplier;
                   previousdDelta[axis] = dDelta;
                   DEBUG_SET(DEBUG_SMART_SMOOTHING, axis, dDeltaMultiplier * 1000.0f);
@@ -1129,7 +1131,7 @@ void pidController(const pidProfile_t *pidProfile, const rollAndPitchTrims_t *an
                 // This is done to avoid DTerm spikes that occur with dynamically
                 // calculated deltaT whenever another task causes the PID
                 // loop execution to be delayed.
-                pidData[axis].D = pidCoefficient[axis].Kd * dDelta;
+                pidData[axis].D = dDelta;
             } else {
                 pidData[axis].D = 0;
             }
