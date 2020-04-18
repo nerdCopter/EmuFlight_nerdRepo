@@ -15,7 +15,7 @@
 variables:
   owner: nerdCopter
   repoName: EmuFlight_nerdRepo
-  releaseNotes: Build 'master'; It may be unstable; **Use only for testing.**
+  releaseNotes: not intended for public consumption. this is test of the Microsoft Azure Pipelines build system
 
 name: $(Build.RequestedFor)_$(Build.SourceBranchName)_$(BuildID)
 
@@ -43,6 +43,7 @@ stages:
 - stage: Release
   jobs:
   - job: Release
+    timeoutInMinutes: 360
 
     steps:
     - task: DownloadPipelineArtifact@2
