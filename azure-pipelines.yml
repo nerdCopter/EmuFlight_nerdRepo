@@ -40,7 +40,7 @@ stages:
     steps:
     - script: make arm_sdk_install
       displayName: 'Install the build toolchain'
-    - script: make all -j2
+    - script: make $(GOAL) -j2
       displayName: 'Build the Targets'
     - script: mkdir release; cp obj/*.hex release/
       displayName: 'Copy artefacts'
