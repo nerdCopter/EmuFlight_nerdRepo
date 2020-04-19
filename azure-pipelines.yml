@@ -90,8 +90,8 @@ stages:
           $(Build.RequestedFor)
           Build.QueuedBy
           $(Build.QueuedBy)
-        githubReleaseDraft: false
-        githubReleasePrerelease: true
+        githubReleaseDraft: true              #this will allow hiding until manually unsetting 'draft'
+        githubReleasePrerelease: true         #make it a pre-release, we can manually unset also if appropriate
         githubIgnoreAssets: false
         githubReleaseAsset: |
           $(Pipeline.Workspace)/emuflight/**
