@@ -12,9 +12,6 @@ typedef struct variance
     float xVar;
     float yVar;
     float zVar;
-    float xyCoVar;
-    float xzCoVar;
-    float yzCoVar;
 
     uint32_t windex;
     float xWindow[MAX_KALMAN_WINDOW_SIZE];
