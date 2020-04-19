@@ -24,26 +24,17 @@ trigger: none
 stages:
 - stage: Build
   jobs:
-    timeoutInMinutes: 180   # 3 hours
   - job: 'Linux'
-      strategy:
-      maxParallel: 3
-      matrix:
-        batch1:
-          GOAL: targets-group-1
-        batch2:
-          GOAL: targets-group-2
-        batch3:
-          GOAL: targets-group-rest
+    timeoutInMinutes: 360
     pool:
       vmImage: 'ubuntu-16.04'
     steps:
     - script: make arm_sdk_install
       displayName: 'Install the build toolchain'
-    - script: make ${GOAL} -j2 || exit $?
+    - script: make all -j2
       displayName: 'Build the Targets'
     - script: mkdir release; cp obj/*.hex release/
-      displayName: 'Copy artifacts'
+      displayName: 'Copy artefacts'
     - task: PublishPipelineArtifact@1
       displayName: 'Publish Linux release'
       inputs:
