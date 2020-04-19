@@ -26,6 +26,15 @@ stages:
   jobs:
   - job: 'Linux'
     timeoutInMinutes: 360
+    strategy:
+      maxParallel: 3
+      matrix:
+        batch1:
+          GOAL: targets-group-1
+        batch2:
+          GOAL: targets-group-2
+        batch3:
+          GOAL: targets-group-rest
     pool:
       vmImage: 'ubuntu-16.04'
     steps:
