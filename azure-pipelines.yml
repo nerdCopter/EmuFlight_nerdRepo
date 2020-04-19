@@ -24,7 +24,7 @@ trigger: none
 stages:
 - stage: Build
   jobs:
-  timeoutInMinutes: 180   # 3 hours
+    timeoutInMinutes: 180   # 3 hours
   - job: 'Linux'
       strategy:
       maxParallel: 3
