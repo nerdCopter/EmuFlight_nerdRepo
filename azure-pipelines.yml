@@ -13,7 +13,7 @@
 
 
 variables:
-  endpoint: nerdCopter
+  endpoint: EmuFlight_nerdProject
   owner: nerdCopter
   repoName: testBuilds
   releaseNotes: '* not intended for public consumption.<br>* this is test of the `Microsoft Azure Pipelines` build system<br>* may contain bugs / incomplete features.<br>* do not use unless directed to do so.'
