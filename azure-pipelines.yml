@@ -17,12 +17,14 @@ variables:
   owner: nerdCopter
   repoName: EmuFlight_nerdRepo
   releaseNotes: '* not intended for public consumption.<br>* this is test of the `Microsoft Azure Pipelines` build system<br>* may contain bugs / incomplete features.<br>* do not use unless directed to do so.'
-  rtag: $(Date:yyyyMMdd).$(BuildID)
-  bbranch: $(Build.SourceBranchName)
 
-name: '$(rtag).$(bbranch)'
-
-trigger: none
+name: $(Date:yyyyMMdd).$(BuildID)
+trigger:
+  batch: true
+  branches:
+    include:
+    - master
+pr: none
 
 stages:
 - stage: Build
@@ -78,8 +80,8 @@ stages:
         manuallySetRepository: true
         githubOwner: '$(owner)'
         githubRepositoryName: '$(repoName)'
-        githubTag: $(rtag)
-        githubReleaseTitle: $(bbranch)
+        githubTag: $(Date:yyyyMMdd).$(BuildID)
+        githubReleaseTitle: $(Date:yyyyMMdd).$(BuildID).$(Build.SourceBranchName)
         githubReleaseNotes: |+
           $(releaseNotes)
 
