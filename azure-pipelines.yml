@@ -18,7 +18,9 @@ variables:
   repoName: EmuFlight_nerdRepo
   releaseNotes: '* not intended for public consumption.<br>* this is test of the `Microsoft Azure Pipelines` build system<br>* may contain bugs / incomplete features.<br>* do not use unless directed to do so.'
 
-name: $(Date:yyyyMMdd).$(BuildID).$(Build.SourceBranchName)
+rtag: $(Date:yyyyMMdd).$(BuildID)
+bbranch: $(Build.SourceBranchName)
+name: $(rtag).$(bbranch)
 
 trigger: none
 
@@ -76,39 +78,30 @@ stages:
         manuallySetRepository: true
         githubOwner: '$(owner)'
         githubRepositoryName: '$(repoName)'
-        githubTag: $(today).$(Build.Repository.Name).$(Build.SourceBranchName)
-        githubReleaseTitle: '$(Build.Repository.Name): $(Build.SourceBranchName) ($(today))'
+        githubTag: $(rtag)
+        githubReleaseTitle: $(bbranch)
         githubReleaseNotes: |+
           $(releaseNotes)
 
-          ### Repository:
+          #### Repository:
           $(Build.Repository.Name) ([link]($(Build.Repository.Uri)))
 
-          ### Pull request branch:
+          #### Branch:
           $(Build.SourceBranchName) ([link]($(Build.Repository.Uri)/tree/$(Build.SourceBranchName)))
 
-          ### Author:
-          $(Build.RequestedFor)
-
-          ### Latest changeset:
+          #### Commit SHA:
           $(Build.SourceVersion) ([link]($(Build.Repository.Uri)/commit/$(Build.SourceVersion)))
 
-          ### Changes:
+          #### Commit Message:
           $(Build.SourceVersionMessage)
 
-          ### Debug:
-          Build.SourceBranchName
-          $(Build.SourceBranchName)
-          Build.Repository.Name
-          $(Build.Repository.Name)
-          Build.Repository.ID
-          $(Build.Repository.ID)
-          Build.Repository.Uri
-          $(Build.Repository.Uri)
-          Build.RequestedFor
-          $(Build.RequestedFor)
-          Build.QueuedBy
-          $(Build.QueuedBy)
+          #### Debug:
+          Build.SourceBranchName: $(Build.SourceBranchName)
+          Build.Repository.Name: $(Build.Repository.Name)
+          Build.Repository.ID: $(Build.Repository.ID)
+          Build.Repository.Uri: $(Build.Repository.Uri)
+          Build.RequestedFor: $(Build.RequestedFor)
+          Build.QueuedBy: $(Build.QueuedBy)
         githubReleaseDraft: true              #this will allow hiding until manually unsetting 'draft'
         githubReleasePrerelease: true         #make it a pre-release, we can manually unset also if appropriate
         githubIgnoreAssets: false
