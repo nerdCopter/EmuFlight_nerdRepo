@@ -20,7 +20,7 @@ variables:
   rtag: $(Date:yyyyMMdd).$(BuildID)
   bbranch: $(Build.SourceBranchName)
 
-name: $(rtag).$(bbranch)
+name: '$(rtag).$(bbranch)'
 
 trigger: none
 
