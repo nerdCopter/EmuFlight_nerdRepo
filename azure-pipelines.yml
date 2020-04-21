@@ -16,7 +16,7 @@ variables:
   endpoint: nerdCopter
   owner: nerdCopter
   repoName: EmuFlight_nerdRepo
-  releaseNotes: '* not intended for public consumption.<br>* this is test of the `Microsoft Azure Pipelines` build system<br>* may contain bugs / incomplete features.<br>* do not use unless directed to do so.'
+  releaseNotes: ' * not intended for public consumption.<br /> * this is test of the `Microsoft Azure Pipelines` build system<br /> * may contain bugs / incomplete features.<br /> * do not use unless directed to do so.'
 
 name: $(Date:yyyyMMdd).$(BuildID)
 trigger:
@@ -81,7 +81,7 @@ stages:
         githubOwner: '$(owner)'
         githubRepositoryName: '$(repoName)'
         githubTag: $(Date:yyyyMMdd).$(BuildID)
-        githubReleaseTitle: $(Date:yyyyMMdd).$(BuildID).$(Build.SourceBranchName)
+        githubReleaseTitle: '$(Build.Repository.Name): $(Build.SourceBranchName) ($(today))'
         githubReleaseNotes: |+
           $(releaseNotes)
 
