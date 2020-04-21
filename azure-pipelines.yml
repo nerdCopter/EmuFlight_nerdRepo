@@ -13,9 +13,9 @@
 
 
 variables:
-  endpoint: nerdCopter/EmuFlight_nerdRepo
+  endpoint: nerdCopter
   owner: nerdCopter
-  repoName: testBuilds
+  repoName: EmuFlight_nerdRepo
   releaseNotes: '* not intended for public consumption.<br>* this is test of the `Microsoft Azure Pipelines` build system<br>* may contain bugs / incomplete features.<br>* do not use unless directed to do so.'
 
 name: $(Date:yyyyMMdd).$(BuildID).$(Build.SourceBranchName)
