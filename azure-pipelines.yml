@@ -16,7 +16,11 @@ variables:
   endpoint: nerdCopter
   owner: nerdCopter
   repoName: EmuFlight_nerdRepo
-  releaseNotes: ' * not intended for public consumption.<br /> * this is test of the `Microsoft Azure Pipelines` build system<br /> * may contain bugs / incomplete features.<br /> * do not use unless directed to do so.'
+  releaseNotes: |+
+     * not intended for public consumption.
+     * this is test of the `Microsoft Azure Pipelines` build system
+     * may contain bugs / incomplete features.
+     * do not use unless directed to do so.
 
 name: $(Date:yyyyMMdd).$(BuildID)
 trigger:
