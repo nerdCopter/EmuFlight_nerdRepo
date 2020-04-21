@@ -18,7 +18,17 @@ variables:
   repoName: testBuilds
   releaseNotes: '* not intended for public consumption.<br>* this is test of the `Microsoft Azure Pipelines` build system<br>* may contain bugs / incomplete features.<br>* do not use unless directed to do so.'
 
-name: $(Build.RequestedFor)_$(Build.SourceBranchName)_$(BuildID)
+name: $(Date:yyyyMMdd).$(BuildID).$(Build.SourceBranchName)
+
+resources:
+  repositories:
+  - repository: EmuFlight_nerdRepo
+    name: nerdCopter/EmuFlight_nerdRepo
+    type: git
+  - repository: testBuilds
+    name: nerdCopter/testBuilds
+    type: git
+    ref: master
 
 trigger: none
 
@@ -31,13 +41,16 @@ stages:
       maxParallel: 3
       matrix:
         batch1:
-          GOAL: targets-group-1
+#          GOAL: targets-group-1
+          GOAL: FOXEERF405    # for testing purposes
           artifactName: emu1
         batch2:
-          GOAL: targets-group-2
+#          GOAL: targets-group-2
+          GOAL: HELIOSPRING   # for testing purposes
           artifactName: emu2
         batch3:
-          GOAL: targets-group-rest
+#          GOAL: targets-group-rest
+          GOAL: STRIXF10      # for testing purposes
           artifactName: emu3
 
     pool:
