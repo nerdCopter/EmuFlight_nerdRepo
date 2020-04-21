@@ -20,16 +20,6 @@ variables:
 
 name: $(Date:yyyyMMdd).$(BuildID).$(Build.SourceBranchName)
 
-resources:
-  repositories:
-  - repository: EmuFlight_nerdRepo
-    name: nerdCopter/EmuFlight_nerdRepo
-    type: git
-  - repository: testBuilds
-    name: nerdCopter/testBuilds
-    type: git
-    ref: master
-
 trigger: none
 
 stages:
