@@ -39,16 +39,16 @@ stages:
       maxParallel: 3
       matrix:
         batch1:
-#          GOAL: targets-group-1
-          GOAL: FOXEERF405    # for testing purposes
+          GOAL: targets-group-1
+#          GOAL: FOXEERF405    # for testing purposes
           artifactName: emu1
         batch2:
-#          GOAL: targets-group-2
-          GOAL: HELIOSPRING   # for testing purposes
+          GOAL: targets-group-2
+#          GOAL: HELIOSPRING   # for testing purposes
           artifactName: emu2
         batch3:
-#          GOAL: targets-group-rest
-          GOAL: STRIXF10      # for testing purposes
+          GOAL: targets-group-rest
+#          GOAL: STRIXF10      # for testing purposes
           artifactName: emu3
 
     pool:
