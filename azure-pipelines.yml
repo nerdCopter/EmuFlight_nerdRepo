@@ -115,7 +115,7 @@ stages:
         githubIgnoreAssets: false
         githubReleaseAsset: |
           $(Pipeline.Workspace)/emu**/**
-        githubReuseRelease: true
+        githubReuseRelease: false
         githubReuseDraftOnly: false
         githubSkipDuplicatedAssets: false
         githubEditRelease: true
