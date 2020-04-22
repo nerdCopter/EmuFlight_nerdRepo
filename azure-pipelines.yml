@@ -52,8 +52,10 @@ stages:
           artifactName: emu3
 
     pool:
-      vmImage: 'ubuntu-18.04'
+      vmImage: 'ubuntu-latest'
     steps:
+    - script: function curl () { command curl --connect-timeout 30 --retry 5 "$@" ; } ;
+      displayName: 'improve curl parameters'
     - script: make arm_sdk_install
       displayName: 'Install the build toolchain'
     - script: make $(GOAL) -j2
@@ -113,7 +115,7 @@ stages:
         githubIgnoreAssets: false
         githubReleaseAsset: |
           $(Pipeline.Workspace)/emu**/**
-        githubReuseRelease: true
+        githubReuseRelease: false
         githubReuseDraftOnly: false
         githubSkipDuplicatedAssets: false
         githubEditRelease: true
