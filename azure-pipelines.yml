@@ -104,7 +104,7 @@ stages:
         githubOwner: '$(owner)'
         githubRepositoryName: '$(destinationRepoName)'
         #githubTag: $(Date:yyyyMMdd).$(BuildID) #defaults to $(name) and this usually fails variables anyway
-        githubReleaseTitle: '$(Build.Repository.Name): $(Build.SourceBranchName) ($(tag))'
+        githubReleaseTitle: '$(Build.Repository.Name): $(Build.SourceBranchName) ($(Build.BuildNumber))'
         githubReleaseDraft: true              #this will allow hiding until manually unsetting 'draft'
         githubReleasePrerelease: true         #make it a pre-release, we can manually unset also if appropriate
         githubIgnoreAssets: false
@@ -141,7 +141,7 @@ stages:
         manuallySetRepository: true
         githubOwner: 'nerdCopter'
         githubRepositoryName: 'testBuilds'
-        githubReleaseTitle: '$(Build.Repository.Name): $(Build.SourceBranchName) ($(tag))'
+        githubReleaseTitle: '$(Build.Repository.Name): $(Build.SourceBranchName) ($(Build.BuildNumber))'
         githubReleaseDraft: true
         githubReleasePrerelease: true
         githubIgnoreAssets: false
