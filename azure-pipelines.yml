@@ -147,6 +147,10 @@ stages:
 
     - task: GitHubRelease@1
       inputs:
+        githubEndpoint: '$(endpoint)'
+        manuallySetRepository: true
+        githubOwner: '$(owner)'
+        githubRepositoryName: '$(destinationRepoNameTwo)'
         gitHubConnection: 'github-pat-for-azure'
         repositoryName: 'nerdCopter/testBuilds'
         action: 'create'
