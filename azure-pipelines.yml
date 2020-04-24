@@ -15,20 +15,36 @@
 variables:
   endpoint: nerdCopter
   owner: nerdCopter
-  repoName: EmuFlight_nerdRepo
+  destinationRepoName: EmuFlight_nerdRepo                     #release destination
+  destinationRepoNameTwo: EmuFlight_EmuClassic_nerdCopter     #release destination
+
   releaseNotes: |+
      * not intended for public consumption.
-     * this is test of the `Microsoft Azure Pipelines` build system
      * may contain bugs / incomplete features.
      * do not use unless directed to do so.
 
 name: $(Date:yyyyMMdd).$(BuildID)
-trigger:
-  batch: true
-  branches:
-    include:
-    - master
+
+resources:   #seems the pipeline connection to origin repo is always included, so this should be only additional repos
+  repositories:
+  - repository: EmuClassic_nerdCopter
+    type: github
+    endpoint: nerdCopter
+    name: nerdCopter/EmuClassic_nerdCopter
+
+trigger: none
+#trigger:
+#  branches:
+#    include:
+#    - '*'  # must quote since "*" is a YAML reserved character; we want a string
+#    - master
+#    - build/*
+
 pr: none
+#pr:
+#  branches:
+#    include:
+#    - '*'  # must quote since "*" is a YAML reserved character; we want a string
 
 stages:
 - stage: Build
@@ -54,6 +70,10 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
+    - checkout: self
+      clean: true
+      fetchDepth: 50
+      persistCredentials: true
     - script: function curl () { command curl --connect-timeout 30 --retry 5 "$@" ; } ;
       displayName: 'improve curl parameters'
     - script: make arm_sdk_install
@@ -62,8 +82,8 @@ stages:
       displayName: 'Build the Targets'
     - script: mkdir release; cp obj/*.hex release/
       displayName: 'Copy artifacts'
-    - script: rm -rf obj/*
-      displayName: 'Clean artifacts for parallel jobs'
+#    - script: rm -rf obj/*
+#      displayName: 'Clean artifacts'
     - task: PublishPipelineArtifact@1
       displayName: 'Publish Linux release'
       inputs:
@@ -75,6 +95,10 @@ stages:
   - job: Release
 
     steps:
+    - checkout: self
+      clean: true
+      fetchDepth: 50
+      persistCredentials: true
     - task: DownloadPipelineArtifact@2
       inputs:
         buildType: 'current'
@@ -85,7 +109,7 @@ stages:
         githubEndpoint: '$(endpoint)'
         manuallySetRepository: true
         githubOwner: '$(owner)'
-        githubRepositoryName: '$(repoName)'
+        githubRepositoryName: '$(destinationRepoName)'
         githubTag: $(Date:yyyyMMdd).$(BuildID)
         githubReleaseTitle: '$(Build.Repository.Name): $(Build.SourceBranchName) ($(today))'
         githubReleaseNotes: |+
@@ -111,6 +135,47 @@ stages:
           Build.RequestedFor: $(Build.RequestedFor)
           Build.QueuedBy: $(Build.QueuedBy)
         githubReleaseDraft: true              #this will allow hiding until manually unsetting 'draft'
+        githubReleasePrerelease: true         #make it a pre-release, we can manually unset also if appropriate
+        githubIgnoreAssets: false
+        githubReleaseAsset: |
+          $(Pipeline.Workspace)/emu**/**
+        githubReuseRelease: false
+        githubReuseDraftOnly: false
+        githubSkipDuplicatedAssets: false
+        githubEditRelease: true
+        githubDeleteEmptyTag: false
+
+    - task: GitHubReleasePublish@1
+      inputs:
+        githubEndpoint: '$(endpoint)'
+        manuallySetRepository: true
+        githubOwner: '$(owner)'
+        githubRepositoryName: '$(destinationRepoNameTwo)'
+        githubTag: $(Date:yyyyMMdd).$(BuildID)
+        githubReleaseTitle: '$(Build.Repository.Name): $(Build.SourceBranchName) ($(today))'
+        githubReleaseNotes: |+
+          $(releaseNotes)
+
+          #### Repository:
+          $(Build.Repository.Name) ([link]($(Build.Repository.Uri)))
+
+          #### Branch:
+          $(Build.SourceBranchName) ([link]($(Build.Repository.Uri)/tree/$(Build.SourceBranchName)))
+
+          #### Commit SHA:
+          $(Build.SourceVersion) ([link]($(Build.Repository.Uri)/commit/$(Build.SourceVersion)))
+
+          #### Commit Message:
+          $(Build.SourceVersionMessage)
+
+          #### Debug:
+          Build.SourceBranchName: $(Build.SourceBranchName)
+          Build.Repository.Name: $(Build.Repository.Name)
+          Build.Repository.ID: $(Build.Repository.ID)
+          Build.Repository.Uri: $(Build.Repository.Uri)
+          Build.RequestedFor: $(Build.RequestedFor)
+          Build.QueuedBy: $(Build.QueuedBy)
+        githubReleaseDraft: false              #this will allow hiding until manually unsetting 'draft'
         githubReleasePrerelease: true         #make it a pre-release, we can manually unset also if appropriate
         githubIgnoreAssets: false
         githubReleaseAsset: |
