@@ -17,6 +17,7 @@ variables:
   owner: nerdCopter
   destinationRepoName: EmuFlight_nerdRepo                     #release destination
   destinationRepoNameTwo: EmuFlight_EmuClassic_nerdCopter     #release destination
+  firmVersion: ''
   releaseNotes: |+
      * not intended for public consumption.
      * may contain bugs / incomplete features.
