@@ -104,7 +104,7 @@ stages:
         githubOwner: '$(owner)'
         githubRepositoryName: '$(destinationRepoName)'
         #githubTag: $(Date:yyyyMMdd).$(BuildID) #defaults to $(name) and this usually fails variables anyway
-        githubReleaseTitle: '$(Build.Repository.Name): $(Build.SourceBranchName) ($(name))'
+        githubReleaseTitle: '$(Build.Repository.Name): $(Build.SourceBranchName) ($(tag))'
         githubReleaseDraft: true              #this will allow hiding until manually unsetting 'draft'
         githubReleasePrerelease: true         #make it a pre-release, we can manually unset also if appropriate
         githubIgnoreAssets: false
@@ -117,17 +117,12 @@ stages:
         githubReleaseNotes: |+
           $(releaseNotes)
 
-          #### Repository:
-          $(Build.Repository.Name) ([link]($(Build.Repository.Uri)))
+          #### Repo:Branch
+          [$(Build.Repository.Name)]($(Build.Repository.Uri)/tree/$(Build.SourceBranchName)):[$(Build.SourceBranchName)]($(Build.Repository.Uri))
 
-          #### Branch:
-          $(Build.SourceBranchName) ([link]($(Build.Repository.Uri)/tree/$(Build.SourceBranchName)))
-
-          #### Commit SHA:
-          $(Build.SourceVersion) ([link]($(Build.Repository.Uri)/commit/$(Build.SourceVersion)))
-
-          #### Commit Message:
-          $(Build.SourceVersionMessage)
+          #### Commit:
+          [$(Build.SourceVersion)]($(Build.Repository.Uri)/commit/$(Build.SourceVersion))
+          `$(Build.SourceVersionMessage)`
 
           #### Debug:
           Build.SourceBranchName: $(Build.SourceBranchName)
@@ -136,6 +131,9 @@ stages:
           Build.Repository.Uri: $(Build.Repository.Uri)
           Build.RequestedFor: $(Build.RequestedFor)
           Build.QueuedBy: $(Build.QueuedBy)
+          Build.Reason: $(Build.Reason)
+          Build.BuildId: $(Build.BuildId)
+          Build.BuildNumber: $(Build.BuildNumber)
 
     - task: GitHubReleasePublish@1
       inputs:
@@ -143,7 +141,7 @@ stages:
         manuallySetRepository: true
         githubOwner: 'nerdCopter'
         githubRepositoryName: 'testBuilds'
-        githubReleaseTitle: '$(Build.Repository.Name): $(Build.SourceBranchName) ($(name))'
+        githubReleaseTitle: '$(Build.Repository.Name): $(Build.SourceBranchName) ($(tag))'
         githubReleaseDraft: true
         githubReleasePrerelease: true
         githubIgnoreAssets: false
@@ -156,17 +154,12 @@ stages:
         githubReleaseNotes: |+
           $(releaseNotes)
 
-          #### Repository:
-          $(Build.Repository.Name) ([link]($(Build.Repository.Uri)))
+          #### Repo:Branch
+          [$(Build.Repository.Name)]($(Build.Repository.Uri)/tree/$(Build.SourceBranchName)):[$(Build.SourceBranchName)]($(Build.Repository.Uri))
 
-          #### Branch:
-          $(Build.SourceBranchName) ([link]($(Build.Repository.Uri)/tree/$(Build.SourceBranchName)))
-
-          #### Commit SHA:
-          $(Build.SourceVersion) ([link]($(Build.Repository.Uri)/commit/$(Build.SourceVersion)))
-
-          #### Commit Message:
-          $(Build.SourceVersionMessage)
+          #### Commit:
+          [$(Build.SourceVersion)]($(Build.Repository.Uri)/commit/$(Build.SourceVersion))
+          `$(Build.SourceVersionMessage)`
 
           #### Debug:
           Build.SourceBranchName: $(Build.SourceBranchName)
@@ -175,3 +168,6 @@ stages:
           Build.Repository.Uri: $(Build.Repository.Uri)
           Build.RequestedFor: $(Build.RequestedFor)
           Build.QueuedBy: $(Build.QueuedBy)
+          Build.Reason: $(Build.Reason)
+          Build.BuildId: $(Build.BuildId)
+          Build.BuildNumber: $(Build.BuildNumber)
