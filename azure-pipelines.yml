@@ -70,6 +70,8 @@ stages:
       displayName: 'improve curl parameters'
     - script: make arm_sdk_install
       displayName: 'Install the build toolchain'
+    - script: echo "##vso[task.setvariable variable=firmVersion]$(make version)"
+      displayName: 'get make version'
     - script: make $(GOAL) -j2
       displayName: 'Build the Targets'
     - script: mkdir release; cp obj/*.hex release/
@@ -123,7 +125,10 @@ stages:
           [$(Build.SourceVersion)]($(Build.Repository.Uri)/commit/$(Build.SourceVersion))
           `$(Build.SourceVersionMessage)`
 
-          #### Debug:
+          #### Version:
+          $(firmVersion)
+
+          #### Azure Pipelines Debug:
           Build.SourceBranchName: $(Build.SourceBranchName)
           Build.Repository.Name: $(Build.Repository.Name)
           Build.Repository.ID: $(Build.Repository.ID)
@@ -160,7 +165,10 @@ stages:
           [$(Build.SourceVersion)]($(Build.Repository.Uri)/commit/$(Build.SourceVersion))
           `$(Build.SourceVersionMessage)`
 
-          #### Debug:
+          #### Version:
+          $(firmVersion)
+
+          #### Azure Pipelines Debug:
           Build.SourceBranchName: $(Build.SourceBranchName)
           Build.Repository.Name: $(Build.Repository.Name)
           Build.Repository.ID: $(Build.Repository.ID)
