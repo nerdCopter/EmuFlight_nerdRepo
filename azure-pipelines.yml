@@ -151,8 +151,7 @@ stages:
         repositoryName: 'nerdCopter/testBuilds'
         action: 'create'
         target: '$(Build.SourceVersion)'
-        tagSource: 'auto'
-        #userSpecifiedTag : true
+        tagSource: 'userSpecifiedTag'
         tag: $(name)
         title: '$(Build.Repository.Name): $(Build.SourceBranchName) $(today)'
         isDraft: true
