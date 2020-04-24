@@ -145,47 +145,19 @@ stages:
         githubEditRelease: true
         githubDeleteEmptyTag: false
 
-    - task: GitHubRelease@1
+    - task: GitHubReleasePublish@1
       inputs:
-        githubEndpoint: '$(endpoint)'
+        githubEndpoint: 'github-pat-for-azure'
         manuallySetRepository: true
-        githubOwner: '$(owner)'
-        githubRepositoryName: '$(destinationRepoNameTwo)'
-        gitHubConnection: 'github-pat-for-azure'
-        repositoryName: 'nerdCopter/testBuilds'
-        action: 'create'
-        target: '$(Build.SourceVersion)'
-        tagSource: 'userSpecifiedTag'
-        tag: $(name)
-        title: '$(Build.Repository.Name): $(Build.SourceBranchName) $(today)'
-        isDraft: true
-        isPreRelease: true
-        #changeLogCompareToRelease: 'lastNonDraftRelease'
-        #changeLogType: 'commitBased'
+        githubOwner: 'nerdCopter'
+        githubRepositoryName: 'nerdCopter/testBuilds'
+        githubReleaseTitle: '$(Build.Repository.Name): $(Build.SourceBranchName) ($(today))'
+        githubReleaseDraft: true
+        githubReleasePrerelease: true
+        githubIgnoreAssets: false
+        githubReleaseAsset: '$(Pipeline.Workspace)/emu**/**'
         githubReuseRelease: false
-        githubReuseDraftOnly: false
+        githubReuseDraftOnly: true
         githubSkipDuplicatedAssets: false
-        githubEditRelease: true
+        githubEditRelease: false
         githubDeleteEmptyTag: false
-        githubReleaseNotes: |+
-          $(releaseNotes)
-
-          #### Repository:
-          $(Build.Repository.Name) ([link]($(Build.Repository.Uri)))
-
-          #### Branch:
-          $(Build.SourceBranchName) ([link]($(Build.Repository.Uri)/tree/$(Build.SourceBranchName)))
-
-          #### Commit SHA:
-          $(Build.SourceVersion) ([link]($(Build.Repository.Uri)/commit/$(Build.SourceVersion)))
-
-          #### Commit Message:
-          $(Build.SourceVersionMessage)
-
-          #### Debug:
-          Build.SourceBranchName: $(Build.SourceBranchName)
-          Build.Repository.Name: $(Build.Repository.Name)
-          Build.Repository.ID: $(Build.Repository.ID)
-          Build.Repository.Uri: $(Build.Repository.Uri)
-          Build.RequestedFor: $(Build.RequestedFor)
-          Build.QueuedBy: $(Build.QueuedBy)
