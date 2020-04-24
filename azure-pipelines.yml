@@ -112,6 +112,15 @@ stages:
         githubRepositoryName: '$(destinationRepoName)'
         #githubTag: $(Date:yyyyMMdd).$(BuildID) #defaults to $(name) and this usually fails variables anyway
         githubReleaseTitle: '$(Build.Repository.Name): $(Build.SourceBranchName) ($(today))'
+        githubReleaseDraft: true              #this will allow hiding until manually unsetting 'draft'
+        githubReleasePrerelease: true         #make it a pre-release, we can manually unset also if appropriate
+        githubIgnoreAssets: false
+        githubReleaseAsset: '$(Pipeline.Workspace)/emu**/**'
+        githubReuseRelease: false
+        githubReuseDraftOnly: false
+        githubSkipDuplicatedAssets: false
+        githubEditRelease: true
+        githubDeleteEmptyTag: false
         githubReleaseNotes: |+
           $(releaseNotes)
 
@@ -134,16 +143,6 @@ stages:
           Build.Repository.Uri: $(Build.Repository.Uri)
           Build.RequestedFor: $(Build.RequestedFor)
           Build.QueuedBy: $(Build.QueuedBy)
-        githubReleaseDraft: true              #this will allow hiding until manually unsetting 'draft'
-        githubReleasePrerelease: true         #make it a pre-release, we can manually unset also if appropriate
-        githubIgnoreAssets: false
-        githubReleaseAsset: |
-          $(Pipeline.Workspace)/emu**/**
-        githubReuseRelease: false
-        githubReuseDraftOnly: false
-        githubSkipDuplicatedAssets: false
-        githubEditRelease: true
-        githubDeleteEmptyTag: false
 
     - task: GitHubReleasePublish@1
       inputs:
@@ -161,3 +160,25 @@ stages:
         githubSkipDuplicatedAssets: false
         githubEditRelease: false
         githubDeleteEmptyTag: false
+        githubReleaseNotes: |+
+          $(releaseNotes)
+
+          #### Repository:
+          $(Build.Repository.Name) ([link]($(Build.Repository.Uri)))
+
+          #### Branch:
+          $(Build.SourceBranchName) ([link]($(Build.Repository.Uri)/tree/$(Build.SourceBranchName)))
+
+          #### Commit SHA:
+          $(Build.SourceVersion) ([link]($(Build.Repository.Uri)/commit/$(Build.SourceVersion)))
+
+          #### Commit Message:
+          $(Build.SourceVersionMessage)
+
+          #### Debug:
+          Build.SourceBranchName: $(Build.SourceBranchName)
+          Build.Repository.Name: $(Build.Repository.Name)
+          Build.Repository.ID: $(Build.Repository.ID)
+          Build.Repository.Uri: $(Build.Repository.Uri)
+          Build.RequestedFor: $(Build.RequestedFor)
+          Build.QueuedBy: $(Build.QueuedBy)
