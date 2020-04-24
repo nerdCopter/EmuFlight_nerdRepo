@@ -25,13 +25,6 @@ variables:
 
 name: $(Date:yyyyMMdd).$(BuildID)
 
-#resources:   #seems the pipeline connection to origin repo is always included, so this should be only additional repos
-#  repositories:
-#  - repository: EmuClassic_nerdCopter
-#    type: github
-#    endpoint: nerdCopter
-#    name: nerdCopter/EmuClassic_nerdCopter
-
 trigger: none
 #trigger:
 #  branches:
@@ -111,7 +104,7 @@ stages:
         githubOwner: '$(owner)'
         githubRepositoryName: '$(destinationRepoName)'
         #githubTag: $(Date:yyyyMMdd).$(BuildID) #defaults to $(name) and this usually fails variables anyway
-        githubReleaseTitle: '$(Build.Repository.Name): $(Build.SourceBranchName) ($(today))'
+        githubReleaseTitle: '$(Build.Repository.Name): $(Build.SourceBranchName) ($(name))'
         githubReleaseDraft: true              #this will allow hiding until manually unsetting 'draft'
         githubReleasePrerelease: true         #make it a pre-release, we can manually unset also if appropriate
         githubIgnoreAssets: false
@@ -150,7 +143,7 @@ stages:
         manuallySetRepository: true
         githubOwner: 'nerdCopter'
         githubRepositoryName: 'testBuilds'
-        githubReleaseTitle: '$(Build.Repository.Name): $(Build.SourceBranchName) ($(today))'
+        githubReleaseTitle: '$(Build.Repository.Name): $(Build.SourceBranchName) ($(name))'
         githubReleaseDraft: true
         githubReleasePrerelease: true
         githubIgnoreAssets: false
