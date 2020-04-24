@@ -150,7 +150,7 @@ stages:
         githubEndpoint: 'github-pat-for-azure'
         manuallySetRepository: true
         githubOwner: 'nerdCopter'
-        githubRepositoryName: 'nerdCopter/testBuilds'
+        githubRepositoryName: 'testBuilds'
         githubReleaseTitle: '$(Build.Repository.Name): $(Build.SourceBranchName) ($(today))'
         githubReleaseDraft: true
         githubReleasePrerelease: true
