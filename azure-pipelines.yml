@@ -25,12 +25,12 @@ variables:
 
 name: $(Date:yyyyMMdd).$(BuildID)
 
-resources:   #seems the pipeline connection to origin repo is always included, so this should be only additional repos
-  repositories:
-  - repository: EmuClassic_nerdCopter
-    type: github
-    endpoint: nerdCopter
-    name: nerdCopter/EmuClassic_nerdCopter
+#resources:   #seems the pipeline connection to origin repo is always included, so this should be only additional repos
+#  repositories:
+#  - repository: EmuClassic_nerdCopter
+#    type: github
+#    endpoint: nerdCopter
+#    name: nerdCopter/EmuClassic_nerdCopter
 
 trigger: none
 #trigger:
@@ -145,14 +145,23 @@ stages:
         githubEditRelease: true
         githubDeleteEmptyTag: false
 
-    - task: GitHubReleasePublish@1
+    - task: GitHubRelease@1
       inputs:
-        githubEndpoint: '$(endpoint)'
-        manuallySetRepository: true
-        githubOwner: '$(owner)'
-        githubRepositoryName: '$(destinationRepoNameTwo)'
-        githubTag: $(Date:yyyyMMdd).$(BuildID)
-        githubReleaseTitle: '$(Build.Repository.Name): $(Build.SourceBranchName) ($(today))'
+        gitHubConnection: 'github-pat-for-azure'
+        repositoryName: 'nerdCopter/testBuilds'
+        action: 'create'
+        target: '$(Build.SourceVersion)'
+        tagSource: 'gitTag'
+        title: '$(Build.Repository.Name): $(Build.SourceBranchName) $(today)'
+        isDraft: true
+        isPreRelease: true
+        changeLogCompareToRelease: 'lastNonDraftRelease'
+        changeLogType: 'commitBased'
+        githubReuseRelease: false
+        githubReuseDraftOnly: false
+        githubSkipDuplicatedAssets: false
+        githubEditRelease: true
+        githubDeleteEmptyTag: false
         githubReleaseNotes: |+
           $(releaseNotes)
 
@@ -175,13 +184,3 @@ stages:
           Build.Repository.Uri: $(Build.Repository.Uri)
           Build.RequestedFor: $(Build.RequestedFor)
           Build.QueuedBy: $(Build.QueuedBy)
-        githubReleaseDraft: false              #this will allow hiding until manually unsetting 'draft'
-        githubReleasePrerelease: true         #make it a pre-release, we can manually unset also if appropriate
-        githubIgnoreAssets: false
-        githubReleaseAsset: |
-          $(Pipeline.Workspace)/emu**/**
-        githubReuseRelease: false
-        githubReuseDraftOnly: false
-        githubSkipDuplicatedAssets: false
-        githubEditRelease: true
-        githubDeleteEmptyTag: false
