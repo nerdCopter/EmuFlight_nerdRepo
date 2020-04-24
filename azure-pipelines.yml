@@ -70,7 +70,7 @@ stages:
       displayName: 'improve curl parameters'
     - script: make arm_sdk_install
       displayName: 'Install the build toolchain'
-    - script: echo "##vso[task.setvariable variable=firmVersion]$(make version)"
+    - script: echo "##vso[task.setvariable variable=firmVersion;]$(make version)"
       displayName: 'get make version'
     - script: make $(GOAL) -j2
       displayName: 'Build the Targets'
