@@ -110,7 +110,7 @@ stages:
         manuallySetRepository: true
         githubOwner: '$(owner)'
         githubRepositoryName: '$(destinationRepoName)'
-        githubTag: $(Date:yyyyMMdd).$(BuildID)
+        #githubTag: $(Date:yyyyMMdd).$(BuildID) #defaults to $(name) and this usually fails variables anyway
         githubReleaseTitle: '$(Build.Repository.Name): $(Build.SourceBranchName) ($(today))'
         githubReleaseNotes: |+
           $(releaseNotes)
@@ -151,7 +151,7 @@ stages:
         repositoryName: 'nerdCopter/testBuilds'
         action: 'create'
         target: '$(Build.SourceVersion)'
-        tagSource: 'gitTag'
+        #tagSource: 'gitTag'
         title: '$(Build.Repository.Name): $(Build.SourceBranchName) $(today)'
         isDraft: true
         isPreRelease: true
