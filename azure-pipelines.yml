@@ -156,8 +156,8 @@ stages:
         title: '$(Build.Repository.Name): $(Build.SourceBranchName) $(today)'
         isDraft: true
         isPreRelease: true
-        changeLogCompareToRelease: 'lastNonDraftRelease'
-        changeLogType: 'commitBased'
+        #changeLogCompareToRelease: 'lastNonDraftRelease'
+        #changeLogType: 'commitBased'
         githubReuseRelease: false
         githubReuseDraftOnly: false
         githubSkipDuplicatedAssets: false
