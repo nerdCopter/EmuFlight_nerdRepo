@@ -118,7 +118,7 @@ stages:
           $(releaseNotes)
 
           #### Repo:Branch
-          [$(Build.Repository.Name)]($(Build.Repository.Uri)/tree/$(Build.SourceBranchName)):[$(Build.SourceBranchName)]($(Build.Repository.Uri))
+          [$(Build.Repository.Name)]($(Build.Repository.Uri)):[$(Build.SourceBranchName)]($(Build.Repository.Uri)/tree/$(Build.SourceBranchName))
 
           #### Commit:
           [$(Build.SourceVersion)]($(Build.Repository.Uri)/commit/$(Build.SourceVersion))
@@ -155,7 +155,7 @@ stages:
           $(releaseNotes)
 
           #### Repo:Branch
-          [$(Build.Repository.Name)]($(Build.Repository.Uri)/tree/$(Build.SourceBranchName)):[$(Build.SourceBranchName)]($(Build.Repository.Uri))
+          [$(Build.Repository.Name)]($(Build.Repository.Uri)):[$(Build.SourceBranchName)]($(Build.Repository.Uri)/tree/$(Build.SourceBranchName))
 
           #### Commit:
           [$(Build.SourceVersion)]($(Build.Repository.Uri)/commit/$(Build.SourceVersion))
