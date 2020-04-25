@@ -68,7 +68,7 @@ stages:
       persistCredentials: true        #probably do not need this
     - script: function curl () { command curl --connect-timeout 30 --retry 5 "$@" ; } ;
       displayName: 'improve curl parameters'
-    - script: make arm_sdk_install
+    - script: make arm_sdk_install --debug=mj
       displayName: 'Install the build toolchain'
     - script: |
         myVersion="$(make version)"
@@ -76,7 +76,7 @@ stages:
         echo "send firmware version to file $(Pipeline.Workspace)/variables/firmVersion"
         echo "debug: mkdir -p $(Pipeline.Workspace)/variables"
         mkdir -p '$(Pipeline.Workspace)/variables'
-        echo "debug: echo $myVersion \| tee $(Pipeline.Workspace)/variables/firmVersion"
+        echo "debug: echo $myVersion | tee $(Pipeline.Workspace)/variables/firmVersion"
         echo $myVersion | tee $(Pipeline.Workspace)/variables/firmVersion
         echo "debug: cat $(Pipeline.Workspace)/variables/firmVersion"
         cat $(Pipeline.Workspace)/variables/firmVersion
@@ -120,7 +120,7 @@ stages:
         $firmVersion = Get-Content -Path "$(Pipeline.Workspace)/variables/firmVersion"
         Write-Output ("##vso[task.setvariable variable=firmVersion;]$firmVersion")
         Write-Output "firmware version is: $firmVersion"
-      displayName: 'read vars and vals'
+      displayName: 'read variables artifact'
       continueOnError: true
     - powershell: |
         Write-Output 'var outside: $(firmVersion)'
