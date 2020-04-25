@@ -105,6 +105,10 @@ stages:
         Write-Output ("##vso[task.setvariable variable=today;]$(Get-Date -Format yyyyMMdd)")
         Write-Output ("today is $today ${today}")
         Write-Output "firmware version is: $firmVersion ${firmVersion}"
+        Write-Output (Write-Output $(today))
+        Write-Output (Write-Output $(firmVersion))
+        Write-Output '$(today)'
+        Write-Output '$(firmVersion)'
       displayName: 'vars and vals'
     - task: GitHubReleasePublish@1
       inputs:
