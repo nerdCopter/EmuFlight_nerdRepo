@@ -74,9 +74,19 @@ stages:
     - script: |
         myVersion="$(make version)"
         echo "##vso[task.setvariable variable=firmVersion;]$myVersion"
-        mkdir -p $(Pipeline.Workspace)/variables
+        echo "debug: mkdir -p $(Pipeline.Workspace)/variables"
+        mkdir -p '$(Pipeline.Workspace)/variables'
+        echo "debug: echo $myVersion \| tee $(Pipeline.Workspace)/variables/firmVersion"
         echo $myVersion | tee $(Pipeline.Workspace)/variables/firmVersion
-      displayName: 'get make version'
+        echo "debug: cat $(Pipeline.Workspace)/variables/firmVersion"
+        cat $(Pipeline.Workspace)/variables/firmVersion
+        echo "tray al the same with"
+        mkdir -p '$(System.DefaultWorkingDirectory)/variables'
+        echo "debug: echo $myVersion \| tee $(System.DefaultWorkingDirectory)/variables/firmVersion"
+        echo $myVersion | tee $(System.DefaultWorkingDirectory)/variables/firmVersion
+        echo "debug: cat $(System.DefaultWorkingDirectory)/variables/firmVersion"
+        cat $(System.DefaultWorkingDirectory)/variables/firmVersion
+      displayName: 'make version'
     - script: make $(GOAL) -j2
       displayName: 'Build the Targets'
     - script: mkdir release; cp obj/*.hex release/
@@ -110,6 +120,7 @@ stages:
         Write-Output '$firmVersion'
         Write-Output "okay, reading from file"
         $firmVersion = Get-Content -Path "$(Pipeline.Workspace)/variables/firmVersion"
+        $firmVersion2 = Get-Content -Path "$(System.DefaultWorkingDirectory)/variables/firmVersion"
         Write-Output ("##vso[task.setvariable variable=firmVersion;]$firmVersion")
         Write-Output "okay, read from file ^^"
         Write-Output "firmware version is: $firmVersion ${firmVersion}"
@@ -151,7 +162,8 @@ stages:
           `$(Build.SourceVersionMessage)`
 
           #### Version:
-          $(firmVersion)
+          1: $(firmVersion)
+          2: $(firmVersion2)
 
           #### Azure Pipelines Debug:
           Build.SourceBranchName: $(Build.SourceBranchName)
