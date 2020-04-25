@@ -17,7 +17,6 @@ variables:                                                    #default scope is 
   owner: nerdCopter
   destinationRepoName: EmuFlight_nerdRepo                     #release destination
   destinationRepoNameTwo: EmuFlight_EmuClassic_nerdCopter     #release destination
-  #firmVersion: ''
   releaseNotes: |+
      * not intended for public consumption.
      * may contain bugs / incomplete features.
@@ -74,22 +73,13 @@ stages:
     - script: |
         myVersion="$(make version)"
         echo "##vso[task.setvariable variable=firmVersion;]$myVersion"
-        echo ""
-        echo "try to make firmware version with $(Pipeline.Workspace)/variables"
+        echo "send firmware version to file $(Pipeline.Workspace)/variables/firmVersion"
         echo "debug: mkdir -p $(Pipeline.Workspace)/variables"
         mkdir -p '$(Pipeline.Workspace)/variables'
         echo "debug: echo $myVersion \| tee $(Pipeline.Workspace)/variables/firmVersion"
         echo $myVersion | tee $(Pipeline.Workspace)/variables/firmVersion
         echo "debug: cat $(Pipeline.Workspace)/variables/firmVersion"
         cat $(Pipeline.Workspace)/variables/firmVersion
-        echo ""
-        echo "try to make firmware version with $(System.DefaultWorkingDirectory)/variables"
-        echo "debug: mkdir -p $(System.DefaultWorkingDirectory)/variables"
-        mkdir -p '$(System.DefaultWorkingDirectory)/variables'
-        echo "debug: echo $myVersion \| tee $(System.DefaultWorkingDirectory)/variables/firmVersion"
-        echo $myVersion | tee $(System.DefaultWorkingDirectory)/variables/firmVersion
-        echo "debug: cat $(System.DefaultWorkingDirectory)/variables/firmVersion"
-        cat $(System.DefaultWorkingDirectory)/variables/firmVersion
       displayName: 'make version'
     - script: make $(GOAL) -j2
       displayName: 'Build the Targets'
@@ -97,12 +87,13 @@ stages:
       displayName: 'Copy artifacts'
 #    - script: rm -rf obj/*
 #      displayName: 'Clean artifacts'
+    # Publish the release folder as pipeline artifact
     - task: PublishPipelineArtifact@1
       displayName: 'Publish Linux release'
       inputs:
         artifactName: $(artifactName)
         targetPath: '$(System.DefaultWorkingDirectory)/release/'
-    # Publish the folder as pipeline artifact
+    # Publish the variables folder as pipeline artifact
     - publish: $(Pipeline.Workspace)/variables
       artifact: variables
 
@@ -116,42 +107,25 @@ stages:
       clean: true
       fetchDepth: 50                  #lets shallow, but not too shallow for failure retries
       persistCredentials: true        #probably do not need this
+    #Download the release folder pipeline artifact
     - task: DownloadPipelineArtifact@2
       inputs:
         buildType: 'current'
         targetPath: '$(Pipeline.Workspace)'
+    #Download the variables folder pipeline artifact
     - download: current
       artifact: variables
     - powershell: |
-        Write-Output ("##vso[task.setvariable variable=today;]$(Get-Date -Format yyyyMMdd)")
-        Write-Output "var only: today is $today ${today}"
-        Write-Output "var only: firmware version is: $firmVersion ${firmVersion}"
-        Write-Output 'var only: $today'
-        Write-Output 'var only: $firmVersion'
-        Write-Output "okay, reading from file"
+        Write-Output "reading file: $(Pipeline.Workspace)/variables/firmVersion"
         $firmVersion = Get-Content -Path "$(Pipeline.Workspace)/variables/firmVersion"
         Write-Output ("##vso[task.setvariable variable=firmVersion;]$firmVersion")
-        Write-Output "okay, read from file ^^"
-        Write-Output "firmware version is: $firmVersion ${firmVersion}"
-        Write-Output $firmVersion
-        Write-Output '$firmVersion'
-      displayName: 'vars and vals 1'
+        Write-Output "firmware version is: $firmVersion"
+      displayName: 'read vars and vals'
       continueOnError: true
     - powershell: |
-        Write-Output "var outside: $firmVersion"
         Write-Output 'var outside: $(firmVersion)'
-      displayName: 'var firmVersion outside'
+      displayName: 'verify firmVersion outside task'
       continueOnError: true
-#    - powershell: |
-#        $firmVersion2 = Get-Content -Path "$(System.DefaultWorkingDirectory)/variables/firmVersion"
-#        Write-Output "reading from file"
-#        $firmVersion2 = Get-Content -Path "$(Pipeline.Workspace)/variables/firmVersion"
-#        Write-Output ("##vso[task.setvariable variable=firmVersion2;]$firmVersion2")
-#        Write-Output "okay, read from file ^^"
-#        Write-Output "firmware version is: $firmVersion2 ${firmVersion2}"
-#        Write-Output $firmVersion2
-#        Write-Output '$firmVersion2'
-#      displayName: 'vars and vals 2'
     - task: GitHubReleasePublish@1
       continueOnError: true
       inputs:
@@ -181,8 +155,7 @@ stages:
           `$(Build.SourceVersionMessage)`
 
           #### Version:
-          1: $(firmVersion)
-          2: $(firmVersion2)
+          $(firmVersion)
 
           #### Azure Pipelines Debug:
           Build.SourceBranchName: $(Build.SourceBranchName)
