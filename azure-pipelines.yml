@@ -208,3 +208,10 @@ stages:
           Build.Reason: $(Build.Reason)
           Build.BuildId: $(Build.BuildId)
           Build.BuildNumber: $(Build.BuildNumber)
+
+    # Publish pipeline artifacts
+    # Publish (upload) a file or directory as a named artifact for the current run
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: '$(Pipeline.Workspace)'
+        artifactName: 'artifacts drop'
