@@ -103,8 +103,8 @@ stages:
         targetPath: '$(Pipeline.Workspace)'
     - powershell: |
         Write-Output ("##vso[task.setvariable variable=today;]$(Get-Date -Format yyyyMMdd)")
-        Write-Output ("today is $(today) $today ${today}")
-        Write-Output "firmware version is: $(firmVersion) $firmVersion"
+        Write-Output ("today is $today ${today}")
+        Write-Output "firmware version is: $firmVersion ${firmVersion}"
       displayName: 'vars and vals'
     - task: GitHubReleasePublish@1
       inputs:
