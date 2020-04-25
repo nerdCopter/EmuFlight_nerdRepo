@@ -73,7 +73,7 @@ stages:
       displayName: 'Install the build toolchain'
     - script: |
         myVersion="$(make version)"
-        echo "##vso[task.setvariable variable=firmVersion;]$myVersion"
+        echo "##vso[pipeline.setvariable variable=firmVersion;]$myVersion"
         echo $myVersion
       displayName: 'get make version'
     - script: make $(GOAL) -j2
@@ -105,12 +105,14 @@ stages:
         Write-Output ("##vso[task.setvariable variable=today;]$(Get-Date -Format yyyyMMdd)")
         Write-Output ("today is $today ${today}")
         Write-Output "firmware version is: $firmVersion ${firmVersion}"
-        Write-Output (Write-Output $(today))
-        Write-Output (Write-Output $(firmVersion))
+        Write-Output ($(today))
+        Write-Output ($(firmVersion))
         Write-Output '$(today)'
         Write-Output '$(firmVersion)'
       displayName: 'vars and vals'
+      continueOnError: true
     - task: GitHubReleasePublish@1
+      continueOnError: true
       inputs:
         githubEndpoint: '$(endpoint)'
         manuallySetRepository: true
@@ -152,6 +154,7 @@ stages:
           Build.BuildNumber: $(Build.BuildNumber)
 
     - task: GitHubReleasePublish@1
+      continueOnError: true
       inputs:
         githubEndpoint: 'github-pat-for-azure'
         manuallySetRepository: true
