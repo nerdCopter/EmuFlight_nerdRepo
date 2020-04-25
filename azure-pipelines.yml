@@ -71,11 +71,11 @@ stages:
       displayName: 'improve curl parameters'
     - script: make arm_sdk_install
       displayName: 'Install the build toolchain'
-    - script: |
-        myVersion="$(make version)"
-        echo "##vso[task.setvariable variable=firmVersion;]$myVersion"
-        echo $myVersion
-      displayName: 'get make version'
+#    - script: |
+#        myVersion="$(make version)"
+#        echo "##vso[task.setvariable variable=firmVersion;]$myVersion"
+#        echo $myVersion
+#      displayName: 'get make version'
     - script: make $(GOAL) -j2
       displayName: 'Build the Targets'
     - script: mkdir release; cp obj/*.hex release/
@@ -102,6 +102,8 @@ stages:
         buildType: 'current'
         targetPath: '$(Pipeline.Workspace)'
     - powershell: Write-Output ("##vso[task.setvariable variable=today;]$(Get-Date -Format yyyyMMdd)")
+    - powershell: Write-Output ("##vso[task.setvariable variable=firmVersion;]$(make version)")
+      displayName: 'get make version'
     - task: GitHubReleasePublish@1
       inputs:
         githubEndpoint: '$(endpoint)'
