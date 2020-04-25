@@ -104,19 +104,17 @@ stages:
         targetPath: '$(Pipeline.Workspace)'
     - powershell: |
         Write-Output ("##vso[task.setvariable variable=today;]$(Get-Date -Format yyyyMMdd)")
-        Write-Output ("today is $today ${today}")
+        Write-Output "today is $today ${today}"
         Write-Output "firmware version is: $firmVersion ${firmVersion}"
-        Write-Output ($(today))
-        Write-Output ($(firmVersion))
-        Write-Output '$(today)'
-        Write-Output '$(firmVersion)'
+        Write-Output '$today'
+        Write-Output '$firmVersion'
         Write-Output "okay, reading from file"
         $firmVersion = Get-Content -Path '$(System.DefaultWorkingDirectory)/variables/firmVersion'
         Write-Output ("##vso[task.setvariable variable=firmVersion;]$firmVersion")
         Write-Output "okay, read from file ^^"
         Write-Output "firmware version is: $firmVersion ${firmVersion}"
-        Write-Output ($(firmVersion))
-        Write-Output '$(firmVersion)'
+        Write-Output $firmVersion
+        Write-Output '$firmVersion'
       displayName: 'vars and vals'
       continueOnError: true
     - powershell: |
