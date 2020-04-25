@@ -74,8 +74,8 @@ stages:
     - script: |
         myVersion="$(make version)"
         echo "##vso[task.setvariable variable=firmVersion;]$myVersion"
-        mkdir variables
-        echo $myVersion | tee variables/firmVersion
+        mkdir -p $(Pipeline.Workspace)/variables
+        echo $myVersion | tee $(Pipeline.Workspace)/variables/firmVersion
       displayName: 'get make version'
     - script: make $(GOAL) -j2
       displayName: 'Build the Targets'
@@ -109,7 +109,7 @@ stages:
         Write-Output '$today'
         Write-Output '$firmVersion'
         Write-Output "okay, reading from file"
-        $firmVersion = Get-Content -Path '$(System.DefaultWorkingDirectory)/variables/firmVersion'
+        $firmVersion = Get-Content -Path "$(Pipeline.Workspace)/variables/firmVersion"
         Write-Output ("##vso[task.setvariable variable=firmVersion;]$firmVersion")
         Write-Output "okay, read from file ^^"
         Write-Output "firmware version is: $firmVersion ${firmVersion}"
@@ -118,7 +118,7 @@ stages:
       displayName: 'vars and vals'
       continueOnError: true
     - powershell: |
-        Write-Output ($(firmVersion))
+        Write-Output $firmVersion
         Write-Output '$(firmVersion)'
       displayName: 'firmVersion outside'
       continueOnError: true
