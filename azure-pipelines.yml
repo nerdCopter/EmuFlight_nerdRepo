@@ -102,16 +102,9 @@ stages:
       inputs:
         artifactName: $(artifactName)
         targetPath: '$(System.DefaultWorkingDirectory)/release/'
-    - task: PublishPipelineArtifact@2
-      displayName: 'Publish Firmware version1'
-      inputs:
-        artifactName: $(artifactName)
-        targetPath: '$(Pipeline.Workspace)/variables/firmVersion'
-    - task: PublishPipelineArtifact@3
-      displayName: 'Publish Firmware version2'
-      inputs:
-        artifactName: $(artifactName)
-        targetPath: '$(System.DefaultWorkingDirectory)/variables/firmVersion'
+    # Publish the folder as pipeline artifact
+    - publish: $(Pipeline.Workspace)/variables
+      artifact: variables
 
 
 - stage: Release
@@ -127,6 +120,8 @@ stages:
       inputs:
         buildType: 'current'
         targetPath: '$(Pipeline.Workspace)'
+    - download: current
+      artifact: variables
     - powershell: |
         Write-Output ("##vso[task.setvariable variable=today;]$(Get-Date -Format yyyyMMdd)")
         Write-Output "var only: today is $today ${today}"
@@ -147,16 +142,16 @@ stages:
         Write-Output 'var outside: $(firmVersion)'
       displayName: 'var firmVersion outside'
       continueOnError: true
-    - powershell: |
-        $firmVersion2 = Get-Content -Path "$(System.DefaultWorkingDirectory)/variables/firmVersion"
-        Write-Output "reading from file"
-        $firmVersion2 = Get-Content -Path "$(Pipeline.Workspace)/variables/firmVersion"
-        Write-Output ("##vso[task.setvariable variable=firmVersion2;]$firmVersion2")
-        Write-Output "okay, read from file ^^"
-        Write-Output "firmware version is: $firmVersion2 ${firmVersion2}"
-        Write-Output $firmVersion2
-        Write-Output '$firmVersion2'
-      displayName: 'vars and vals 2'
+#    - powershell: |
+#        $firmVersion2 = Get-Content -Path "$(System.DefaultWorkingDirectory)/variables/firmVersion"
+#        Write-Output "reading from file"
+#        $firmVersion2 = Get-Content -Path "$(Pipeline.Workspace)/variables/firmVersion"
+#        Write-Output ("##vso[task.setvariable variable=firmVersion2;]$firmVersion2")
+#        Write-Output "okay, read from file ^^"
+#        Write-Output "firmware version is: $firmVersion2 ${firmVersion2}"
+#        Write-Output $firmVersion2
+#        Write-Output '$firmVersion2'
+#      displayName: 'vars and vals 2'
     - task: GitHubReleasePublish@1
       continueOnError: true
       inputs:
