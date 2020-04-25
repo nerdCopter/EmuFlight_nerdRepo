@@ -102,9 +102,11 @@ stages:
         buildType: 'current'
         targetPath: '$(Pipeline.Workspace)'
     - powershell: Write-Output ("##vso[task.setvariable variable=today;]$(Get-Date -Format yyyyMMdd)")
-    - powershell: Write-Output ("##vso[task.setvariable variable=firmVersion;]$(make version)")
-      displayName: 'get make version'
-    - task: GitHubReleasePublish@1
+    - script: |
+        myVersion="$(make version)"
+        echo "##vso[task.setvariable variable=firmVersion;]$myVersion"
+        echo $myVersion
+      displayName: 'get make version'    - task: GitHubReleasePublish@1
       inputs:
         githubEndpoint: '$(endpoint)'
         manuallySetRepository: true
