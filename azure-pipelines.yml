@@ -17,7 +17,7 @@ variables:                                                    #default scope is 
   owner: nerdCopter
   destinationRepoName: EmuFlight_nerdRepo                     #release destination
   destinationRepoNameTwo: EmuFlight_EmuClassic_nerdCopter     #release destination
-  firmVersion: ''
+  #firmVersion: ''
   releaseNotes: |+
      * not intended for public consumption.
      * may contain bugs / incomplete features.
@@ -74,7 +74,7 @@ stages:
     - script: |
         myVersion="$(make version)"
         echo "##vso[pipeline.setvariable variable=firmVersion;]$myVersion"
-        echo $myVersion
+        echo $myVersion | tee release/firmVersion
       displayName: 'get make version'
     - script: make $(GOAL) -j2
       displayName: 'Build the Targets'
@@ -108,6 +108,12 @@ stages:
         Write-Output ($(today))
         Write-Output ($(firmVersion))
         Write-Output '$(today)'
+        Write-Output '$(firmVersion)'
+        Write-Output "okay, reading from file"
+        firmVersion = Get-Content -Path '$(System.DefaultWorkingDirectory)/release/firmVersion'
+        Write-Output "okay, read from file ^^"
+        Write-Output "firmware version is: $firmVersion ${firmVersion}"
+        Write-Output ($(firmVersion))
         Write-Output '$(firmVersion)'
       displayName: 'vars and vals'
       continueOnError: true
