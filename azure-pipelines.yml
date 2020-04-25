@@ -74,13 +74,17 @@ stages:
     - script: |
         myVersion="$(make version)"
         echo "##vso[task.setvariable variable=firmVersion;]$myVersion"
+        echo ""
+        echo "try to make firmware version with $(Pipeline.Workspace)/variables"
         echo "debug: mkdir -p $(Pipeline.Workspace)/variables"
         mkdir -p '$(Pipeline.Workspace)/variables'
         echo "debug: echo $myVersion \| tee $(Pipeline.Workspace)/variables/firmVersion"
         echo $myVersion | tee $(Pipeline.Workspace)/variables/firmVersion
         echo "debug: cat $(Pipeline.Workspace)/variables/firmVersion"
         cat $(Pipeline.Workspace)/variables/firmVersion
-        echo "tray al the same with"
+        echo ""
+        echo "try to make firmware version with $(System.DefaultWorkingDirectory)/variables"
+        echo "debug: mkdir -p $(System.DefaultWorkingDirectory)/variables"
         mkdir -p '$(System.DefaultWorkingDirectory)/variables'
         echo "debug: echo $myVersion \| tee $(System.DefaultWorkingDirectory)/variables/firmVersion"
         echo $myVersion | tee $(System.DefaultWorkingDirectory)/variables/firmVersion
@@ -114,25 +118,34 @@ stages:
         targetPath: '$(Pipeline.Workspace)'
     - powershell: |
         Write-Output ("##vso[task.setvariable variable=today;]$(Get-Date -Format yyyyMMdd)")
-        Write-Output "today is $today ${today}"
-        Write-Output "firmware version is: $firmVersion ${firmVersion}"
-        Write-Output '$today'
-        Write-Output '$firmVersion'
+        Write-Output "var only: today is $today ${today}"
+        Write-Output "var only: firmware version is: $firmVersion ${firmVersion}"
+        Write-Output 'var only: $today'
+        Write-Output 'var only: $firmVersion'
         Write-Output "okay, reading from file"
         $firmVersion = Get-Content -Path "$(Pipeline.Workspace)/variables/firmVersion"
-        $firmVersion2 = Get-Content -Path "$(System.DefaultWorkingDirectory)/variables/firmVersion"
         Write-Output ("##vso[task.setvariable variable=firmVersion;]$firmVersion")
         Write-Output "okay, read from file ^^"
         Write-Output "firmware version is: $firmVersion ${firmVersion}"
         Write-Output $firmVersion
         Write-Output '$firmVersion'
-      displayName: 'vars and vals'
+      displayName: 'vars and vals 1'
       continueOnError: true
     - powershell: |
-        Write-Output $firmVersion
-        Write-Output '$(firmVersion)'
-      displayName: 'firmVersion outside'
+        Write-Output "var outside: $firmVersion"
+        Write-Output 'var outside: $(firmVersion)'
+      displayName: 'var firmVersion outside'
       continueOnError: true
+    - powershell: |
+        $firmVersion2 = Get-Content -Path "$(System.DefaultWorkingDirectory)/variables/firmVersion"
+        Write-Output "reading from file"
+        $firmVersion2 = Get-Content -Path "$(Pipeline.Workspace)/variables/firmVersion"
+        Write-Output ("##vso[task.setvariable variable=firmVersion2;]$firmVersion2")
+        Write-Output "okay, read from file ^^"
+        Write-Output "firmware version is: $firmVersion2 ${firmVersion2}"
+        Write-Output $firmVersion2
+        Write-Output '$firmVersion2'
+      displayName: 'vars and vals 2'
     - task: GitHubReleasePublish@1
       continueOnError: true
       inputs:
