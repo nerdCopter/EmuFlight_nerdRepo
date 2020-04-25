@@ -102,12 +102,12 @@ stages:
       inputs:
         artifactName: $(artifactName)
         targetPath: '$(System.DefaultWorkingDirectory)/release/'
-    - task: PublishPipelineArtifact@1
+    - task: PublishPipelineArtifact@2
       displayName: 'Publish Firmware version1'
       inputs:
         artifactName: $(artifactName)
         targetPath: '$(Pipeline.Workspace)/variables/firmVersion'
-    - task: PublishPipelineArtifact@1
+    - task: PublishPipelineArtifact@3
       displayName: 'Publish Firmware version2'
       inputs:
         artifactName: $(artifactName)
