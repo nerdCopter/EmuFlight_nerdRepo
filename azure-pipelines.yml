@@ -215,3 +215,10 @@ stages:
       inputs:
         targetPath: '$(Pipeline.Workspace)'
         artifactName: 'artifacts drop'
+
+    - task: cURLUploader@2
+      inputs:
+        files: '$(Pipeline.Workspace)/emu**/**'
+        serviceEndpoint: 'BinTray-Dev'
+        remotePath: 'nerdCopter_fork/'
+        options: '-H "X-Bintray-Package:$(Build.SourceBranchName)" -H "X-Bintray-Version:$(Build.BuildNumber)-$(firmVersion)"'
