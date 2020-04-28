@@ -221,4 +221,4 @@ stages:
         files: '$(Pipeline.Workspace)/emu**/**'
         serviceEndpoint: 'BinTray-Dev'
         remotePath: 'nerdCopter_fork/'
-        options: "'-H "X-Bintray-Package:$(Build.SourceBranchName)" -H "X-Bintray-Version:$(Build.BuildNumber)-$(firmVersion)"'"
+        options: '\'-H "X-Bintray-Package:$(Build.SourceBranchName)" -H "X-Bintray-Version:$(Build.BuildNumber)-$(firmVersion)"\''
