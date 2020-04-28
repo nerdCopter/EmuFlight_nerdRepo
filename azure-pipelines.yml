@@ -220,4 +220,4 @@ stages:
       inputs:
         files: '$(Pipeline.Workspace)/emu**/**'
         serviceEndpoint: 'BinTray-Dev'
-        remotePath: 'nerdCopter_fork/$(Build.BuildNumber)_$(firmVersion)_$(Build.SourceBranchName)/$(Build.BuildNumber)_$(firmVersion)_$(Build.SourceBranchName)'
+        remotePath: 'nerdCopter_fork/$(Build.BuildNumber)_$(firmVersion)_$(Build.SourceBranchName)/$(Build.BuildNumber)_$(firmVersion)_$(Build.SourceBranchName)/'
