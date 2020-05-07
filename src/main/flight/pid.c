@@ -940,7 +940,7 @@ void pidController(const pidProfile_t *pidProfile, const rollAndPitchTrims_t *an
 
 
     // gradually scale back integration when above windup point
-    const float dynCi = constrainf((1.1f - getMotorMixRange()) * ITermWindupPointInv, 0.1f, 1.0f) * deltaT * itermAccelerator;
+    const float dynCi = constrainf((1.0f - getMotorMixRange()) * ITermWindupPointInv, 0.0f, 1.0f) * itermAccelerator * deltaT;
     float errorRate;
 
     // ----------PID controller----------
