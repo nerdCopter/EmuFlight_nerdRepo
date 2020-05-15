@@ -45,12 +45,13 @@ void pgResetFn_controlRateProfiles(controlRateConfig_t *controlRateConfig)
           .rateDynamics = { // defaults do nothing to effect stick feels
               100, 100, 10, 10, 0, 0,   // PLow, PHigh, Ilow, IHigh, Dlow, Dhigh
           },
+          .raceflightTPA = {
+            {100, 100, 95, 95, 95, 95, 95, 100, 100}, // kp
+            {100, 100, 100, 100, 100, 100, 100, 100, 100}, // ki
+            {100, 95, 90, 85, 85, 85, 85, 100, 100}, // kd
+          },
             .thrMid8 = 50,
             .thrExpo8 = 0,
-            .dynThrP = 75,
-            .dynThrI = 125,
-            .dynThrD = 65,
-            .tpa_breakpoint = 1600,
             .rates_type = RATES_TYPE_BETAFLIGHT,
             .rcRates[FD_ROLL] = 100,
             .rcRates[FD_PITCH] = 100,

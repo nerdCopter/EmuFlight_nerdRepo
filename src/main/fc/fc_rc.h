@@ -36,9 +36,6 @@ float getSetpointRate(int axis);
 uint32_t getSetpointRateInt(int axis);
 float getRcDeflection(int axis);
 float getRcDeflectionAbs(int axis);
-float getThrottlePAttenuation(void);
-float getThrottleIAttenuation(void);
-float getThrottleDAttenuation(void);
 void updateRcCommands(void);
 void resetYawAxis(void);
 void initRcProcessing(void);
@@ -50,3 +47,6 @@ bool rcSmoothingAutoCalculate(void);
 bool rcSmoothingInitializationComplete(void);
 #endif
 float rateDynamics(float rcCommand, int axis);
+float getThrottlePIDAttenuationKp(void);
+float getThrottlePIDAttenuationKi(void);
+float getThrottlePIDAttenuationKd(void);

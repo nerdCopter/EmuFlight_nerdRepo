@@ -1095,7 +1095,7 @@ void pidController(const pidProfile_t *pidProfile, const rollAndPitchTrims_t *an
             pidData[axis].Sum = 0;
         }
         // calculating the PID sum and TPA and SPA
-        const float pidSum = (pidData[axis].P * getThrottlePAttenuation() * setPointPAttenuation[axis]) + (pidData[axis].I * getThrottleIAttenuation() * setPointIAttenuation[axis]) + (pidData[axis].D * getThrottleDAttenuation() * setPointDAttenuation[axis]);
+        const float pidSum = (pidData[axis].P * getThrottlePIDAttenuationKp() * setPointPAttenuation[axis]) + (pidData[axis].I * getThrottlePIDAttenuationKi() * setPointIAttenuation[axis]) + (pidData[axis].D * getThrottlePIDAttenuationKd() * setPointDAttenuation[axis]);
         {
             pidData[axis].Sum = pidSum;
         }

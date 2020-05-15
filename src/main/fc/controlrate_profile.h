@@ -25,6 +25,7 @@
 #include "pg/pg.h"
 
 #define CONTROL_RATE_PROFILE_COUNT  6
+#define ATTENUATION_CURVE_SIZE      9
 
 typedef enum {
     RATES_TYPE_BETAFLIGHT = 0,
@@ -54,6 +55,12 @@ typedef struct rateDynamics_s { // here for stick pids :)
     uint8_t rateWeightEnd;
 } rateDynamics_t;
 
+typedef struct RaceFlightTPA_s {
+  uint8_t kpAttenuationCurve[ATTENUATION_CURVE_SIZE];
+  uint8_t kiAttenuationCurve[ATTENUATION_CURVE_SIZE];
+  uint8_t kdAttenuationCurve[ATTENUATION_CURVE_SIZE];
+} RaceFlightTpa_t;
+
 typedef struct controlRateConfig_s {
     uint8_t thrMid8;
     uint8_t thrExpo8;
@@ -63,11 +70,8 @@ typedef struct controlRateConfig_s {
     uint8_t rates[3];
 
     rateDynamics_t rateDynamics;
+    RaceFlightTpa_t raceflightTPA;
 
-    uint8_t dynThrP;                        // TPA seperated into PID components
-    uint8_t dynThrI;
-    uint8_t dynThrD;
-    uint16_t tpa_breakpoint;                // Breakpoint where TPA is activated
     uint8_t throttle_limit_type;            // Sets the throttle limiting type - off, scale or clip
     uint8_t throttle_limit_percent;         // Sets the maximum pilot commanded throttle limit
     uint8_t vbat_comp_type;                 // Sets the type of battery compensation: off, boost, limit or both
