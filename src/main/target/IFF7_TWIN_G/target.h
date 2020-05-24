@@ -21,8 +21,7 @@
 #pragma once
 
 #define TARGET_BOARD_IDENTIFIER "S7X2"
-
-#define USBD_PRODUCT_STRING     "IFF7_TWIN_G"
+#define USBD_PRODUCT_STRING     "IFLIGHT F722 TWIN G"
 
 #define USE_DUAL_GYRO
 
