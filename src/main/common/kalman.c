@@ -63,9 +63,9 @@ void update_kalman_covariance(float *gyroRateData)
      varStruct.xSumMean +=  varStruct.xWindow[ varStruct.windex];
      varStruct.ySumMean +=  varStruct.yWindow[ varStruct.windex];
      varStruct.zSumMean +=  varStruct.zWindow[ varStruct.windex];
-     varStruct.xSumVar =  varStruct.xSumVar + ( varStruct.xWindow[ varStruct.windex] *  varStruct.xWindow[ varStruct.windex]);
-     varStruct.ySumVar =  varStruct.ySumVar + ( varStruct.yWindow[ varStruct.windex] *  varStruct.yWindow[ varStruct.windex]);
-     varStruct.zSumVar =  varStruct.zSumVar + ( varStruct.zWindow[ varStruct.windex] *  varStruct.zWindow[ varStruct.windex]);
+     varStruct.xSumVar += ( varStruct.xWindow[ varStruct.windex] *  varStruct.xWindow[ varStruct.windex]);
+     varStruct.ySumVar += ( varStruct.yWindow[ varStruct.windex] *  varStruct.yWindow[ varStruct.windex]);
+     varStruct.zSumVar += ( varStruct.zWindow[ varStruct.windex] *  varStruct.zWindow[ varStruct.windex]);
      varStruct.windex++;
     if ( varStruct.windex >= varStruct.w)
     {
@@ -74,9 +74,9 @@ void update_kalman_covariance(float *gyroRateData)
      varStruct.xSumMean -=  varStruct.xWindow[ varStruct.windex];
      varStruct.ySumMean -=  varStruct.yWindow[ varStruct.windex];
      varStruct.zSumMean -=  varStruct.zWindow[ varStruct.windex];
-     varStruct.xSumVar =  varStruct.xSumVar - ( varStruct.xWindow[ varStruct.windex] *  varStruct.xWindow[ varStruct.windex]);
-     varStruct.ySumVar =  varStruct.ySumVar - ( varStruct.yWindow[ varStruct.windex] *  varStruct.yWindow[ varStruct.windex]);
-     varStruct.zSumVar =  varStruct.zSumVar - ( varStruct.zWindow[ varStruct.windex] *  varStruct.zWindow[ varStruct.windex]);
+     varStruct.xSumVar -= ( varStruct.xWindow[ varStruct.windex] *  varStruct.xWindow[ varStruct.windex]);
+     varStruct.ySumVar -= ( varStruct.yWindow[ varStruct.windex] *  varStruct.yWindow[ varStruct.windex]);
+     varStruct.zSumVar -= ( varStruct.zWindow[ varStruct.windex] *  varStruct.zWindow[ varStruct.windex]);
 
      varStruct.xMean =  varStruct.xSumMean *  varStruct.inverseN;
      varStruct.yMean =  varStruct.ySumMean *  varStruct.inverseN;
