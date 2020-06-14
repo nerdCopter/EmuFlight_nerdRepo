@@ -40,6 +40,9 @@ typedef struct variance
     float xWindow[MAX_KALMAN_WINDOW_SIZE];
     float yWindow[MAX_KALMAN_WINDOW_SIZE];
     float zWindow[MAX_KALMAN_WINDOW_SIZE];
+    float xvarianceWindow[MAX_KALMAN_WINDOW_SIZE];
+    float yvarianceWindow[MAX_KALMAN_WINDOW_SIZE];
+    float zvarianceWindow[MAX_KALMAN_WINDOW_SIZE];
 
     float xSumMean;
     float ySumMean;
