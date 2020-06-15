@@ -92,9 +92,9 @@ static void BuildTPACurveThrottleLookupTables(void)
 {
     for (int x = 0; x <= 999; x++)
     {
-        throttleLookupKp[x] = ApplyAttenuationCurve(((float)x / 999.0f), currentControlRateProfile->tpaKpCurve, ATTENUATION_CURVE_SIZE);
-        throttleLookupKi[x] = ApplyAttenuationCurve(((float)x / 999.0f), currentControlRateProfile->tpaKiCurve, ATTENUATION_CURVE_SIZE);
-        throttleLookupKd[x] = ApplyAttenuationCurve(((float)x / 999.0f), currentControlRateProfile->tpaKdCurve, ATTENUATION_CURVE_SIZE);
+        throttleLookupKp[x] = ApplyAttenuationCurve(((float)x / 999.0f), currentControlRateProfile->raceflightTPA.kpAttenuationCurve, ATTENUATION_CURVE_SIZE);
+        throttleLookupKi[x] = ApplyAttenuationCurve(((float)x / 999.0f), currentControlRateProfile->raceflightTPA.kiAttenuationCurve, ATTENUATION_CURVE_SIZE);
+        throttleLookupKd[x] = ApplyAttenuationCurve(((float)x / 999.0f), currentControlRateProfile->raceflightTPA.kdAttenuationCurve, ATTENUATION_CURVE_SIZE);
     }
 }
 

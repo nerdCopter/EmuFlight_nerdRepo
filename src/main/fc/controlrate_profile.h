@@ -55,7 +55,13 @@ typedef struct rateDynamics_s { // here for stick pids :)
     uint8_t rateWeightCenter;
     uint8_t rateWeightEnd;
 } rateDynamics_t;
-
+// RF TPA
+typedef struct RaceFlightTPA_s {
+  uint8_t kpAttenuationCurve[ATTENUATION_CURVE_SIZE];
+  uint8_t kiAttenuationCurve[ATTENUATION_CURVE_SIZE];
+  uint8_t kdAttenuationCurve[ATTENUATION_CURVE_SIZE];
+} RaceFlightTpa_t;
+// RF TPA
 typedef struct controlRateConfig_s {
     uint8_t thrMid8;
     uint8_t thrExpo8;
@@ -66,9 +72,7 @@ typedef struct controlRateConfig_s {
     rateDynamics_t rateDynamics;
     uint8_t throttle_limit_type;            // Sets the throttle limiting type - off, scale or clip
     uint8_t throttle_limit_percent;         // Sets the maximum pilot commanded throttle limit
-    uint8_t tpaKpCurve[ATTENUATION_CURVE_SIZE];
-    uint8_t tpaKiCurve[ATTENUATION_CURVE_SIZE];
-    uint8_t tpaKdCurve[ATTENUATION_CURVE_SIZE];
+    RaceFlightTpa_t raceflightTPA;
     uint8_t tpaCurveType;
     uint8_t vbat_comp_type;                 // Sets the type of battery compensation: off, boost, limit or both
     uint8_t vbat_comp_ref;                  // Sets the voltage reference to calculate the battery compensation

@@ -1726,9 +1726,9 @@ static void printTPACurve(void)
     cliPrintf("tpakp ");
     for (int i = 0; i < ATTENUATION_CURVE_SIZE; i++) {
         if (i == ATTENUATION_CURVE_SIZE - 1) {
-            cliPrintf("%d", currentControlRateProfile->tpaKpCurve[i]);
+            cliPrintf("%d", currentControlRateProfile->raceflightTPA.kpAttenuationCurve[i]);
         } else {
-            cliPrintf("%d=", currentControlRateProfile->tpaKpCurve[i]);
+            cliPrintf("%d=", currentControlRateProfile->raceflightTPA.kpAttenuationCurve[i]);
         }
     }
     cliPrintLinefeed();
@@ -1736,9 +1736,9 @@ static void printTPACurve(void)
     cliPrintf("tpaki ");
     for (int i = 0; i < ATTENUATION_CURVE_SIZE; i++) {
         if (i == ATTENUATION_CURVE_SIZE - 1) {
-            cliPrintf("%d", currentControlRateProfile->tpaKiCurve[i]);
+            cliPrintf("%d", currentControlRateProfile->raceflightTPA.kiAttenuationCurve[i]);
         } else {
-            cliPrintf("%d=", currentControlRateProfile->tpaKiCurve[i]);
+            cliPrintf("%d=", currentControlRateProfile->raceflightTPA.kiAttenuationCurve[i]);
         }
     }
     cliPrintLinefeed();
@@ -1746,9 +1746,9 @@ static void printTPACurve(void)
     cliPrintf("tpakd ");
     for (int i = 0; i < ATTENUATION_CURVE_SIZE; i++) {
         if (i == ATTENUATION_CURVE_SIZE - 1) {
-            cliPrintf("%d", currentControlRateProfile->tpaKdCurve[i]);
+            cliPrintf("%d", currentControlRateProfile->raceflightTPA.kdAttenuationCurve[i]);
         } else {
-            cliPrintf("%d=", currentControlRateProfile->tpaKdCurve[i]);
+            cliPrintf("%d=", currentControlRateProfile->raceflightTPA.kdAttenuationCurve[i]);
         }
     }
     cliPrintLinefeed();
@@ -1809,19 +1809,19 @@ static void cliTPACurve(char *cmdLine)
             else {
                 switch (type) {
                     case KP:
-                        memcpy(currentControlRateProfile->tpaKpCurve, tempCurve, sizeof(tempCurve));
+                        memcpy(currentControlRateProfile->raceflightTPA.kpAttenuationCurve, tempCurve, sizeof(tempCurve));
                         cliPrintf("New TPA Saved");
                         cliPrintLinefeed();
                         printTPACurve();
                         break;
                     case KI:
-                        memcpy(currentControlRateProfile->tpaKiCurve, tempCurve, sizeof(tempCurve));
+                        memcpy(currentControlRateProfile->raceflightTPA.kiAttenuationCurve, tempCurve, sizeof(tempCurve));
                         cliPrintf("New TPA Saved");
                         cliPrintLinefeed();
                         printTPACurve();
                         break;
                     case KD:
-                        memcpy(currentControlRateProfile->tpaKdCurve, tempCurve, sizeof(tempCurve));
+                        memcpy(currentControlRateProfile->raceflightTPA.kdAttenuationCurve, tempCurve, sizeof(tempCurve));
                         cliPrintf("New TPA Saved");
                         cliPrintLinefeed();
                         printTPACurve();
@@ -3838,7 +3838,7 @@ static void printTPACurveJson() {
         {
             cliPrint(",");
         }
-        cliPrintf("\"%d\"", currentControlRateProfile->tpaKpCurve[i]);
+        cliPrintf("\"%d\"", currentControlRateProfile->raceflightTPA.kpAttenuationCurve[i]);
     }
     cliPrint("],\"kd\":[");
     for (int i = 0; i < ATTENUATION_CURVE_SIZE; i++) {
@@ -3846,7 +3846,7 @@ static void printTPACurveJson() {
         {
             cliPrint(",");
         }
-        cliPrintf("\"%d\"", currentControlRateProfile->tpaKdCurve[i]);
+        cliPrintf("\"%d\"", currentControlRateProfile->raceflightTPA.kdAttenuationCurve[i]);
     }
     cliPrint("],\"ki\":[");
     for (int i = 0; i < ATTENUATION_CURVE_SIZE; i++) {
@@ -3854,7 +3854,7 @@ static void printTPACurveJson() {
         {
             cliPrint(",");
         }
-        cliPrintf("\"%d\"", currentControlRateProfile->tpaKiCurve[i]);
+        cliPrintf("\"%d\"", currentControlRateProfile->raceflightTPA.kiAttenuationCurve[i]);
     }
     cliPrint("]}");
 
