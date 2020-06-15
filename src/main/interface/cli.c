@@ -1815,7 +1815,7 @@ static void cliTPACurve(char *cmdLine)
                         printTPACurve();
                         break;
                     case KI:
-                        memcpy(currentControlRateProfile-raceflightTPA.kiAttenuationCurve, tempCurve, sizeof(tempCurve));
+                        memcpy(currentControlRateProfile->raceflightTPA.kiAttenuationCurve, tempCurve, sizeof(tempCurve));
                         cliPrintf("New TPA Saved");
                         cliPrintLinefeed();
                         printTPACurve();
