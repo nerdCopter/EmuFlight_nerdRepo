@@ -78,6 +78,7 @@ volatile int16_t rcInterpolationStepCount;
 volatile uint16_t rxRefreshRate;
 volatile uint16_t currentRxRefreshRate;
 
+// RF TPA
 static float throttleLookupKp[1000];
 static float throttleLookupKi[1000];
 static float throttleLookupKd[1000];
@@ -91,9 +92,9 @@ static void BuildTPACurveThrottleLookupTables(void)
 {
     for (int x = 0; x <= 999; x++)
     {
-        throttleLookupKp[x] = ApplyAttenuationCurve(((float)x / 999.0f), currentControlRateProfile->raceflightTPA.kpAttenuationCurve, ATTENUATION_CURVE_SIZE);
-        throttleLookupKi[x] = ApplyAttenuationCurve(((float)x / 999.0f), currentControlRateProfile->raceflightTPA.kiAttenuationCurve, ATTENUATION_CURVE_SIZE);
-        throttleLookupKd[x] = ApplyAttenuationCurve(((float)x / 999.0f), currentControlRateProfile->raceflightTPA.kdAttenuationCurve, ATTENUATION_CURVE_SIZE);
+        throttleLookupKp[x] = ApplyAttenuationCurve(((float)x / 999.0f), currentControlRateProfile->tpaKpCurve, ATTENUATION_CURVE_SIZE);
+        throttleLookupKi[x] = ApplyAttenuationCurve(((float)x / 999.0f), currentControlRateProfile->tpaKiCurve, ATTENUATION_CURVE_SIZE);
+        throttleLookupKd[x] = ApplyAttenuationCurve(((float)x / 999.0f), currentControlRateProfile->tpaKdCurve, ATTENUATION_CURVE_SIZE);
     }
 }
 
@@ -126,6 +127,7 @@ float getThrottlePIDAttenuationKi(void) {
 float getThrottlePIDAttenuationKd(void) {
     return throttleLookupKd[currentAdjustedThrottle];
 }
+// RF TPA
 
 #ifdef USE_RC_SMOOTHING_FILTER
 #define RC_SMOOTHING_IDENTITY_FREQUENCY         80    // Used in the formula to convert a BIQUAD cutoff frequency to PT1
@@ -666,11 +668,11 @@ FAST_CODE void processRcCommand(void)
 FAST_CODE FAST_CODE_NOINLINE void updateRcCommands(void)
 {
     isRXDataNew = true;
-
+    // RF TPA
     // rcData is 1000,2000 range, subtract 1000 and clamp between 0 and 1000 (for TPA lookup table indexing)
     int16_t shift = rcData[THROTTLE] - 1000;
     currentAdjustedThrottle = (shift <= 0) ? 0 : ((shift >= 1000) ? 1000 : shift );
-
+    // RF TPA
     for (int axis = 0; axis < 3; axis++) {
         // non coupled PID reduction scaler used in PID controller 1 and PID controller 2.
 
@@ -802,7 +804,9 @@ void initRcProcessing(void)
 
         break;
     }
+    // RF TPA
     BuildTPACurveThrottleLookupTables();
+    // RF TPA
 }
 
 bool rcSmoothingIsEnabled(void)

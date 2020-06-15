@@ -25,8 +25,9 @@
 #include "pg/pg.h"
 
 #define CONTROL_RATE_PROFILE_COUNT  6
+// RF TPA
 #define ATTENUATION_CURVE_SIZE      9
-
+// RF TPA
 typedef enum {
     RATES_TYPE_BETAFLIGHT = 0,
     RATES_TYPE_RACEFLIGHT,
@@ -55,12 +56,6 @@ typedef struct rateDynamics_s { // here for stick pids :)
     uint8_t rateWeightEnd;
 } rateDynamics_t;
 
-typedef struct RaceFlightTPA_s {
-  uint8_t kpAttenuationCurve[ATTENUATION_CURVE_SIZE];
-  uint8_t kiAttenuationCurve[ATTENUATION_CURVE_SIZE];
-  uint8_t kdAttenuationCurve[ATTENUATION_CURVE_SIZE];
-} RaceFlightTpa_t;
-
 typedef struct controlRateConfig_s {
     uint8_t thrMid8;
     uint8_t thrExpo8;
@@ -68,12 +63,13 @@ typedef struct controlRateConfig_s {
     uint8_t rcRates[3];
     uint8_t rcExpo[3];
     uint8_t rates[3];
-
     rateDynamics_t rateDynamics;
-    RaceFlightTpa_t raceflightTPA;
-
     uint8_t throttle_limit_type;            // Sets the throttle limiting type - off, scale or clip
     uint8_t throttle_limit_percent;         // Sets the maximum pilot commanded throttle limit
+    uint8_t tpaKpCurve[ATTENUATION_CURVE_SIZE];
+    uint8_t tpaKiCurve[ATTENUATION_CURVE_SIZE];
+    uint8_t tpaKdCurve[ATTENUATION_CURVE_SIZE];
+    uint8_t tpaCurveType;
     uint8_t vbat_comp_type;                 // Sets the type of battery compensation: off, boost, limit or both
     uint8_t vbat_comp_ref;                  // Sets the voltage reference to calculate the battery compensation
     uint8_t vbat_comp_throttle_level;       // Sets the level of throttle battery compensation

@@ -1726,9 +1726,9 @@ static void printTPACurve(void)
     cliPrintf("tpakp ");
     for (int i = 0; i < ATTENUATION_CURVE_SIZE; i++) {
         if (i == ATTENUATION_CURVE_SIZE - 1) {
-            cliPrintf("%d", currentControlRateProfile->raceflightTPA.kpAttenuationCurve[i]);
+            cliPrintf("%d", currentControlRateProfile->tpaKpCurve[i]);
         } else {
-            cliPrintf("%d=", currentControlRateProfile->raceflightTPA.kpAttenuationCurve[i]);
+            cliPrintf("%d=", currentControlRateProfile->tpaKpCurve[i]);
         }
     }
     cliPrintLinefeed();
@@ -1736,9 +1736,9 @@ static void printTPACurve(void)
     cliPrintf("tpaki ");
     for (int i = 0; i < ATTENUATION_CURVE_SIZE; i++) {
         if (i == ATTENUATION_CURVE_SIZE - 1) {
-            cliPrintf("%d", currentControlRateProfile->raceflightTPA.kiAttenuationCurve[i]);
+            cliPrintf("%d", currentControlRateProfile->tpaKiCurve[i]);
         } else {
-            cliPrintf("%d=", currentControlRateProfile->raceflightTPA.kiAttenuationCurve[i]);
+            cliPrintf("%d=", currentControlRateProfile->tpaKiCurve[i]);
         }
     }
     cliPrintLinefeed();
@@ -1746,9 +1746,9 @@ static void printTPACurve(void)
     cliPrintf("tpakd ");
     for (int i = 0; i < ATTENUATION_CURVE_SIZE; i++) {
         if (i == ATTENUATION_CURVE_SIZE - 1) {
-            cliPrintf("%d", currentControlRateProfile->raceflightTPA.kdAttenuationCurve[i]);
+            cliPrintf("%d", currentControlRateProfile->tpaKdCurve[i]);
         } else {
-            cliPrintf("%d=", currentControlRateProfile->raceflightTPA.kdAttenuationCurve[i]);
+            cliPrintf("%d=", currentControlRateProfile->tpaKdCurve[i]);
         }
     }
     cliPrintLinefeed();
@@ -1809,19 +1809,19 @@ static void cliTPACurve(char *cmdLine)
             else {
                 switch (type) {
                     case KP:
-                        memcpy(currentControlRateProfile->raceflightTPA.kpAttenuationCurve, tempCurve, sizeof(tempCurve));
+                        memcpy(currentControlRateProfile->tpaKpCurve, tempCurve, sizeof(tempCurve));
                         cliPrintf("New TPA Saved");
                         cliPrintLinefeed();
                         printTPACurve();
                         break;
                     case KI:
-                        memcpy(currentControlRateProfile->raceflightTPA.kiAttenuationCurve, tempCurve, sizeof(tempCurve));
+                        memcpy(currentControlRateProfile->tpaKiCurve, tempCurve, sizeof(tempCurve));
                         cliPrintf("New TPA Saved");
                         cliPrintLinefeed();
                         printTPACurve();
                         break;
                     case KD:
-                        memcpy(currentControlRateProfile->raceflightTPA.kdAttenuationCurve, tempCurve, sizeof(tempCurve));
+                        memcpy(currentControlRateProfile->tpaKdCurve, tempCurve, sizeof(tempCurve));
                         cliPrintf("New TPA Saved");
                         cliPrintLinefeed();
                         printTPACurve();
@@ -3838,7 +3838,15 @@ static void printTPACurveJson() {
         {
             cliPrint(",");
         }
-        cliPrintf("\"%d\"", currentControlRateProfile->raceflightTPA.kpAttenuationCurve[i]);
+        cliPrintf("\"%d\"", currentControlRateProfile->tpaKpCurve[i]);
+    }
+    cliPrint("],\"kd\":[");
+    for (int i = 0; i < ATTENUATION_CURVE_SIZE; i++) {
+        if (i > 0)
+        {
+            cliPrint(",");
+        }
+        cliPrintf("\"%d\"", currentControlRateProfile->tpaKdCurve[i]);
     }
     cliPrint("],\"ki\":[");
     for (int i = 0; i < ATTENUATION_CURVE_SIZE; i++) {
@@ -3846,17 +3854,10 @@ static void printTPACurveJson() {
         {
             cliPrint(",");
         }
-        cliPrintf("\"%d\"", currentControlRateProfile->raceflightTPA.kiAttenuationCurve[i]);
+        cliPrintf("\"%d\"", currentControlRateProfile->tpaKiCurve[i]);
     }
     cliPrint("]}");
-    cliPrint("],\"kd\":[");
-    for (int i = 0; i < ATTENUATION_CURVE_SIZE; i++) {
-        if (i > 0)
-        {
-            cliPrint(",");
-        }
-        cliPrintf("\"%d\"", currentControlRateProfile->raceflightTPA.kdAttenuationCurve[i]);
-    }
+
 }
 // RF TPA
 

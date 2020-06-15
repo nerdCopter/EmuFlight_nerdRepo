@@ -47,6 +47,8 @@ bool rcSmoothingAutoCalculate(void);
 bool rcSmoothingInitializationComplete(void);
 #endif
 float rateDynamics(float rcCommand, int axis);
+// RF TPA
 float getThrottlePIDAttenuationKp(void);
 float getThrottlePIDAttenuationKi(void);
 float getThrottlePIDAttenuationKd(void);
+// RF TPA
