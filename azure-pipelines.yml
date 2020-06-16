@@ -47,16 +47,16 @@ stages:
       maxParallel: 3
       matrix:
         batch1:
-#          GOAL: targets-group-1
-          GOAL: FOXEERF405    # for testing purposes
+          GOAL: targets-group-1
+#          GOAL: FOXEERF405    # for testing purposes
           artifactName: emu1
         batch2:
-#          GOAL: targets-group-2
-          GOAL: HELIOSPRING   # for testing purposes
+          GOAL: targets-group-2
+#          GOAL: HELIOSPRING   # for testing purposes
           artifactName: emu2
         batch3:
-#          GOAL: targets-group-rest
-          GOAL: STRIXF10      # for testing purposes
+          GOAL: targets-group-rest
+#          GOAL: STRIXF10      # for testing purposes
           artifactName: emu3
 
     pool:
@@ -97,3 +97,113 @@ stages:
     - publish: $(Pipeline.Workspace)/variables
       artifact: variables
 
+- stage: Release
+  jobs:
+  - job: Release
+
+    steps:
+    - checkout: self
+      clean: true
+      fetchDepth: 50                  #lets shallow, but not too shallow for failure retries
+      persistCredentials: true        #probably do not need this
+    #Download the release folder pipeline artifact
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        buildType: 'current'
+        targetPath: '$(Pipeline.Workspace)'
+    #Download the variables folder pipeline artifact
+    - download: current
+      artifact: variables
+    - powershell: |
+        Write-Output "reading file: $(Pipeline.Workspace)/variables/firmVersion"
+        $firmVersion = Get-Content -Path "$(Pipeline.Workspace)/variables/firmVersion"
+        Write-Output ("##vso[task.setvariable variable=firmVersion;]$firmVersion")
+        Write-Output "firmware version is: $firmVersion"
+      displayName: 'read variables artifact'
+      continueOnError: true
+    - powershell: |
+        Write-Output 'var outside: $(firmVersion)'
+      displayName: 'verify firmVersion outside task'
+      continueOnError: true
+    - task: GitHubReleasePublish@1
+      continueOnError: true
+      inputs:
+        githubEndpoint: '$(endpoint)'
+        manuallySetRepository: true
+        githubOwner: '$(owner)'
+        githubRepositoryName: '$(destinationRepoName)'
+        #githubTag: $(Date:yyyyMMdd).$(BuildID) #defaults to $(name) and this usually fails variables anyway
+        githubReleaseTitle: '$(Build.Repository.Name): $(Build.SourceBranchName) ($(Build.BuildNumber))'
+        githubReleaseDraft: true              #this will allow hiding until manually unsetting 'draft'
+        githubReleasePrerelease: true         #make it a pre-release, we can manually unset also if appropriate
+        githubIgnoreAssets: false
+        githubReleaseAsset: '$(Pipeline.Workspace)/emu**/**'
+        githubReuseRelease: false
+        githubReuseDraftOnly: false
+        githubSkipDuplicatedAssets: false
+        githubEditRelease: true
+        githubDeleteEmptyTag: false
+        githubReleaseNotes: |+
+          $(releaseNotes)
+
+          #### Repo:Branch
+          [$(Build.Repository.Name)]($(Build.Repository.Uri)):[$(Build.SourceBranchName)]($(Build.Repository.Uri)/tree/$(Build.SourceBranchName))
+
+          #### Commit:
+          [$(Build.SourceVersion)]($(Build.Repository.Uri)/commit/$(Build.SourceVersion))
+          `$(Build.SourceVersionMessage)`
+
+          #### Version:
+          $(firmVersion)
+
+          #### Azure Pipelines Debug:
+          Build.SourceBranchName: $(Build.SourceBranchName)
+          Build.Repository.Name: $(Build.Repository.Name)
+          Build.Repository.ID: $(Build.Repository.ID)
+          Build.Repository.Uri: $(Build.Repository.Uri)
+          Build.RequestedFor: $(Build.RequestedFor)
+          Build.QueuedBy: $(Build.QueuedBy)
+          Build.Reason: $(Build.Reason)
+          Build.BuildId: $(Build.BuildId)
+          Build.BuildNumber: $(Build.BuildNumber)
+
+    - task: GitHubReleasePublish@1
+      continueOnError: true
+      inputs:
+        githubEndpoint: 'github-pat-for-azure'
+        manuallySetRepository: true
+        githubOwner: 'nerdCopter'
+        githubRepositoryName: 'testBuilds'
+        githubReleaseTitle: '$(Build.Repository.Name): $(Build.SourceBranchName) ($(Build.BuildNumber))'
+        githubReleaseDraft: true
+        githubReleasePrerelease: true
+        githubIgnoreAssets: false
+        githubReleaseAsset: '$(Pipeline.Workspace)/emu**/**'
+        githubReuseRelease: false
+        githubReuseDraftOnly: true
+        githubSkipDuplicatedAssets: false
+        githubEditRelease: false
+        githubDeleteEmptyTag: false
+        githubReleaseNotes: |+
+          $(releaseNotes)
+
+          #### Repo:Branch
+          [$(Build.Repository.Name)]($(Build.Repository.Uri)):[$(Build.SourceBranchName)]($(Build.Repository.Uri)/tree/$(Build.SourceBranchName))
+
+          #### Commit:
+          [$(Build.SourceVersion)]($(Build.Repository.Uri)/commit/$(Build.SourceVersion))
+          `$(Build.SourceVersionMessage)`
+
+          #### Version:
+          $(firmVersion)
+
+          #### Azure Pipelines Debug:
+          Build.SourceBranchName: $(Build.SourceBranchName)
+          Build.Repository.Name: $(Build.Repository.Name)
+          Build.Repository.ID: $(Build.Repository.ID)
+          Build.Repository.Uri: $(Build.Repository.Uri)
+          Build.RequestedFor: $(Build.RequestedFor)
+          Build.QueuedBy: $(Build.QueuedBy)
+          Build.Reason: $(Build.Reason)
+          Build.BuildId: $(Build.BuildId)
+          Build.BuildNumber: $(Build.BuildNumber)
