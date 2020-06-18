@@ -58,6 +58,9 @@
 #include "drivers/flash.h"
 #include "drivers/max7456_symbols.h"
 #include "drivers/sdcard.h"
+#ifdef USE_VCP
+#include "drivers/serial_usb_vcp.h"
+#endif
 #include "drivers/time.h"
 
 #include "fc/config.h"
@@ -403,6 +406,18 @@ static void osdFormatMessage(char *buff, size_t size, const char *message)
     if (message) {
         memcpy(buff, message, strlen(message));
     }
+
+    // Save warning into pilotConfig->warning, used for DJI OSD
+    // stored into another field for saving original pilot name
+    // works if osd_warning_enabled is on, osd warnings is enabled and usb is not connected
+    if (osdWarnDjiEnabled()) {
+        if (message) {
+            tfp_sprintf(pilotConfigMutable()->warning, message);
+        } else {
+            tfp_sprintf(pilotConfigMutable()->warning, " ");
+        }
+    }
+
     // Ensure buff is zero terminated
     buff[size - 1] = '\0';
 }
@@ -449,6 +464,15 @@ void osdWarnSetState(uint8_t warningIndex, bool enabled)
 bool osdWarnGetState(uint8_t warningIndex)
 {
     return osdConfig()->enabledWarnings & (1 << warningIndex);
+}
+
+bool osdWarnDjiEnabled(void)
+{
+    return osdWarnGetState(OSD_WARNING_DJI)
+#ifdef USE_VCP
+                && !usbVcpIsConnected()
+#endif
+    ;
 }
 
 static bool osdDrawSingleElement(uint8_t item)
@@ -1118,6 +1142,9 @@ void pgResetFn_osdConfig(osdConfig_t *osdConfig)
     osdConfig->distance_alarm = 0;
     osdConfig->ahMaxPitch = 20; // 20 degrees
     osdConfig->ahMaxRoll = 40; // 40 degrees
+
+    // Turn off replacing craft name for DJI OSD
+    osdWarnSetState(OSD_WARNING_DJI, false);
 }
 
 static void osdDrawLogo(int x, int y)
