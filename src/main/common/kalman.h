@@ -50,4 +50,4 @@ typedef struct kalman
 } kalman_t;
 
 extern void kalman_init(void);
-extern float kalman_update(float input, int axis);
+extern float kalman_update(float input, int axis, float setpoint);

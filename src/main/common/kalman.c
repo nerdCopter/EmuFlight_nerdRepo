@@ -109,11 +109,10 @@ FAST_CODE float kalman_process(kalman_t* kalmanState, float input, float target)
 }
 
 
-FAST_CODE float kalman_update(float input, int axis)
+FAST_CODE float kalman_update(float input, int axis, float setpoint)
 {
-
     update_kalman_covariance(&kalmanFilterStateRate[axis], input);
-    input = kalman_process(&kalmanFilterStateRate[axis], input, getSetpointRate(axis) );
+    input = kalman_process(&kalmanFilterStateRate[axis], input, setpoint);
 
     int16_t Kgain = (kalmanFilterStateRate[axis].k * 1000.0f);
     DEBUG_SET(DEBUG_KALMAN, axis, Kgain);                               //Kalman gain
