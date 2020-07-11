@@ -127,6 +127,8 @@ typedef struct pidProfile_s {
     uint8_t iterm_rotation;                 // rotates iterm to translate world errors to local coordinate system
     uint8_t motor_output_limit;             // Upper limit of the motor output (percent)
     int8_t auto_profile_cell_count;         // Cell count for this profile to be used with if auto PID profile switching is used
+    uint8_t iDecayV2;                       // What version of idecay will you use?
+    uint8_t iDecayCutoff;                   // Iterm value above which iDecayV2 has full effect
 } pidProfile_t;
 
 #ifndef USE_OSD_SLAVE

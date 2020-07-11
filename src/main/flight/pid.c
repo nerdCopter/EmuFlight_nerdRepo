@@ -172,6 +172,8 @@ void resetPidProfile(pidProfile_t *pidProfile)
         .motor_output_limit = 100,
         .auto_profile_cell_count = AUTO_PROFILE_CELL_COUNT_STAY,
         .horizonTransition = 0,
+        .iDecayV2 = true,
+        .iDecayCutoff = 100,
     );
 }
 
@@ -207,8 +209,6 @@ static FAST_RAM filterApplyFnPtr dtermLowpassApplyFn = nullFilterApply;
 static FAST_RAM_ZERO_INIT dtermLowpass_t dtermLowpass[XYZ_AXIS_COUNT];
 static FAST_RAM filterApplyFnPtr dtermLowpass2ApplyFn = nullFilterApply;
 static FAST_RAM_ZERO_INIT dtermLowpass_t dtermLowpass2[XYZ_AXIS_COUNT];
-
-static FAST_RAM_ZERO_INIT float iDecay;
 
 #ifdef USE_RC_SMOOTHING_FILTER
 static FAST_RAM_ZERO_INIT pt1Filter_t setpointDerivativePt1[XYZ_AXIS_COUNT];
@@ -335,6 +335,7 @@ static FAST_RAM_ZERO_INIT float crashGyroThreshold;
 static FAST_RAM_ZERO_INIT float crashSetpointThreshold;
 static FAST_RAM_ZERO_INIT float crashLimitYaw;
 static FAST_RAM_ZERO_INIT float itermLimit;
+static FAST_RAM_ZERO_INIT float iDecay;
 #if defined(USE_THROTTLE_BOOST)
 FAST_RAM_ZERO_INIT float throttleBoost;
 pt1Filter_t throttleLpf;
@@ -722,25 +723,30 @@ void pidController(const pidProfile_t *pidProfile, const rollAndPitchTrims_t *an
             boostedErrorRate = errorRate * errorLimitAxis;
         }
 
+        const float errorRateBoosted = errorRate + boostedErrorRate;
+
         rotateITermAndAxisError();
         // --------low-level gyro-based PID based on 2DOF PID controller. ----------
         // 2-DOF PID controller with optional filter on derivative term.
         // derivative term can be based on measurement or error using a sliding value from 0-100
 
         // -----calculate P component
-        pidData[axis].P = (pidCoefficient[axis].Kp * (boostedErrorRate + errorRate)) * vbatCompensationFactor;
+        pidData[axis].P = (pidCoefficient[axis].Kp * (errorRateBoosted)) * vbatCompensationFactor;
 
         // -----calculate I component
-        //float iterm = constrainf(pidData[axis].I + (pidCoefficient[axis].Ki * errorRate) * dynCi, -itermLimit, itermLimit);
-        float iterm    = temporaryIterm[axis];
-        float ITermNew = pidCoefficient[axis].Ki * (boostedErrorRate + errorRate) * dynCi;
-        if (ITermNew != 0.0f)
-        {
-            if (SIGN(iterm) != SIGN(ITermNew))
-            {
-            	  const float newVal = ITermNew * iDecay;
-            	  if (fabs(iterm) > fabs(newVal))
-            	  {
+        float iterm = temporaryIterm[axis];
+        float itermErrorRate = errorRateBoosted;
+
+        float iDecayMultiplier = iDecay;
+        float ITermNew = pidCoefficient[axis].Ki * (itermErrorRate) * dynCi;
+        if (ITermNew != 0.0f) {
+            if (SIGN(iterm) != SIGN(ITermNew)) {
+                if (pidProfile->iDecayV2 == true) {
+                    // at low iterm iDecayMultiplier will be 1 and at high iterm it will be equivilant to iDecay
+                    iDecayMultiplier = 1.0f + (iDecay - 1.0f) * constrainf(iterm / pidProfile->iDecayCutoff, 0.0f, 1.0f);
+                }
+                  const float newVal = ITermNew * iDecayMultiplier;
+                  if (fabs(iterm) > fabs(newVal)) {
                 		ITermNew = newVal;
             	  }
             }
