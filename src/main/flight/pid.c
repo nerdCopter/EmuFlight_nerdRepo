@@ -176,7 +176,9 @@ void resetPidProfile(pidProfile_t *pidProfile) {
     .motor_output_limit = 100,
     .auto_profile_cell_count = AUTO_PROFILE_CELL_COUNT_STAY,
     .horizonTransition = 0,
-                );
+    .thrust_linearization_level = 0,
+    .mixer_laziness = false,
+    );
 }
 
 void pgResetFn_pidProfiles(pidProfile_t *pidProfiles) {
@@ -597,9 +599,7 @@ void pidController(const pidProfile_t *pidProfile, const rollAndPitchTrims_t *an
         setPointIAttenuation[axis] = 1 + (getRcDeflectionAbs(axis) * (setPointITransition[axis] - 1));
         setPointDAttenuation[axis] = 1 + (getRcDeflectionAbs(axis) * (setPointDTransition[axis] - 1));
     }
-    //vbat pid compensation on just the p term :) thanks NFE
-    float vbatCompensationFactor = calculateVbatCompensation(currentControlRateProfile->vbat_comp_type, currentControlRateProfile->vbat_comp_ref);
-    vbatCompensationFactor = scaleRangef(currentControlRateProfile->vbat_comp_pid_level, 0.0f, 100.0f, 1.0f, vbatCompensationFactor);
+
     // gradually scale back integration when above windup point
     float dynCi = dT;
     if (ITermWindupPointInv != 0.0f) {
@@ -677,7 +677,7 @@ void pidController(const pidProfile_t *pidProfile, const rollAndPitchTrims_t *an
         }
 #endif // USE_ITERM_RELAX
         // -----calculate P component
-        pidData[axis].P = (pidCoefficient[axis].Kp * (boostedErrorRate + errorRate)) * vbatCompensationFactor;
+        pidData[axis].P = (pidCoefficient[axis].Kp * (boostedErrorRate + errorRate));
         // -----calculate I component
         //float iterm = constrainf(pidData[axis].I + (pidCoefficient[axis].Ki * errorRate) * dynCi, -itermLimit, itermLimit);
         float iDecayMultiplier = iDecay;
