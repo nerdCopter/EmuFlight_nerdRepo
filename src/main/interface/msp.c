@@ -425,7 +425,7 @@ bool mspCommonProcessOutCommand(uint8_t cmdMSP, sbuf_t *dst, mspPostProcessFnPtr
 #ifdef USE_OSD_SLAVE
         sbufWriteU8(dst, 1);  // 1 == OSD
 #else
-#if defined(USE_OSD) && defined(USE_MAX7456)
+#if defined(USE_OSD) && (defined(USE_MAX7456)  || defined(USE_USE_BEESIGN))
         sbufWriteU8(dst, 2);  // 2 == FC with OSD
 #else
         sbufWriteU8(dst, 0);  // 0 == FC
@@ -621,6 +621,7 @@ bool mspCommonProcessOutCommand(uint8_t cmdMSP, sbuf_t *dst, mspPostProcessFnPtr
 #define OSD_FLAGS_RESERVED_1            (1 << 2)
 #define OSD_FLAGS_RESERVED_2            (1 << 3)
 #define OSD_FLAGS_OSD_HARDWARE_MAX_7456 (1 << 4)
+#define OSD_FLAGS_OSD_HARDWARE_BEESIGN  (1 << 5)
         uint8_t osdFlags = 0;
 #if defined(USE_OSD)
         osdFlags |= OSD_FLAGS_OSD_FEATURE;
@@ -765,12 +766,6 @@ bool mspProcessOutCommand(uint8_t cmdMSP, sbuf_t *dst) {
     }
     break;
     case MSP_NAME: {
-        // Show warning for DJI OSD instead of pilot name
-        // works if osd warnings enabled, osd_warn_dji is on and usb is not connected
-        if (osdWarnDjiEnabled()) {
-            sbufWriteString(dst, djiWarningBuffer);
-            break;
-        }
         const int nameLen = strlen(pilotConfig()->name);
         for (int i = 0; i < nameLen; i++) {
             sbufWriteU8(dst, pilotConfig()->name[i]);
@@ -1239,13 +1234,11 @@ bool mspProcessOutCommand(uint8_t cmdMSP, sbuf_t *dst) {
         sbufWriteU8(dst, 0); // was pidProfile.levelSensitivity
         sbufWriteU16(dst, 0);
         sbufWriteU16(dst, 0);
-        //modded msp 1.49 (next 1)
-        sbufWriteU16(dst, currentPidProfile->dtermBoost); // was currentPidProfile->dtermSetpointWeight
+        sbufWriteU16(dst, 0); // was currentPidProfile->dtermSetpointWeight
         sbufWriteU8(dst, currentPidProfile->iterm_rotation);
-        //modded msp 1.49 (next 3)
-        sbufWriteU8(dst, currentPidProfile->iterm_relax_cutoff);
-        sbufWriteU8(dst, currentPidProfile->iterm_relax_cutoff_yaw);
-        sbufWriteU8(dst, currentPidProfile->dtermBoostLimit);
+        sbufWriteU8(dst, 0);
+        sbufWriteU8(dst, 0);
+        sbufWriteU8(dst, 0);
         sbufWriteU8(dst, 0);
 #if defined(USE_THROTTLE_BOOST)
         sbufWriteU8(dst, currentPidProfile->throttle_boost);
@@ -1822,16 +1815,14 @@ mspResult_e mspProcessInCommand(uint8_t cmdMSP, sbuf_t *src) {
         sbufReadU16(src);
         }
         if (sbufBytesRemaining(src) >= 2) {
-        //modded msp 1.49 (next 1)
-        currentPidProfile->dtermBoost = sbufReadU16(src); // was currentPidProfile->dtermSetpointWeight
+        sbufReadU16(src); // was currentPidProfile->dtermSetpointWeight
         }
         if (sbufBytesRemaining(src) >= 14) {
         // Added in MSP API 1.40
         currentPidProfile->iterm_rotation = sbufReadU8(src);
-        //modded msp 1.49 (next 3)
-        currentPidProfile->iterm_relax_cutoff = sbufReadU8(src);
-        currentPidProfile->iterm_relax_cutoff_yaw = sbufReadU8(src);
-        currentPidProfile->dtermBoostLimit = sbufReadU8(src);
+        sbufReadU8(src);
+        sbufReadU8(src);
+        sbufReadU8(src);
         sbufReadU8(src);
 #if defined(USE_THROTTLE_BOOST)
         currentPidProfile->throttle_boost = sbufReadU8(src);
