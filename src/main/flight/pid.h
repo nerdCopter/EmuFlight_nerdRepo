@@ -69,6 +69,13 @@ typedef enum {
     PID_CRASH_RECOVERY_BEEP
 } pidCrashRecovery_e;
 
+typedef enum {
+    MIXER_IMPL_LEGACY = 0,
+    MIXER_IMPL_SMOOTH,
+    MIXER_IMPL_LAZY,
+    MIXER_IMPL_COUNT
+} mixerImplType_e;
+
 typedef struct pidf_s {
     uint8_t P;
     uint8_t I;
@@ -130,10 +137,14 @@ typedef struct pidProfile_s {
     uint8_t iterm_rotation;                 // rotates iterm to translate world errors to local coordinate system
     uint8_t iterm_relax_cutoff;
     uint8_t iterm_relax_cutoff_yaw;
-    uint8_t iterm_relax_threshold;             // This cutoff frequency specifies a low pass filter which predicts average response of the quad to setpoint
-    uint8_t iterm_relax_threshold_yaw;         // This cutoff frequency specifies a low pass filter which predicts average response of the quad to setpoint
+    uint8_t iterm_relax_threshold;          // This cutoff frequency specifies a low pass filter which predicts average response of the quad to setpoint
+    uint8_t iterm_relax_threshold_yaw;      // This cutoff frequency specifies a low pass filter which predicts average response of the quad to setpoint
     uint8_t motor_output_limit;             // Upper limit of the motor output (percent)
     int8_t auto_profile_cell_count;         // Cell count for this profile to be used with if auto PID profile switching is used
+
+    uint8_t thrust_linearization_level;     // Sets the level of thrust linearization
+    bool use_throttle_linearization;        // When thrust_linearization_level is > 0, tells whether the throttle response has to be linear too or counter-compensated for the legacy feedback
+    mixerImplType_e mixer_impl;             // Which mixer implementation use
 } pidProfile_t;
 
 #ifndef USE_OSD_SLAVE
