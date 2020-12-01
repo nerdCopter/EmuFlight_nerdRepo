@@ -107,6 +107,8 @@ typedef struct motorConfig_s {
 PG_DECLARE(motorConfig_t, motorConfig);
 
 #define CHANNEL_FORWARDING_DISABLED (uint8_t)0xFF
+#define THRUST_TO_MOTOR(thrust, a) (((a) - 1 + sqrtf(powerf(1.0f - (a), 2) + 4.0f * (a) * MAX((thrust), 0.0f))) / (2.0f * (a)))
+#define MOTOR_TO_THRUST(motorOutput, a) ((1 - (a)) * (motorOutput) + (a) * powerf(MAX((motorOutput), 0.0f), 2))
 
 extern const mixer_t mixers[];
 extern float motor[MAX_SUPPORTED_MOTORS];
@@ -115,13 +117,14 @@ extern float motorOutputHigh, motorOutputLow;
 struct rxConfig_s;
 
 uint8_t getMotorCount(void);
-float getMotorMixRange(void);
+float getControllerMixRange(void);
 bool areMotorsRunning(void);
 bool mixerIsOutputSaturated(int axis, float errorRate);
 
 void mixerLoadMix(int index, motorMixer_t *customMixers);
 void initEscEndpoints(void);
 void mixerInit(mixerMode_e mixerMode);
+void mixerInitProfile(void);
 
 void mixerConfigureOutput(void);
 
@@ -138,3 +141,4 @@ bool mixerIsTricopter(void);
 
 void mixerSetThrottleAngleCorrection(int correctionValue);
 float mixerGetLoggingThrottle(void);
+void mixThingsUp(float scaledAxisPidRoll, float scaledAxisPidPitch, float scaledAxisPidYaw, float *motorMix);
