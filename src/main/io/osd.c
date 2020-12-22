@@ -928,9 +928,9 @@ static bool osdDrawSingleElement(uint8_t item) {
         const float value = constrain(getMAhDrawn(), 0, batteryConfig()->batteryCapacity);
         // Calculate percentage of total mAh used
         const uint16_t mAhUsedPercent = ceilf(value / (batteryConfig()->batteryCapacity / 100.0f));
-        tfp_sprintf(buff, "%3d%%", mAhUsedPercent);
+        tfp_sprintf(buff , "%c%3d%%", SYM_MAH, mAhUsedPercent);
         break;
-    }   
+    }
     case OSD_DEBUG:
         tfp_sprintf(buff, "DBG %5d %5d %5d %5d", debug[0], debug[1], debug[2], debug[3]);
         break;
