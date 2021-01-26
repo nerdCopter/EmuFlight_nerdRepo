@@ -190,7 +190,7 @@ void resetPidProfile(pidProfile_t *pidProfile) {
     .dterm_ABG_half_life = 50,
     .dterm_ABG_alpha = 0,
     .directFF_yaw = 30,
-    .emuGravityGain = 4000,
+    .emuGravityGain = 1000,
                 );
 }
 
