@@ -1099,9 +1099,6 @@ void pgResetFn_osdConfig(osdConfig_t *osdConfig) {
     for (int i = 0; i < OSD_WARNING_COUNT; i++) {
         osdWarnSetState(i, true);
     }
-    // Turn off replacing craft name for DJI OSD
-    osdWarnSetState(OSD_WARNING_DJI, false);
-
     osdConfig->timers[OSD_TIMER_1] = OSD_TIMER(OSD_TIMER_SRC_ON, OSD_TIMER_PREC_SECOND, 10);
     osdConfig->timers[OSD_TIMER_2] = OSD_TIMER(OSD_TIMER_SRC_TOTAL_ARMED, OSD_TIMER_PREC_SECOND, 10);
     osdConfig->lq_format      = TBS;
@@ -1120,6 +1117,8 @@ void pgResetFn_osdConfig(osdConfig_t *osdConfig) {
     osdConfig->task_frequency = 60; // at 125 or 150 the refresh rate is exactly 25 (PAL) or 30 (NTSC)
     osdConfig->logo_on_arming = OSD_LOGO_ARMING_OFF;
     osdConfig->logo_on_arming_duration = 5;  // 0.5 seconds
+    // Turn off replacing craft name for DJI OSD
+    osdWarnSetState(OSD_WARNING_DJI, false);
 }
 
 static void osdDrawLogo(int x, int y) {
