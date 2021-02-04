@@ -44,6 +44,7 @@ jobs:
     - name: Setup Python
       uses: actions/setup-python@v1
 
+# Why were we maintaining two ways to use arm_sdk? ./make/tools.mk and actions
 #   - name: Setup Toolchain
 #     uses: fiam/arm-none-eabi-gcc@master
 #     with:
@@ -92,6 +93,10 @@ jobs:
         echo "Tag: ${{ env.REVISION_TAG}}"
         echo "Artifact name: ${{ env.ARTIFACT_NAME }}"
       continue-on-error: true
+
+    - name: Download and compile arm_sdk
+      run: |
+        make arm_sdk_install --trace
 
     - name: Compile Code
       run: |
