@@ -73,6 +73,8 @@
 #define USE_BARO_BMP085
 
 #define USE_I2C
+
+/*
 <<<<<<< HEAD:src/main/target/MAMBAF722/target.h
 #define USE_I2C_DEVICE_1
 #define I2C_DEVICE              (I2CDEV_1)
@@ -95,8 +97,19 @@
 #define I2C2_SDA                NONE        // SDA pad  PB11, shared with UART3RX
 #endif
 #define BARO_I2C_INSTANCE       (I2CDEV_2)
-
 >>>>>>> b6f817825 (WIP; Kaio+MakeFile+mods):src/main/target/DIAT_MAMBAF722/target.h
+*/
+
+#define USE_I2C_DEVICE_1
+#define I2C_DEVICE              (I2CDEV_1)
+#define BARO_I2C_INSTANCE       (I2CDEV_1)
+#if defined(MAMBAF722I2C)
+#define I2C1_SCL                PB8        // SCL pad  PB10, shared with UART3TX
+#define I2C1_SDA                PB9       // SDA pad  PB11, shared with UART3RX
+#else
+#define I2C1_SCL                NONE        // SCL pad  PB10, shared with UART3TX
+#define I2C1_SDA                NONE        // SDA pad  PB11, shared with UART3RX
+#endif
 
 //*********** Magnetometer / Compass *************
 #define USE_MAG
