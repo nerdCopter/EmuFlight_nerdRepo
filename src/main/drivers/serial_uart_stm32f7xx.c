@@ -300,6 +300,14 @@ void uartIrqHandler(uartPort_t *s) {
             handleUsartTxDma(s);
         }
     }
+
+        if (__HAL_UART_GET_IT(huart, UART_IT_IDLE)) {
+            if (s->port.idleCallback) {
+                s->port.idleCallback();
+            }
+
+            __HAL_UART_CLEAR_IDLEFLAG(huart);
+        }    
 }
 
 static void handleUsartTxDma(uartPort_t *s) {
@@ -351,7 +359,7 @@ uartPort_t *serialUART(UARTDevice_e device, uint32_t baudRate, portMode_e mode, 
         ioConfig_t ioCfg = IO_CONFIG(
                                ((options & SERIAL_INVERTED) || (options & SERIAL_BIDIR_PP)) ? GPIO_MODE_AF_PP : GPIO_MODE_AF_OD,
                                GPIO_SPEED_FREQ_HIGH,
-                               ((options & SERIAL_INVERTED) || (options & SERIAL_BIDIR_PP)) ? GPIO_PULLDOWN : GPIO_PULLUP
+                               (options & SERIAL_INVERTED) ? GPIO_PULLDOWN : GPIO_PULLUP
                            );
         IOInit(txIO, OWNER_SERIAL_TX, RESOURCE_INDEX(device));
         IOConfigGPIOAF(txIO, ioCfg, hardware->af);
