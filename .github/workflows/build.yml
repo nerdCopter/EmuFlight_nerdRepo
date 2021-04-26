@@ -132,10 +132,10 @@ jobs:
         owner: "emuflight"
         repo: "hex"
         file: "obj/*.hex"
-        name: ""${{github.run_number}}-${{env.VERSION}}-${{env.REVISION_TAG}}""
+        name: "${{github.run_number}}-${{env.VERSION}}-${{env.REVISION_TAG}}"
         summary: "EmuFlight dev test-build"
         description: "See https://github.com/cloudsmith-io/action"
-          version: ${{ github.sha}}
+        version: "${{github.run_number}}-${{env.VERSION}}-${{env.REVISION_TAG}}"
 
     # Rename .hex for Releases
     - name: Rename Artifacts
