@@ -121,6 +121,22 @@ jobs:
         ./jfrog bt upload --publish=true "obj/*.hex" "${repo}/${package}/${version}" "GitHub_Build_${version}/" || true
       continue-on-error: true
 
+    # CouldSmith.io
+    - name: Upload to CloudSmith
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: cloudsmith-io/action@master
+      with:
+        api-key: ${{ secrets.CLOUDSMITH_API_KEY }} #nerdCopter's personal key, stored at Org-level>secrets
+        command: "push"
+        format: "raw"
+        owner: "emuflight"
+        repo: "hex"
+        file: "obj/*.hex"
+        name: ""${{github.run_number}}-${{env.VERSION}}-${{env.REVISION_TAG}}""
+        summary: "EmuFlight dev test-build"
+        description: "See https://github.com/cloudsmith-io/action"
+          version: ${{ github.sha}}
+
     # Rename .hex for Releases
     - name: Rename Artifacts
       if: startsWith(github.ref, 'refs/tags/')
