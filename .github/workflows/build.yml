@@ -2,8 +2,8 @@ on:
   push:
     tags:
     - '*'
-    branches:
-    - '*'
+  #  branches:
+  #  - '*'
   pull_request:
     branches:
     - '*'
@@ -27,7 +27,7 @@ jobs:
       run: function curl () { command curl --connect-timeout 30 --retry 10 "$@" ; }
 
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@master
       with:
         fetch-depth: 0
 
@@ -42,10 +42,11 @@ jobs:
       continue-on-error: true
 
     - name: Setup Python
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@master
 
     - name: Setup Toolchain
-      uses: fiam/arm-none-eabi-gcc@master
+      #uses: fiam/arm-none-eabi-gcc@master
+      uses: emuflight/arm-none-eabi-gcc@retry_timeout
       with:
         release: '9-2020-q2' # The arm-none-eabi-gcc release to use.
 
@@ -93,35 +94,86 @@ jobs:
         echo "Artifact name: ${{ env.ARTIFACT_NAME }}"
       continue-on-error: true
 
+    # Build HEX
     - name: Compile Code
       run: |
         make ${{ matrix.targets }}
 
     # Upload the Builds to ZIP file with existing SHA in .hex names
     - name: Upload Artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@master
       with:
         name: ${{ env.ARTIFACT_NAME }}
         path: obj/*.hex
 
-    # Upload to Bintray before .hex renames / only for tag
-    - name: Upload to Bintray
-      if: startsWith(github.ref, 'refs/tags/')
-      run: |
-        curl -fL https://getcli.jfrog.io | sh
-        export JFROG_CLI_OFFER_CONFIG=false
-        export CI=true
-        export JFROG_CLI_LOG_LEVEL=DEBUG
-        ./jfrog bt config --user=${{secrets.BINTRAYUSERNAME}} --key=${{secrets.BINTRAYAPIKEY}} --licenses=GPL-3.0
-        export repo="emuflight-dev/dev_hex"
-        export package="${{env.REVISION_TAG}}"
-        export version="${{github.run_number}}-${{env.VERSION}}-${{env.REVISION_TAG}}"
-        ./jfrog bt package-create --pub-dn=true --vcs-url="https://github.com/emuflight" "${repo}/${package}" || true
-        ./jfrog bt version-create "${repo}/${package}/${version}"  || true
-        ./jfrog bt upload --publish=true "obj/*.hex" "${repo}/${package}/${version}" "GitHub_Build_${version}/" || true
-      continue-on-error: true
+#    # Upload to Bintray before .hex renames / only for tag
+#    - name: Upload to Bintray
+#      if: startsWith(github.ref, 'refs/tags/')
+#      run: |
+#        curl -fL https://getcli.jfrog.io | sh
+#        export JFROG_CLI_OFFER_CONFIG=false
+#        export CI=true
+#        export JFROG_CLI_LOG_LEVEL=DEBUG
+#        ./jfrog bt config --user=${{secrets.BINTRAYUSERNAME}} --key=${{secrets.BINTRAYAPIKEY}} --licenses=GPL-3.0
+#        export repo="emuflight-dev/dev_hex"
+#        export package="${{env.REVISION_TAG}}"
+#        export version="${{github.run_number}}-${{env.VERSION}}-${{env.REVISION_TAG}}"
+#        ./jfrog bt package-create --pub-dn=true --vcs-url="https://github.com/emuflight" "${repo}/${package}" || true
+#        ./jfrog bt version-create "${repo}/${package}/${version}"  || true
+#        ./jfrog bt upload --publish=true "obj/*.hex" "${repo}/${package}/${version}" "GitHub_Build_${version}/" || true
+#      continue-on-error: true
 
-    # Rename .hex for Releases
+    # Draft Dev-Unstable releases via ncipollo/release-action
+    # softprops/action-gh-release fails to release on separate repo
+    - name: Draft Release Dev-Unstable repo
+      continue-on-error: true
+      uses: ncipollo/release-action@v1
+      with:
+        repo: dev-unstable
+        owner: emuflight
+        token: ${{ secrets.NC_PAT_EMUF }}
+        tag: ${{ github.run_number }}
+        draft: true
+        prerelease: true
+        allowUpdates: true
+        artifacts: obj/*.hex
+        artifactContentType: raw
+        name:  "DEV-UNSTABLE / Build ${{ github.run_number }} / ${{ env.REVISION_TAG}}"
+        body: |
+          ## BUILD for TESTING
+          ### Build ${{ github.run_number }} / ID ${{ github.run_ID }}
+          ### BuildTag: ${{ env.REVISION_TAG}}
+          ### Commit: ${{ github.sha }}
+          ### EmuFlight ${{ env.VERSION }} base plus test code
+          ### Changes in this Build:
+          ### What to Test/Feedback: (Feedback in EmuFlight's Discord or GitHub Discussions)
+
+    # Draft Dev-master releases via ncipollo/release-action
+    # softprops/action-gh-release fails to release on separate repo
+    - name: Draft Release Dev-Master repo
+      continue-on-error: true
+      uses: ncipollo/release-action@v1
+      with:
+        repo: dev-master
+        owner: emuflight
+        token: ${{ secrets.NC_PAT_EMUF }}
+        tag: ${{ github.run_number }}
+        draft: true
+        prerelease: true
+        allowUpdates: true
+        artifacts: obj/*.hex
+        artifactContentType: raw
+        name:  "DEV-MASTER / Build ${{ github.run_number }} / ${{ env.REVISION_TAG}}"
+        body: |
+          ## BUILD of MASTER
+          ### Build ${{ github.run_number }} / ID ${{ github.run_ID }}
+          ### BuildTag: ${{ env.REVISION_TAG}}
+          ### Commit: ${{ github.sha }}
+          ### EmuFlight ${{ env.VERSION }} base plus committed code
+          ### Changes in this Build:
+          ### Feedback Welcome in EmuFlight's Discord or GitHub Discussions.
+
+    # Rename .hex for true Releases on main repo
     - name: Rename Artifacts
       if: startsWith(github.ref, 'refs/tags/')
       run: |
@@ -129,14 +181,17 @@ jobs:
         cd obj
         rename 's/_Build_.*/.hex/' *.hex
 
-    - name: Draft Release
+    #Draft Releases on main Repo
+    # could potentially change to ncipollo/release-action as well
+    - name: Draft Release Main Repo
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
       with:
         files: obj/*.hex
         draft: true
         prerelease: true
-        tag_name: ${{ github.run_number }}   # use the build Number, but we manually change to version so that it creates a version-tag on release
+        #tag_name: ${{ github.run_number }} # use the build Number, but we MUST manually change to version to properly tag upon release
+        tag_name: ${{ env.VERSION }}
         name:  DRAFT / EmuFlight ${{ env.VERSION }} / GitHub Build ${{ github.run_number }}
         body: |
           # EmuFlight ${{ env.VERSION }}
