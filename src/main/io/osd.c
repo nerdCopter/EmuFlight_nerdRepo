@@ -121,6 +121,7 @@ const char * const osdTimerSourceNames[] = {
 // Blink control
 static bool blinkState = true;
 static bool showVisualBeeper = false;
+static bool crsfRssi = false;
 
 static uint32_t blinkBits[(OSD_ITEM_COUNT + 31)/32];
 #define SET_BLINK(item) (blinkBits[(item) / 32] |= (1 << ((item) % 32)))
