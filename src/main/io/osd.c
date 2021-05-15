@@ -938,14 +938,11 @@ static bool osdDrawSingleElement(uint8_t item)
                 osdFormatMessage(buff, OSD_FORMAT_MESSAGE_BUFFER_SIZE, "BATT < FULL");
                 break;
             }
-
             // Visual beeper
             if (osdWarnGetState(OSD_WARNING_VISUAL_BEEPER) && showVisualBeeper) {
                 osdFormatMessage(buff, OSD_FORMAT_MESSAGE_BUFFER_SIZE, "  * * * *");
                 break;
             }
-
-
             osdFormatMessage(buff, OSD_FORMAT_MESSAGE_BUFFER_SIZE, NULL);
             break;
         }
