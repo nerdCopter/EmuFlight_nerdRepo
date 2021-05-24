@@ -183,6 +183,11 @@
 #define TARGET_IO_PORTC         0xffff
 #define TARGET_IO_PORTD         (BIT(2))
 
+#if !defined(CRAZYBEEF4FS) || !defined(CRAZYBEEF4FR) || !defined(CRAZYBEEF4DX)
+#define ADC_BATT 1 A01
+#endif
+
+
 //#define  USE_DSHOT_DMA
 
 #define USABLE_TIMER_CHANNEL_COUNT 9
