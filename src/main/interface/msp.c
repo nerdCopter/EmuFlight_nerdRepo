@@ -1037,9 +1037,9 @@ bool mspProcessOutCommand(uint8_t cmdMSP, sbuf_t *dst) {
 #if defined(USE_RC_SMOOTHING_FILTER)
         sbufWriteU8(dst, rxConfig()->rc_smoothing_type);
         sbufWriteU8(dst, rxConfig()->rc_smoothing_input_cutoff);
-        sbufWriteU8(dst, rxConfig()->rc_smoothing_derivative_cutoff);
+        sbufWriteU8(dst, 0); // was rc_smoothing_derivative_cutoff
         sbufWriteU8(dst, rxConfig()->rc_smoothing_input_type);
-        sbufWriteU8(dst, rxConfig()->rc_smoothing_derivative_type);
+        sbufWriteU8(dst, 0); // was rc_smoothing_derivative_type
 #else
         sbufWriteU8(dst, 0);
         sbufWriteU8(dst, 0);
@@ -1198,12 +1198,7 @@ bool mspProcessOutCommand(uint8_t cmdMSP, sbuf_t *dst) {
         sbufWriteU16(dst, currentPidProfile->dFilter[ROLL].dLpf2);
         sbufWriteU16(dst, currentPidProfile->dFilter[PITCH].dLpf2);
         sbufWriteU16(dst, currentPidProfile->dFilter[YAW].dLpf2);
-        sbufWriteU8(dst, currentPidProfile->dFilter[ROLL].smartSmoothing);
-        sbufWriteU8(dst, currentPidProfile->dFilter[PITCH].smartSmoothing);
-        sbufWriteU8(dst, currentPidProfile->dFilter[YAW].smartSmoothing);
-        sbufWriteU8(dst, currentPidProfile->dFilter[ROLL].Wc);
-        sbufWriteU8(dst, currentPidProfile->dFilter[PITCH].Wc);
-        sbufWriteU8(dst, currentPidProfile->dFilter[YAW].Wc);
+        //MSP 1.51 removes SmartDTermSmoothing and WitchCraft
         sbufWriteU16(dst, gyroConfig()->dyn_notch_q_factor);
         sbufWriteU16(dst, gyroConfig()->dyn_notch_min_hz);
         //added in MSP 1.51
@@ -1804,12 +1799,7 @@ mspResult_e mspProcessInCommand(uint8_t cmdMSP, sbuf_t *src) {
             currentPidProfile->dFilter[ROLL].dLpf2 = sbufReadU16(src);
             currentPidProfile->dFilter[PITCH].dLpf2 = sbufReadU16(src);
             currentPidProfile->dFilter[YAW].dLpf2 = sbufReadU16(src);
-            currentPidProfile->dFilter[ROLL].smartSmoothing = sbufReadU8(src);
-            currentPidProfile->dFilter[PITCH].smartSmoothing = sbufReadU8(src);
-            currentPidProfile->dFilter[YAW].smartSmoothing = sbufReadU8(src);
-            currentPidProfile->dFilter[ROLL].Wc = sbufReadU8(src);
-            currentPidProfile->dFilter[PITCH].Wc = sbufReadU8(src);
-            currentPidProfile->dFilter[YAW].Wc = sbufReadU8(src);
+            //MSP 1.51 removes SmartDTermSmoothing and WitchCraft
             gyroConfigMutable()->dyn_notch_q_factor = sbufReadU16(src);
             gyroConfigMutable()->dyn_notch_min_hz = sbufReadU16(src);
             //added in MSP 1.51
@@ -2125,9 +2115,9 @@ mspResult_e mspProcessInCommand(uint8_t cmdMSP, sbuf_t *src) {
 #if defined(USE_RC_SMOOTHING_FILTER)
         rxConfigMutable()->rc_smoothing_type = sbufReadU8(src);
         rxConfigMutable()->rc_smoothing_input_cutoff = sbufReadU8(src);
-        rxConfigMutable()->rc_smoothing_derivative_cutoff = sbufReadU8(src);
+        sbufReadU8(src); // was rc_smoothing_derivative_cutoff
         rxConfigMutable()->rc_smoothing_input_type = sbufReadU8(src);
-        rxConfigMutable()->rc_smoothing_derivative_type = sbufReadU8(src);
+        sbufReadU8(src); // was rc_smoothing_derivative_type
 #else
         sbufReadU8(src);
         sbufReadU8(src);
