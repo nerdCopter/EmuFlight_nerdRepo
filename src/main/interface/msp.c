@@ -1229,7 +1229,7 @@ bool mspProcessOutCommand(uint8_t cmdMSP, sbuf_t *dst) {
         sbufWriteU16(dst, gyroConfig()->imuf_w);
         //sbufWriteU16(dst, 0) // was imuf_sharpness
 #ifdef  USE_GYRO_IMUF9001
-        sbufWriteU16(dst, gyroConfig()->imuf_ptn_order); //MSP 1.51 Helio only
+//        sbufWriteU16(dst, gyroConfig()->imuf_ptn_order); //MSP 1.51 Helio only
         sbufWriteU16(dst, gyroConfig()->imuf_roll_lpf_cutoff_hz);
         sbufWriteU16(dst, gyroConfig()->imuf_pitch_lpf_cutoff_hz);
         sbufWriteU16(dst, gyroConfig()->imuf_yaw_lpf_cutoff_hz);
