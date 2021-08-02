@@ -1213,7 +1213,7 @@ bool mspProcessOutCommand(uint8_t cmdMSP, sbuf_t *dst) {
         sbufWriteU16(dst, currentPidProfile->dterm_ABG_alpha);
         sbufWriteU16(dst, currentPidProfile->dterm_ABG_boost);
         sbufWriteU8(dst, currentPidProfile->dterm_ABG_half_life);
-        //end 1.51
+        //end MSP 1.51
         //MSP 1.51 dynamic dTerm notch
         sbufWriteU8(dst, currentPidProfile->dtermDynNotch);        //dterm_dyn_notch_enable
         sbufWriteU16(dst, currentPidProfile->dterm_dyn_notch_q);   //dterm_dyn_notch_q
@@ -2151,12 +2151,13 @@ mspResult_e mspProcessInCommand(uint8_t cmdMSP, sbuf_t *src) {
         sbufReadU8(src);
 #endif
         }
-        if (sbufBytesRemaining(src) >= 1) {
         //added in MSP 1.51
         if (sbufBytesRemaining(src) >= 1) {
             rxConfigMutable()->sbus_baud_fast = sbufReadU8(src);
         }
         //end 1.51
+
+        if (sbufBytesRemaining(src) >= 1) {
 // Added in MSP API 1.40
 // Kept separate from the section above to work around missing Configurator support in version < 10.4.2
 #if defined(USE_USB_CDC_HID)
