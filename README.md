@@ -6,6 +6,21 @@ This fork differs from Baseflight, Cleanflight and Betaflight in that it focuses
 
 ## News
 
+
+if you want to support my endless night trying things : https://paypal.me/binarylefmart
+thanks to @Faduf (https://github.com/Faduf/betaflight/tree/4.1.0-RC6_Alti_cutoff) and @Loutwice (https://github.com/loutwice/EmuFlight/releases/tag/0.3.1-altiLimit)
+
+we can have alti limit / min_dth and rescue-gps optimisations on our racers
+
+RECOMMANDATION : if you have GPS wait to have a gps fix (at least 7 sat ) or it can mess with altitude
+
+If gps and baro not ready a warning message NO ALTI LIM will prompt
+if alti limit is reached a warning message will prompt : ALTI_LIM
+three parameters to set by cli :
+alti_cutoff ( alti that cut off the trhottle )
+alti_start_lim ( alti which throttle will be decreasing )
+altiLimiter : ON/OFF
+
 Currently working on the first official release of EmuFlight. The Pegasus configurator will also be our official configurator in the coming months.
 
 
