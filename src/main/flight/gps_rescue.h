@@ -32,6 +32,7 @@ typedef struct gpsRescue_s {
     uint16_t rescueGroundspeed; // centimeters per second
     uint16_t throttleP, throttleI, throttleD;
     uint16_t yawP;
+    uint16_t minRescueDth; //meters
     uint16_t throttleMin;
     uint16_t throttleMax;
     uint16_t throttleHover;

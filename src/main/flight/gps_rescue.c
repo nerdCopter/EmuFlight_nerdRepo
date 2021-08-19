@@ -57,27 +57,28 @@
 PG_REGISTER_WITH_RESET_TEMPLATE(gpsRescueConfig_t, gpsRescueConfig, PG_GPS_RESCUE, 0);
 
 PG_RESET_TEMPLATE(gpsRescueConfig_t, gpsRescueConfig,
-                  .angle = 32,
-                  .initialAltitude = 50,
-                  .descentDistance = 200,
-                  .rescueGroundspeed = 2000,
-                  .throttleP = 150,
-                  .throttleI = 20,
-                  .throttleD = 50,
-                  .velP = 80,
-                  .velI = 20,
-                  .velD = 15,
-                  .yawP = 40,
-                  .throttleMin = 1200,
-                  .throttleMax = 1600,
-                  .throttleHover = 1280,
-                  .sanityChecks = RESCUE_SANITY_ON,
-                  .minSats = 8
-                 );
+    .angle = 45,
+    .initialAltitude = 50,
+    .descentDistance = 200,
+    .rescueGroundspeed = 1500,
+    .minRescueDth = 100,
+    .throttleP = 150,
+    .throttleI = 20,
+    .throttleD = 50,
+    .velP = 80,
+    .velI = 20,
+    .velD = 15,
+    .yawP = 40,
+    .throttleMin = 1100,
+    .throttleMax = 1600,
+    .throttleHover = 1280,
+    .sanityChecks = RESCUE_SANITY_FS_ONLY,
+    .minSats = 6
+);
 
 static uint16_t rescueThrottle;
 static float    rescueYaw;
-
+uint16_t      distanceToHome;
 int32_t       gpsRescueAngle[ANGLE_INDEX_COUNT] = { 0, 0 };
 uint16_t      hoverThrottle = 0;
 float         averageThrottle = 0.0;
@@ -118,7 +119,8 @@ void updateGPSRescueState(void) {
             hoverThrottle = gpsRescueConfig()->throttleHover;
         }
         // Minimum distance detection (100m).  Disarm regardless of sanity check configuration.  Rescue too close is never a good idea.
-        if (rescueState.sensor.distanceToHome < 100) {
+        if (rescueState.sensor.distanceToHome < gpsRescueConfig()->minRescueDth) {
+            rescueState.failure = RESCUE_TOO_CLOSE;
             // Never allow rescue mode to engage as a failsafe within 100 meters or when disarmed.
             if (rescueState.isFailsafe || !ARMING_FLAG(ARMED)) {
                 rescueState.failure = RESCUE_TOO_CLOSE;

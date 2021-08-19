@@ -236,11 +236,11 @@ gpsData_t gpsData;
 PG_REGISTER_WITH_RESET_TEMPLATE(gpsConfig_t, gpsConfig, PG_GPS_CONFIG, 0);
 
 PG_RESET_TEMPLATE(gpsConfig_t, gpsConfig,
-                  .provider = GPS_NMEA,
+                  .provider = GPS_UBLOX,
                   .sbasMode = SBAS_AUTO,
                   .autoConfig = GPS_AUTOCONFIG_ON,
                   .autoBaud = GPS_AUTOBAUD_OFF,
-                  .gps_ublox_use_galileo = false
+                  .gps_ublox_use_galileo = true
                  );
 
 static void shiftPacketLog(void) {

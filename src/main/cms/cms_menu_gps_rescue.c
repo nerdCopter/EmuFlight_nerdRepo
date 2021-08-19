@@ -52,6 +52,7 @@ static uint8_t gpsRescueConfig_minSats;
 static uint16_t gpsRescueConfig_throttleP, gpsRescueConfig_throttleI, gpsRescueConfig_throttleD;
 static uint16_t gpsRescueConfig_velP, gpsRescueConfig_velI, gpsRescueConfig_velD;
 static uint16_t gpsRescueConfig_yawP;
+static uint16_t gpsRescueConfig_minRescueDth; //meters
 
 
 
@@ -114,6 +115,7 @@ static long cmsx_menuGpsRescueOnEnter(void) {
     gpsRescueConfig_throttleMax = gpsRescueConfig()->throttleMax;
     gpsRescueConfig_throttleHover = gpsRescueConfig()->throttleHover;
     gpsRescueConfig_minSats = gpsRescueConfig()->minSats;
+    gpsRescueConfig_minRescueDth = gpsRescueConfig()->minRescueDth;
     return 0;
 }
 
@@ -127,6 +129,7 @@ static long cmsx_menuGpsRescueOnExit(const OSD_Entry *self) {
     gpsRescueConfigMutable()->throttleMax = gpsRescueConfig_throttleMax;
     gpsRescueConfigMutable()->throttleHover = gpsRescueConfig_throttleHover;
     gpsRescueConfigMutable()->minSats = gpsRescueConfig_minSats;
+    gpsRescueConfigMutable()->minRescueDth = gpsRescueConfig_minRescueDth;
     return 0;
 }
 
@@ -135,6 +138,7 @@ static OSD_Entry cmsx_menuGpsRescueEntries[] = {
     { "-- CHANGES REQUIRE REBOOT --", OME_Label, NULL, NULL, 0 },
     { "ANGLE",             OME_UINT16, NULL, &(OSD_UINT16_t){ &gpsRescueConfig_angle, 0, 200, 1 }, 0 },
     { "INITAL ALT      M", OME_UINT16, NULL, &(OSD_UINT16_t){ &gpsRescueConfig_initialAltitudeM, 20, 100, 1 }, 0 },
+    { "MIN DIST HOME",     OME_UINT16, NULL, &(OSD_UINT16_t){ &gpsRescueConfig_minRescueDth, 10, 1000 ,1 }, 0},
     { "DESCENT DIST    M", OME_UINT16, NULL, &(OSD_UINT16_t){ &gpsRescueConfig_descentDistanceM, 30, 500, 1 }, 0 },
     { "GROUND SPEED CM/S", OME_UINT16, NULL, &(OSD_UINT16_t){ &gpsRescueConfig_rescueGroundspeed, 30, 3000, 1 }, 0 },
     { "THROTTLE MIN",      OME_UINT16, NULL, &(OSD_UINT16_t){ &gpsRescueConfig_throttleMin, 1000, 2000, 1 }, 0 },
