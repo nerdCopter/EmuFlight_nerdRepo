@@ -2,25 +2,30 @@
 
 EmuFlight is flight controller software (firmware) used to fly multi-rotor craft.
 
-This fork differs from Baseflight, Cleanflight and Betaflight in that it focuses on flight performance, innovative filtering, and leading-edge features.
-
-## WARNING
-
-**DJI components bypass Configurator safety-checks. Do not attempt arming while connected to Configurator with LiPo plugged.  Always remove propellers and use a smoke-stopper for extra safety.**
+This fork differs from Baseflight, Cleanflight and Betaflight in that it focuses on flight performance, innovative filtering, leading-edge feature additions, and wide target support.
 
 ## News
 
-Currently working on the first official release of EmuFlight.
-To get the latest updates as well as support from us, you can join our discord at <https://discord.gg/gdP9CwE>.
+if you want to support my endless night trying things : https://paypal.me/binarylefmart thanks to @Faduf (https://github.com/Faduf/betaflight/tree/4.1.0-RC6_Alti_cutoff) and @Loutwice (https://github.com/loutwice/EmuFlight/releases/tag/0.3.1-altiLimit)
+
+we can have alti limit / min_dth and rescue-gps optimisations on our racers
+
+RECOMMANDATION : if you have GPS wait to have a gps fix (at least 7 sat ) or it can mess with altitude
+
+If gps and baro not ready a warning message NO ALTI LIM will prompt if alti limit is reached a warning message will prompt : ALTI_LIM three parameters to set by cli : alti_cutoff ( alti that cut off the trhottle ) alti_start_lim ( alti which throttle will be decreasing ) altiLimiter : ON/OFF
+
+Currently working on the first official release of EmuFlight. The Pegasus configurator will also be our official configurator in the coming months.
+
+To get the latest updates as well as support from us, you can join our discord at https://discord.gg/gdP9CwE.
 
 ## Features
 
 EmuFlight has some of the following features:
 
 * Multi-color RGB LED strip support (each LED can be a different color using variable length WS2811 Addressable RGB strips - use for Orientation Indicators, Low Battery Warning, Flight Mode Status, Initialization Troubleshooting, etc)
-* DShot (150, 300, 600, 1200, 2400, 4800), Multishot, and Oneshot (125 and 42) motor protocol support
+* DShot (150, 300, 600 and 1200), Multishot, and Oneshot (125 and 42) motor protocol support
 * Blackbox flight recorder logging (to onboard flash or external microSD card where equipped)
-* Support for targets that use the STM32 F7 and F4 processors. F3 Support removed after version 0.1.0
+* Support for targets that use the STM32 F7, F4 and F3 processors
 * PWM, PPM, and Serial (SBus, SumH, SumD, Spektrum 1024/2048, XBus, etc) RX connection with failsafe detection
 * Multiple telemetry protocols (CSRF, FrSky, HoTT smart-port, MSP, etc)
 * RSSI via ADC - Uses ADC to read PWM RSSI signals, tested with FrSky D4R-II, X8R, X4R-SB, & XSR
@@ -50,10 +55,6 @@ Etiquette: Don't ask to ask and please wait around long enough for a reply - som
 To configure EmuFlight you should use the EmuFlight-configurator GUI tool (Windows/OSX/Linux) which can be found here:
 
 https://github.com/emuflight/EmuConfigurator
-
-## DJI OSD [In]Compatibility
-
-Setting PIDs and Rates (except for Feed Forward) is supported with the DJI OSD. The filtering menus (MISC PP, FILT PP, FILT GLB) are not currently supported and may result in unintended filtering settings.
 
 ## Contributing
 
