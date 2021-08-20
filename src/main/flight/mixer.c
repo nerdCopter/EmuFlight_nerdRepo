@@ -855,7 +855,6 @@ FAST_CODE_NOINLINE void mixTable(timeUs_t currentTimeUs) {
 #endif
     loggingThrottle = throttle;
 
-<<<<<<< HEAD
 #if defined(USE_BARO) || defined(USE_GPS)
   if(isAltiLimit()){
       if(((gpsIsHealthy() && gpsSol.numSat > 7) || isBaroReady())
@@ -879,11 +878,6 @@ FAST_CODE_NOINLINE void mixTable(timeUs_t currentTimeUs) {
   }
 #endif
 
-    motorMixRange = motorMixMax - motorMixMin;
-    if (motorMixRange > 1.0f && (hardwareMotorType != MOTOR_BRUSHED)) {
-        for (int i = 0; i < motorCount; i++) {
-            motorMix[i] /= motorMixRange;
-=======
     float motorMix[MAX_SUPPORTED_MOTORS];
 
     // mix controller output with throttle
@@ -907,7 +901,6 @@ void mixThingsUp(const float scaledAxisPidRoll, const float scaledAxisPidPitch, 
             yawMixMax = yawMixVal;
         } else if (yawMixVal < yawMixMin) {
             yawMixMin = yawMixVal;
->>>>>>> master
         }
         yawMix[i] = yawMixVal;
 
@@ -998,7 +991,7 @@ float mixerGetLoggingThrottle(void) {
     return loggingThrottle;
 }
 
-<<<<<<< HEAD
+
 uint8_t getThrottleLimitationStatus(void)
 {
     return altiLimStatus;
@@ -1007,7 +1000,9 @@ uint8_t getThrottleLimitationStatus(void)
 bool isAltiLimit(void)
 {
   return mixerConfig()->altiLimiter;
-=======
+}
+
+
 float thrustToMotor(float thrust, bool fromIdleLevelOffset) {
     if (!linearThrustEnabled) {
         return thrust;
@@ -1095,5 +1090,4 @@ static void twoPassMix(float *motorMix, const float *yawMix, const float *rollPi
 
         motorMix[i] = thrustToMotor(motorMixThrust, true); // translating back into motor value
     }
->>>>>>> master
 }
