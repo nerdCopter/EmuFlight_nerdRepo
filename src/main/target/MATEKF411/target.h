@@ -65,8 +65,8 @@
 
 #define USE_I2C_DEVICE_2
 #define I2C_DEVICE              (I2CDEV_2)
-#define I2C1_SCL                PB10        // SCL pad
-#define I2C1_SDA                PB3        // SDA pad
+#define I2C2_SCL                PB10        // SCL pad
+#define I2C2_SDA                PB3        // SDA pad
 #define BARO_I2C_INSTANCE       (I2CDEV_2)
 
 #define USE_BARO
