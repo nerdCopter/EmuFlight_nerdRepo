@@ -141,15 +141,15 @@ void resetPidProfile(pidProfile_t *pidProfile)
 
         //WitchCraft, Smart_DTerm_Smoothing Defaults
         .dFilter = {
-            [PID_ROLL] = { 2, 0 },     // wC, smartSmoothing
-            [PID_PITCH] = { 2, 0 },    // wC, smartSmoothing
+            [PID_ROLL] = { 0, 0 },     // wC, smartSmoothing
+            [PID_PITCH] = { 0, 0 },    // wC, smartSmoothing
             [PID_YAW] = { 0, 0 },       // wC, smartSmoothing
         },
 
         .pidSumLimit = PIDSUM_LIMIT_MAX,
         .pidSumLimitYaw = PIDSUM_LIMIT_YAW,
         .yaw_lowpass_hz = 0,
-        .dterm_lowpass_hz = 65,     // filtering ON by default
+        .dterm_lowpass_hz = 90,     // filtering ON by default
         .dterm_lowpass2_hz = 200,   // second Dterm LPF ON by default
         .dterm_notch_hz = 0,
         .dterm_notch_cutoff = 0,
@@ -166,12 +166,12 @@ void resetPidProfile(pidProfile_t *pidProfile)
         .setPointPTransitionYaw = 110,
         .setPointITransitionYaw = 85,
         .setPointDTransitionYaw = 95,
-        .feathered_pids = 70,
+        .feathered_pids = 50,
         .i_decay = 4,
-        .errorBoost = 15,
-        .errorBoostYaw = 40,
-        .errorBoostLimit = 20,
-        .errorBoostLimitYaw = 40,
+        .errorBoost = 150,
+        .errorBoostYaw = 150,
+        .errorBoostLimit = 30,
+        .errorBoostLimitYaw = 30,
         .yawRateAccelLimit = 0,
         .rateAccelLimit = 0,
         .itermThrottleThreshold = 350,
@@ -191,9 +191,9 @@ void resetPidProfile(pidProfile_t *pidProfile)
         .throttle_boost = 5,
         .throttle_boost_cutoff = 15,
         .iterm_rotation = true,
-        .iterm_relax = ITERM_RELAX_OFF,
+        .iterm_relax = ITERM_RELAX_RPY_INC,
         .iterm_relax_cutoff = 11,
-        .iterm_relax_type = ITERM_RELAX_GYRO,
+        .iterm_relax_type = ITERM_RELAX_SETPOINT,
         .acro_trainer_angle_limit = 20,
         .acro_trainer_lookahead_ms = 50,
         .acro_trainer_debug_axis = FD_ROLL,

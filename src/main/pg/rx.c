@@ -55,7 +55,7 @@ void pgResetFn_rxConfig(rxConfig_t *rxConfig)
         .rssi_scale = RSSI_SCALE_DEFAULT,
         .rssi_offset = 0,
         .rssi_invert = 0,
-        .rcInterpolation = RC_SMOOTHING_AUTO,
+        .rcInterpolation = RC_SMOOTHING_MANUAL,
         .rcInterpolationChannels = INTERPOLATION_CHANNELS_RPYT,
         .rcInterpolationInterval = 19,
         .fpvCamAngleDegrees = 0,
