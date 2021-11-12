@@ -2,10 +2,8 @@
 
 # This is Unsanctioned, Unofficial and Unsupported.
 
-* You should probably wait for the official release of 0.3.0.
-* This is custom branch of back-ported bug-fixes and optimizations from [EmuFlight code-base](https://github.com/emuflight/EmuFlight).
+* This is custom branch of back-ported bug-fixes and optimizations from [EmuFlight code-base](https://github.com/emuflight/EmuFlight) 0.2.X versions.
 * It might always report 0.2.22 for compatibility and will not be adding additional *features*.
-* Back-porting bug-fixes or optimizations will be as needed; However, this branch will soon stabilize and cease modification as efforts toward official EmuFlight 0.3.0 continues.
 * Use at your own risk.
 * ***Do NOT report issues to Official EmuFlight.***
 
@@ -20,7 +18,8 @@
 
 ### Defaults and Presets
 
-* ***Defaults are default.  This should be considered a generic starting point.  Although we feel them to be comfortably safe, please know that tuning your quad is still required, including lowpass filters and possibly notches. Do not flash and "rip", or risk R.I.P.  The same is true for our community-provided presets.  Members of @EmuTestBandits have been using higher than historic dTerm values; However, please be diligent in testing motor-heat in incremental test-hovers of 10, 20, and 30 or more second intervals.  EmuFlight/EmuClassic is provided free as-is without warranty of any kind.***
+* ***Defaults are only defaults.  This should be considered a generic starting point for 5inch quads.  Although we feel them to be comfortably safe, please know that tuning your quad is still required, including lowpass filters and possibly notches. Do not flash and "rip", or risk R.I.P.  The same is true for our community-provided presets.  Members of @EmuTestBandits have been using higher than historic dTerm values; However, please be diligent in testing motor-heat in incremental test-hovers of 10, 20, and 30 or more second intervals.  EmuFlight/EmuClassic is provided free as-is without warranty of any kind.***
+* These builds have custom defaults.
 
 ### Tuning
 
