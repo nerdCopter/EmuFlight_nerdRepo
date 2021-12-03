@@ -58,20 +58,41 @@
 #define USE_MSP_UART
 
 // *************** Gyro & ACC **********************
-#define GYRO
-#define ACC
-#define USE_GYRO_SPI_MPU6000
-#define USE_ACC_SPI_MPU6000
+#if (defined(BEEBRAIN_PRO_DSM_US) || defined(BEEBRAIN_PRO_DSM_INTL))
+    #define GYRO
+    #define ACC
 
-#define MPU6000_CS_PIN                  PA4
-#define MPU6000_SPI_INSTANCE            SPI3
+    #define USE_SPI_GYRO
+    #define USE_ACCGYRO_BMI160
+    #define BMI160_SPI_DIVISOR              16
 
-#define USE_EXTI
-#define MPU_INT_EXTI                    PB0
-#define USE_MPU_DATA_READY_SIGNAL
+    #define USE_EXTI
+    #define MPU_INT_EXTI                    PB0
+    #define BMI160_INT_EXTI                 PB0
+    #define USE_MPU_DATA_READY_SIGNAL
 
-#define GYRO_MPU6000_ALIGN              CW90_DEG
-#define ACC_MPU6000_ALIGN               CW90_DEG
+    #define BMI160_CS_PIN                   PA4
+    #define BMI160_SPI_INSTANCE             SPI3
+
+    #define GYRO_BMI160_ALIGN               CW0_DEG
+#else
+    #define GYRO
+    #define ACC
+    #define USE_GYRO_SPI_MPU6000
+    #define USE_ACC_SPI_MPU6000
+
+    #define MPU6000_CS_PIN                  PA4
+    #define MPU6000_SPI_INSTANCE            SPI3
+
+    #define USE_EXTI
+    #define MPU_INT_EXTI                    PB0
+    #define USE_MPU_DATA_READY_SIGNAL
+
+    #define GYRO_MPU6000_ALIGN              CW90_DEG
+    #define ACC_MPU6000_ALIGN               CW90_DEG
+#endif
+
+
 
 // *************** RX ******************************
 #if (defined(BEEBRAIN_PRO_DSM_US) || defined(BEEBRAIN_PRO_DSM_INTL))
