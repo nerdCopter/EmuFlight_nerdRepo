@@ -282,7 +282,7 @@ static const char * const lookupTableRcInterpolationChannels[] = {
     "RP", "RPY", "RPYT", "T", "RPT",
 };
 static const char * const lookupTableFilterType[] = {
-    "PT1", "BIQUAD", "PT2", "PT3", "PT4",
+    "PT1", "BIQUAD", "PT2", "PT3", "PT4", "LULU"
 };
 
 #if defined(USE_GYRO_IMUF9001)
