@@ -1313,6 +1313,9 @@ bool mspProcessOutCommand(uint8_t cmdMSP, sbuf_t *dst) {
         sbufWriteU8(dst, currentPidProfile->axis_lock_hz);
         sbufWriteU8(dst, currentPidProfile->axis_lock_multiplier);
         sbufWriteU8(dst, currentPidProfile->emuGravityGain);
+#ifdef USE_LULU
+        sbufWriteU8(dst, currentPidProfile->lulu_n_val);
+#endif
         //end MSP 1.51
         break;
         case MSP_SENSOR_CONFIG:
@@ -1940,6 +1943,7 @@ mspResult_e mspProcessInCommand(uint8_t cmdMSP, sbuf_t *src) {
         currentPidProfile->axis_lock_hz = sbufReadU8(src);
         currentPidProfile->axis_lock_multiplier = sbufReadU8(src);
         currentPidProfile->emuGravityGain = sbufReadU8(src);
+        currentPidProfile->lulu_n_val = sbufReadU8(src);
         //end 1.51
         }
         pidInitConfig(currentPidProfile);
