@@ -29,6 +29,7 @@
 #include "drivers/system.h"
 #include "interface/msp.h"
 #include "interface/cli.h"
+#include "io/displayport_msp.h"
 #include "io/serial.h"
 #include "msp/msp_serial.h"
 
@@ -60,6 +61,13 @@ void mspSerialAllocatePorts(void) {
         if (serialPort) {
             bool sharedWithTelemetry = isSerialPortShared(portConfig, FUNCTION_MSP, TELEMETRY_PORT_FUNCTIONS_MASK);
             resetMspPort(mspPort, serialPort, sharedWithTelemetry);
+
+#ifdef USE_MSP_DISPLAYPORT
+            if (serialPort->identifier == displayPortProfileMsp()->displayPortSerial) {
+                mspPort->isDisplayPort = true;
+            }
+#endif
+
             portIndex++;
         }
         portConfig = findNextSerialPortConfig(FUNCTION_MSP);
@@ -468,11 +476,8 @@ int mspSerialPush(uint8_t cmd, uint8_t *data, int datalen, mspDirection_e direct
     int ret = 0;
     for (int portIndex = 0; portIndex < MAX_MSP_PORT_COUNT; portIndex++) {
         mspPort_t * const mspPort = &mspPorts[portIndex];
-        if (!mspPort->port) {
-            continue;
-        }
         // XXX Kludge!!! Avoid zombie VCP port (avoid VCP entirely for now)
-        if (mspPort->port->identifier == SERIAL_PORT_USB_VCP) {
+        if (!mspPort->port || !mspPort->isDisplayPort || mspPort->port->identifier == SERIAL_PORT_USB_VCP) {
             continue;
         }
         mspPacket_t push = {
