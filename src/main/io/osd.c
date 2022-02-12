@@ -1138,6 +1138,8 @@ void pgResetFn_osdConfig(osdConfig_t *osdConfig) {
     osdConfig->logo_on_arming_duration = 5;  // 0.5 seconds
     osdConfig->plus_code_digits = 11; // Number of digits to use in OSD_PLUS_CODE
     osdConfig->plus_code_short = false; // If 4 leading digits have to be removed from the OSD_PLUS_CODE
+
+    osdConfig->displayPortDevice = OSD_DISPLAYPORT_DEVICE_AUTO;
 }
 
 static void osdDrawLogo(int x, int y) {

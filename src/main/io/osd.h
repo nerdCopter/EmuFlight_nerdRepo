@@ -115,6 +115,14 @@ typedef enum {
     FORMAT_COUNT
 } crsfformat_e;
 
+typedef enum {
+    OSD_DISPLAYPORT_DEVICE_NONE = 0,
+    OSD_DISPLAYPORT_DEVICE_AUTO,
+    OSD_DISPLAYPORT_DEVICE_MAX7456,
+    OSD_DISPLAYPORT_DEVICE_MSP,
+    OSD_DISPLAYPORT_DEVICE_BEESIGN
+} osdDisplayPortDevice_e;
+
 // *** IMPORTANT ***
 // The order of the OSD stats enumeration *must* match the order they're displayed on-screen
 // This is because the fields are presented in the configurator in the order of the enumeration
@@ -216,6 +224,7 @@ typedef struct osdConfig_s {
     uint8_t logo_on_arming;                   // show the logo on arming
     uint8_t logo_on_arming_duration;          // display duration in 0.1s units
     bool stat_show_cell_value;
+    uint8_t displayPortDevice;                // osdDisplayPortDevice_e
 } osdConfig_t;
 
 PG_DECLARE(osdConfig_t, osdConfig);

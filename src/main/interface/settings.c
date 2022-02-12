@@ -309,6 +309,12 @@ static const char * const lookupTableMax7456Clock[] = {
 };
 #endif
 
+#ifdef USE_OSD
+static const char * const lookupTableOsdDisplayPortDevice[] = {
+    "NONE", "AUTO", "MAX7456", "MSP", "BEESIGN"
+};
+#endif
+
 #ifdef USE_GYRO_OVERFLOW_CHECK
 static const char * const lookupTableGyroOverflowCheck[] = {
     "OFF", "YAW", "ALL"
@@ -467,6 +473,7 @@ const lookupTableEntry_t lookupTables[] = {
     LOOKUP_TABLE_ENTRY(lookupTableThrottleVbatCompType),
 #ifdef USE_OSD
     LOOKUP_TABLE_ENTRY(lookupTableOsdLogoOnArming),
+    LOOKUP_TABLE_ENTRY(lookupTableOsdDisplayPortDevice),
 #endif
     LOOKUP_TABLE_ENTRY(lookupTableMixerImplType),
 };
@@ -1100,7 +1107,7 @@ const clivalue_t valueTable[] = {
     { "osd_stat_max_alt",           VAR_UINT32  | MASTER_VALUE | MODE_BITSET, .config.bitpos = OSD_STAT_MAX_ALTITUDE,    PG_OSD_CONFIG, offsetof(osdConfig_t, enabled_stats)},
     { "osd_stat_bbox",              VAR_UINT32  | MASTER_VALUE | MODE_BITSET, .config.bitpos = OSD_STAT_BLACKBOX,        PG_OSD_CONFIG, offsetof(osdConfig_t, enabled_stats)},
     { "osd_stat_bb_no",             VAR_UINT32  | MASTER_VALUE | MODE_BITSET, .config.bitpos = OSD_STAT_BLACKBOX_NUMBER, PG_OSD_CONFIG, offsetof(osdConfig_t, enabled_stats)},
-
+    { "osd_displayport_device",     VAR_UINT8  | MASTER_VALUE | MODE_LOOKUP, .config.lookup = { TABLE_OSD_DISPLAYPORT_DEVICE }, PG_OSD_CONFIG, offsetof(osdConfig_t, displayPortDevice) },
 #endif
 
 // PG_SYSTEM_CONFIG
