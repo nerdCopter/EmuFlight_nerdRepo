@@ -25,7 +25,6 @@
 #include <string.h>
 #include <math.h>
 #include <ctype.h>
-
 #include "platform.h"
 
 // FIXME remove this for targets that don't need a CLI.  Perhaps use a no-op macro when USE_CLI is not enabled
@@ -3577,6 +3576,35 @@ static void cliExit(const char *cmdName, char *cmdline)
     cliReboot();
 }
 
+static void cliExitNoReboot(const char *cmdName, char *cmdline)
+{
+    UNUSED(cmdName);
+    UNUSED(cmdline);
+
+    cliPrintHashLine("leaving CLI mode, unsaved changes lost");
+    cliWriterFlush();
+
+    *cliBuffer = '\0';
+    bufferIndex = 0;
+    cliMode = false;
+    // incase a motor was left running during motortest, clear it here
+    mixerResetDisarmedMotors();
+    //cliReboot();
+
+
+    //taken from cliRebootEx command
+    // cliPrint("\r\nNot Rebooting :)");
+    // cliWriterFlush();
+    waitForSerialPortToFinishTransmitting(cliPort);
+    motorShutdown();
+    
+    //below causes freeze
+    //cliPort = NULL;
+    // setPrintfSerialPort(NULL);
+    // cliWriter = NULL;
+    // cliErrorWriter = NULL;
+}
+
 #ifdef USE_GPS
 static void cliGpsPassthrough(const char *cmdName, char *cmdline)
 {
@@ -6805,6 +6833,7 @@ const clicmd_t cmdTable[] = {
     CLI_COMMAND_DEF("escprog", "passthrough esc to serial", "<mode [sk/bl/ki/cc]> <index>", cliEscPassthrough),
 #endif
     CLI_COMMAND_DEF("exit", NULL, NULL, cliExit),
+    CLI_COMMAND_DEF("exit_no_reboot", NULL, NULL, cliExitNoReboot),
     CLI_COMMAND_DEF("feature", "configure features",
         "list\r\n"
         "\t<->[name]", cliFeature),
@@ -7004,7 +7033,7 @@ static void processCharacter(const char c)
         if (!cliMode) {
             return;
         }
-
+        
         cliPrompt();
     } else if (bufferIndex < sizeof(cliBuffer) && c >= 32 && c <= 126) {
         if (!bufferIndex && c == ' ')
