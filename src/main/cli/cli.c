@@ -30,6 +30,7 @@
 // FIXME remove this for targets that don't need a CLI.  Perhaps use a no-op macro when USE_CLI is not enabled
 // signal that we're in cli mode
 bool cliMode = false;
+bool cliExited = false;
 
 #ifdef USE_CLI
 
@@ -3587,6 +3588,7 @@ static void cliExitNoReboot(const char *cmdName, char *cmdline)
     *cliBuffer = '\0';
     bufferIndex = 0;
     cliMode = false;
+    cliExited = true;
     // incase a motor was left running during motortest, clear it here
     mixerResetDisarmedMotors();
     //cliReboot();
@@ -7106,7 +7108,12 @@ void cliProcess(void)
     if (!cliWriter) {
         return;
     }
-
+    
+    //attempt to ignore serial after exit_no_reboot
+    // doesn't work
+    // if (cliExited) {
+    //     return;
+    // }
     // Flush the buffer to get rid of any MSP data polls sent by configurator after CLI was invoked
     cliWriterFlush();
 
@@ -7169,6 +7176,9 @@ static bool cliProcessCustomDefaults(bool quiet)
 
 void cliEnter(serialPort_t *serialPort)
 {
+    if (cliExited) {
+        return;
+    }
     cliMode = true;
     cliPort = serialPort;
     setPrintfSerialPort(cliPort);
