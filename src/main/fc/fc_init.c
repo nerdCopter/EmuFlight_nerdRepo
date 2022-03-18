@@ -519,18 +519,18 @@ void init(void) {
                     break;
                 }
                 FALLTHROUGH;
+#elif defined(USE_CMS) && defined(USE_MSP_DISPLAYPORT) && defined(USE_OSD_OVER_MSP_DISPLAYPORT) // OSD over MSP; not supported (yet)
+            case OSD_DISPLAYPORT_DEVICE_MSP:
+                osdDisplayPort = displayPortMspInit();
+                if (osdDisplayPort || device == OSD_DISPLAYPORT_DEVICE_MSP) {
+                    break;
+                }
+                FALLTHROUGH;
 #elif defined(USE_MAX7456)
             // If there is a max7456 chip for the OSD then use it
             case OSD_DISPLAYPORT_DEVICE_MAX7456:
                 osdDisplayPort = max7456DisplayPortInit(vcdProfile());
                 if (osdDisplayPort || device == OSD_DISPLAYPORT_DEVICE_MAX7456) {
-                    break;
-                }
-                FALLTHROUGH;
-#elif defined(USE_CMS) && defined(USE_MSP_DISPLAYPORT) && defined(USE_OSD_OVER_MSP_DISPLAYPORT) // OSD over MSP; not supported (yet)
-            case OSD_DISPLAYPORT_DEVICE_MSP:
-                osdDisplayPort = displayPortMspInit();
-                if (osdDisplayPort || device == OSD_DISPLAYPORT_DEVICE_MSP) {
                     break;
                 }
                 FALLTHROUGH;
