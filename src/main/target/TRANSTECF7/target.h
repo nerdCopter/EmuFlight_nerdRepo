@@ -137,3 +137,7 @@
 
 #define USABLE_TIMER_CHANNEL_COUNT      8
 #define USED_TIMERS                     (TIM_N(2)|TIM_N(3)|TIM_N(4)|TIM_N(8))
+
+#undef USE_TELEMETRY_MAVLINK
+#undef USE_PPM
+#undef USE_PWM
