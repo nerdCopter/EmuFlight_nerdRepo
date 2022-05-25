@@ -347,3 +347,11 @@
 #define USE_RX_SX127X
 
 #endif
+
+
+
+
+
+#undef USE_TELEMETRY_MAVLINK
+#undef USE_PPM
+#undef USE_PWM
