@@ -235,3 +235,12 @@
  */
 #define USABLE_TIMER_CHANNEL_COUNT 5
 #define USED_TIMERS             ( TIM_N(3) | TIM_N(8) | TIM_N(5) )
+
+#undef USE_TELEMETRY_MAVLINK
+#undef USE_PPM
+#undef USE_PWM
+
+#undef USE_SERVOS
+#undef USE_GPS_RESCUE
+#undef USE_CMS_GPS_RESCUE_MENU
+#undef USE_GPS_PLUS_CODES
