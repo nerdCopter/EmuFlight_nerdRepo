@@ -136,6 +136,8 @@ void pgResetFn_gyroConfig(gyroConfig_t *gyroConfig)
     gyroConfig->smithPredictorStrength = 50;
     gyroConfig->smithPredictorDelay = 40;
     gyroConfig->smithPredictorFilterHz = 5;
+    gyroConfig->imuf_w = 32;
+    gyroConfig->imuf_q = 10000;
 }
 
 FAST_CODE bool isGyroSensorCalibrationComplete(const gyroSensor_t *gyroSensor)

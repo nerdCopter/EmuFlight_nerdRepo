@@ -24,6 +24,7 @@
 #include "common/filter.h"
 #include "common/time.h"
 #include "common/utils.h"
+#include "common/kalman.h"
 
 #include "drivers/accgyro/accgyro.h"
 #include "drivers/bus.h"
@@ -132,6 +133,9 @@ typedef struct gyro_s {
     smithPredictor_t smithPredictor[XYZ_AXIS_COUNT];
 #endif // USE_SMITH_PREDICTOR
 
+    kalman_t kalmanFilterStateRate[XYZ_AXIS_COUNT];
+
+
     uint16_t accSampleRateHz;
     uint8_t gyroToUse;
     uint8_t gyroDebugMode;
@@ -222,6 +226,9 @@ typedef struct gyroConfig_s {
     uint8_t smithPredictorStrength;
     uint8_t smithPredictorDelay;
     uint16_t smithPredictorFilterHz;
+
+    uint8_t imuf_w;
+    uint16_t imuf_q;
 } gyroConfig_t;
 
 PG_DECLARE(gyroConfig_t, gyroConfig);

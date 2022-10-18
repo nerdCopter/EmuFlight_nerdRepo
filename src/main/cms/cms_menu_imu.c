@@ -38,6 +38,7 @@
 #include "cms/cms_menu_imu.h"
 
 #include "common/utils.h"
+#include "common/kalman.h"
 
 #include "config/feature.h"
 #include "config/simplified_tuning.h"
@@ -776,6 +777,8 @@ static uint16_t dtermLpfDynMin;
 static uint16_t dtermLpfDynMax;
 static uint8_t dtermLpfDynExpo;
 #endif
+static uint16_t gyroConfig_imuf_q;
+static uint16_t gyroConfig_imuf_w;
 
 #ifdef USE_SMITH_PREDICTOR
 static uint8_t smithPredictor_strength;
@@ -802,6 +805,8 @@ static const void *cmsx_menuDynFilt_onEnter(displayPort_t *pDisp)
     dtermLpfDynMax  = pidProfile->dterm_lpf1_dyn_max_hz;
     dtermLpfDynExpo = pidProfile->dterm_lpf1_dyn_expo;
 #endif
+    gyroConfig_imuf_q = gyroConfig()->imuf_q;
+    gyroConfig_imuf_w = gyroConfig()->imuf_w;
 
 #ifdef USE_SMITH_PREDICTOR
     smithPredictor_strength  = gyroConfig()->smithPredictorStrength;
@@ -832,6 +837,8 @@ static const void *cmsx_menuDynFilt_onExit(displayPort_t *pDisp, const OSD_Entry
     pidProfile->dterm_lpf1_dyn_max_hz         = dtermLpfDynMax;
     pidProfile->dterm_lpf1_dyn_expo           = dtermLpfDynExpo;
 #endif
+    gyroConfigMutable()->imuf_q = gyroConfig_imuf_q;
+    gyroConfigMutable()->imuf_w = gyroConfig_imuf_w;
 
 #ifdef USE_SMITH_PREDICTOR
     gyroConfigMutable()->smithPredictorStrength = smithPredictor_strength;
@@ -861,6 +868,8 @@ static const OSD_Entry cmsx_menuDynFiltEntries[] =
     { "DTERM DLPF MAX",  OME_UINT16 | SLIDER_DTERM, NULL, &(OSD_UINT16_t) { &dtermLpfDynMax, 0, 1000, 1 } },
     { "DTERM DLPF EXPO", OME_UINT8, NULL, &(OSD_UINT8_t) { &dtermLpfDynExpo,  0, 10, 1 } },
 #endif
+    { "IMUF W",          OME_UINT8, NULL, &(OSD_UINT16_t) { &gyroConfig_imuf_w,         0,   MAX_KALMAN_WINDOW_SIZE, 1 } },
+    { "IMUF Q",          OME_UINT16, NULL, &(OSD_UINT16_t) { &gyroConfig_imuf_q,       100, 16000, 100 } },
 
 #ifdef USE_SMITH_PREDICTOR
     { "SMITH STR",       OME_UINT8,  NULL, &(OSD_UINT8_t)  { &smithPredictor_strength,    0, 100, 1 } },

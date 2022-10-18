@@ -46,6 +46,14 @@ static FAST_CODE void GYRO_FILTER_FUNCTION_NAME(void)
             gyro.sampleSum[axis] = 0;
         }
 
+        if (axis != FD_YAW) {
+            GYRO_FILTER_DEBUG_SET(DEBUG_KALMAN, axis, lrintf(gyroADCf));
+        }
+        gyroADCf = kalman_update(gyroADCf, axis);
+        if (axis != FD_YAW) {
+            GYRO_FILTER_DEBUG_SET(DEBUG_KALMAN, (axis+2), lrintf(gyroADCf));
+        }
+
         // DEBUG_GYRO_SAMPLE(1) Record the post-downsample value for the selected debug axis
         GYRO_FILTER_AXIS_DEBUG_SET(axis, DEBUG_GYRO_SAMPLE, 1, lrintf(gyroADCf));
 
@@ -85,6 +93,9 @@ static FAST_CODE void GYRO_FILTER_FUNCTION_NAME(void)
 #ifdef USE_SMITH_PREDICTOR
          gyroADCf = applySmithPredictor(&gyro.smithPredictor[axis], gyroADCf, axis);
 #endif
+
+        update_kalman_covariance(&gyro.kalmanFilterStateRate[axis], gyroADCf);
+
         // DEBUG_GYRO_FILTERED records the scaled, filtered, after all software filtering has been applied.
         GYRO_FILTER_DEBUG_SET(DEBUG_GYRO_FILTERED, axis, lrintf(gyroADCf));
 
