@@ -42,6 +42,13 @@
 #include "drivers/system.h"
 #include "drivers/time.h"
 
+// HELIOSPRING
+#ifdef USE_DMA_SPI_DEVICE
+#include "drivers/dma_spi.h"
+#include "sensors/gyro.h"
+#include "sensors/acceleration.h"
+#endif //USE_DMA_SPI_DEVICE
+
 #include "drivers/accgyro/accgyro.h"
 #include "drivers/accgyro/accgyro_mpu3050.h"
 #include "drivers/accgyro/accgyro_mpu6050.h"
@@ -58,8 +65,21 @@
 #include "drivers/accgyro/accgyro_spi_l3gd20.h"
 #include "drivers/accgyro/accgyro_mpu.h"
 
+//HELIOSPRING
+#ifdef USE_GYRO_IMUF9001
+#include "drivers/accgyro/accgyro_imuf9001.h"
+#include "rx/rx.h"
+#include "fc/rc.h"
+#include "fc/runtime_config.h"
+#endif //USE_GYRO_IMUF9001
+
 #include "pg/pg.h"
 #include "pg/gyrodev.h"
+
+// HELIOSPRING
+#ifdef USE_GYRO_IMUF9001
+    imufData_t imufData;
+#endif
 
 #ifndef MPU_ADDRESS
 #define MPU_ADDRESS             0x68
@@ -135,6 +155,12 @@ busStatus_e mpuIntcallback(uint32_t arg)
 
 static void mpuIntExtiHandler(extiCallbackRec_t *cb)
 {
+// HELIOSPRING
+#ifdef USE_DMA_SPI_DEVICE
+    //start dma read
+    (void)(cb);
+    gyroDmaSpiStartRead();
+#else // NOT HELIOSPRING
     gyroDev_t *gyro = container_of(cb, gyroDev_t, exti);
 
     // Ideally we'd use a timer to capture such information, but unfortunately the port used for EXTI interrupt does
@@ -152,6 +178,7 @@ static void mpuIntExtiHandler(extiCallbackRec_t *cb)
     }
 
     gyro->detectedEXTI++;
+#endif // USE_DMA_SPI_DEVICE // HELIOSPRING
 }
 #else
 static void mpuIntExtiHandler(extiCallbackRec_t *cb)
@@ -176,10 +203,35 @@ static void mpuIntExtiInit(gyroDev_t *gyro)
     }
 #endif
 
+
+// normal
+//    IOInit(mpuIntIO, OWNER_GYRO_EXTI, 0);
+//    EXTIHandlerInit(&gyro->exti, mpuIntExtiHandler);
+//    EXTIConfig(mpuIntIO, &gyro->exti, NVIC_PRIO_MPU_INT_EXTI, IOCFG_IN_FLOATING, BETAFLIGHT_EXTI_TRIGGER_RISING);
+//    EXTIEnable(mpuIntIO);
+
+
+// HELIOSPRING // ROBERT logic
+// #if defined (STM32F7)
+//     IOInit(mpuIntIO, OWNER_GYRO_EXTI, 0);
+//     EXTIHandlerInit(&gyro->exti, mpuIntExtiHandler);
+// //    EXTIConfig(mpuIntIO, &gyro->exti, NVIC_PRIO_MPU_INT_EXTI, IO_CONFIG(GPIO_MODE_INPUT,0,GPIO_NOPULL));   // TODO - maybe pullup / pulldown ?
+//     EXTIConfig(mpuIntIO, &gyro->exti, NVIC_PRIO_MPU_INT_EXTI, IOCFG_IN_FLOATING, EXTI_TRIGGER_RISING);
+// #else
+//     IOInit(mpuIntIO, OWNER_GYRO_EXTI, 0);
+//     IOConfigGPIO(mpuIntIO, IOCFG_IN_FLOATING);   // TODO - maybe pullup / pulldown ?
+//     EXTIHandlerInit(&gyro->exti, mpuIntExtiHandler);
+//     EXTIConfig(mpuIntIO, &gyro->exti, NVIC_PRIO_MPU_INT_EXTI, IOCFG_IN_FLOATING, EXTI_TRIGGER_RISING);
+// #endif
+
+
+// HELIOSPING nerdCopter fix logic
     IOInit(mpuIntIO, OWNER_GYRO_EXTI, 0);
+#if !defined (STM32F7)
+    IOConfigGPIO(mpuIntIO, IOCFG_IN_FLOATING);   // TODO - maybe pullup / pulldown ?
+#endif
     EXTIHandlerInit(&gyro->exti, mpuIntExtiHandler);
-    EXTIConfig(mpuIntIO, &gyro->exti, NVIC_PRIO_MPU_INT_EXTI, IOCFG_IN_FLOATING, BETAFLIGHT_EXTI_TRIGGER_RISING);
-    EXTIEnable(mpuIntIO);
+    EXTIConfig(mpuIntIO, &gyro->exti, NVIC_PRIO_MPU_INT_EXTI, IOCFG_IN_FLOATING, EXTI_TRIGGER_RISING);
 }
 #endif // USE_GYRO_EXTI
 
@@ -215,6 +267,83 @@ bool mpuGyroRead(gyroDev_t *gyro)
     return true;
 }
 
+// HELIOSPRING
+#ifdef USE_DMA_SPI_DEVICE
+FAST_CODE bool mpuGyroDmaSpiReadStart(gyroDev_t * gyro)
+{
+    (void)(gyro); ///not used at this time
+    //no reason not to get acc and gyro data at the same time
+#ifdef USE_GYRO_IMUF9001
+    if (isImufCalibrating == IMUF_IS_CALIBRATING) //calibrating
+    {
+        //two steps
+        //step 1 is isImufCalibrating=1, this starts the calibration command and sends it to the IMU-f
+        //step 2 is isImufCalibrating=2, this sets the tx buffer back to 0 so we don't keep sending the calibration command over and over
+        memset(dmaTxBuffer, 0, sizeof(imufCommand_t)); //clear buffer
+        //set calibration command with CRC, typecast the dmaTxBuffer as imufCommand_t
+        (*(imufCommand_t *)(dmaTxBuffer)).command = IMUF_COMMAND_CALIBRATE;
+        (*(imufCommand_t *)(dmaTxBuffer)).crc     = getCrcImuf9001((uint32_t *)dmaTxBuffer, 11); //typecast the dmaTxBuffer as a uint32_t array which is what the crc command needs
+        //set isImufCalibrating to step 2, which is just used so the memset to 0 runs after the calibration commmand is sent
+        isImufCalibrating = IMUF_DONE_CALIBRATING; //go to step two
+    }
+    else if (isImufCalibrating == IMUF_DONE_CALIBRATING)
+    {
+        // step 2, memset of the tx buffer has run, set isImufCalibrating to 0.
+        (*(imufCommand_t *)(dmaTxBuffer)).command = 0;
+        (*(imufCommand_t *)(dmaTxBuffer)).crc     = 0; //typecast the dmaTxBuffer as a uint32_t array which is what the crc command needs
+        imufEndCalibration();
+    }
+    else
+    {
+        if (isSetpointNew) {
+            //send setpoint and arm status
+            (*(imufCommand_t *)(dmaTxBuffer)).command = IMUF_COMMAND_SETPOINT;
+            (*(imufCommand_t *)(dmaTxBuffer)).param1  = getSetpointRateInt(0);
+            (*(imufCommand_t *)(dmaTxBuffer)).param2  = getSetpointRateInt(1);
+            (*(imufCommand_t *)(dmaTxBuffer)).param3  = getSetpointRateInt(2);
+            (*(imufCommand_t *)(dmaTxBuffer)).crc     = getCrcImuf9001((uint32_t *)dmaTxBuffer, 11); //typecast the dmaTxBuffer as a uint32_t array which is what the crc command needs
+            isSetpointNew = 0;
+        }
+    }
+    memset(dmaRxBuffer, 0, gyroConfig()->imuf_mode); //clear buffer
+    //send and receive data using SPI and DMA
+    dmaSpiTransmitReceive(dmaTxBuffer, dmaRxBuffer, gyroConfig()->imuf_mode, 0);
+#else
+    dmaTxBuffer[0] = MPU_RA_ACCEL_XOUT_H | 0x80;
+    dmaSpiTransmitReceive(dmaTxBuffer, dmaRxBuffer, 15, 0);
+#endif // USE_GYRO_IMUF9001
+    return true;
+}
+FAST_CODE void mpuGyroDmaSpiReadFinish(gyroDev_t * gyro)
+{
+    //spi rx dma callback
+#ifdef USE_GYRO_IMUF9001
+    memcpy(&imufData, dmaRxBuffer, sizeof(imufData_t));
+    acc.dev.ADCRaw[X]    = (int16_t)(imufData.accX * acc.dev.acc_1G);
+    acc.dev.ADCRaw[Y]    = (int16_t)(imufData.accY * acc.dev.acc_1G);
+    acc.dev.ADCRaw[Z]    = (int16_t)(imufData.accZ * acc.dev.acc_1G);
+    gyro->gyroADC[X]    = imufData.gyroX;
+    gyro->gyroADC[Y]    = imufData.gyroY;
+    gyro->gyroADC[Z]    = imufData.gyroZ;
+    gyro->gyroADCRaw[X]  = (int16_t)(imufData.gyroX * 16.4f);
+    gyro->gyroADCRaw[Y]  = (int16_t)(imufData.gyroY * 16.4f);
+    gyro->gyroADCRaw[Z]  = (int16_t)(imufData.gyroZ * 16.4f);
+    if (gyroConfig()->imuf_mode == GTBCM_GYRO_ACC_QUAT_FILTER_F) {
+        imufQuat.w       = imufData.quaternionW;
+        imufQuat.x       = imufData.quaternionX;
+        imufQuat.y       = imufData.quaternionY;
+        imufQuat.z       = imufData.quaternionZ;
+    }
+#else
+    acc.dev.ADCRaw[X]   = (int16_t)((dmaRxBuffer[1] << 8)  | dmaRxBuffer[2]);
+    acc.dev.ADCRaw[Y]   = (int16_t)((dmaRxBuffer[3] << 8)  | dmaRxBuffer[4]);
+    acc.dev.ADCRaw[Z]   = (int16_t)((dmaRxBuffer[5] << 8)  | dmaRxBuffer[6]);
+    gyro->gyroADCRaw[X] = (int16_t)((dmaRxBuffer[9] << 8)  | dmaRxBuffer[10]);
+    gyro->gyroADCRaw[Y] = (int16_t)((dmaRxBuffer[11] << 8) | dmaRxBuffer[12]);
+    gyro->gyroADCRaw[Z] = (int16_t)((dmaRxBuffer[13] << 8) | dmaRxBuffer[14]);
+#endif // USE_GYRO_IMUF9001
+}
+#endif
 
 #ifdef USE_SPI_GYRO
 bool mpuAccReadSPI(accDev_t *acc)
@@ -343,11 +472,14 @@ bool mpuGyroReadSPI(gyroDev_t *gyro)
 typedef uint8_t (*gyroSpiDetectFn_t)(const extDevice_t *dev);
 
 static gyroSpiDetectFn_t gyroSpiDetectFnTable[] = {
-#ifdef USE_GYRO_SPI_MPU6000
+#ifdef USE_GYRO_SPI_MPU6000BUSTYPE_I2C
     mpu6000SpiDetect,
 #endif
 #ifdef USE_GYRO_SPI_MPU6500
     mpu6500SpiDetect,   // some targets using MPU_9250_SPI, ICM_20608_SPI or ICM_20602_SPI state sensor is MPU_65xx_SPI
+#endif
+#ifdef USE_GYRO_IMUF9001 // HELIOSPRING
+    imuf9001SpiDetect,
 #endif
 #ifdef  USE_GYRO_SPI_MPU9250
     mpu9250SpiDetect,
@@ -445,7 +577,7 @@ bool mpuDetect(gyroDev_t *gyro, const gyroDeviceConfig_t *config)
         gyro->dev.bus->busType = config->busType;
     }
 
-#ifdef USE_I2C_GYRO
+#ifdef USE_I2C_GYRO && !defined(USE_DMA_SPI_DEVICE) // HELIOSPRING (&& !def)
     if (gyro->dev.bus->busType == BUS_TYPE_I2C) {
         gyro->dev.bus->busType_u.i2c.device = I2C_CFG_TO_DEV(config->i2cBus);
         gyro->dev.busType_u.i2c.address = config->i2cAddress ? config->i2cAddress : MPU_ADDRESS;

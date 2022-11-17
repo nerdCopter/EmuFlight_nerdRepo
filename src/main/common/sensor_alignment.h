@@ -38,7 +38,17 @@ typedef enum {
     CW180_DEG_FLIP = 7,     // 00,10,10
     CW270_DEG_FLIP = 8,     // 00,10,11
 
-    ALIGN_CUSTOM = 9,    // arbitrary sensor angles, e.g. for external sensors
+#ifdef USE_GYRO_IMUF9001 // HELIOSPRING
+    CW45_DEG = 9,
+    CW135_DEG = 10,
+    CW225_DEG = 11,
+    CW315_DEG = 12,
+    CW45_DEG_FLIP = 13,
+    CW135_DEG_FLIP = 14,
+    CW225_DEG_FLIP = 15,
+    CW315_DEG_FLIP = 16,
+#endif
+    ALIGN_CUSTOM = 17,    // arbitrary sensor angles, e.g. for external sensors
 } sensor_align_e;
 
 typedef union sensorAlignment_u {

@@ -81,6 +81,9 @@ bool busRawReadRegisterBufferStart(const extDevice_t *dev, uint8_t reg, uint8_t 
 // Write routines where the register is masked with 0x7f
 bool busWriteRegister(const extDevice_t *dev, uint8_t reg, uint8_t data)
 {
+#ifdef USE_DMA_SPI_DEVICE // HELIOSPRING
+    return spiBusWriteRegister(busdev, reg & 0x7f, data);
+#else
 #if !defined(USE_SPI) && !defined(USE_I2C)
     UNUSED(reg);
     UNUSED(data);
@@ -97,6 +100,7 @@ bool busWriteRegister(const extDevice_t *dev, uint8_t reg, uint8_t data)
     default:
         return false;
     }
+#endif
 }
 
 bool busWriteRegisterStart(const extDevice_t *dev, uint8_t reg, uint8_t data)
@@ -190,6 +194,10 @@ bool busBusy(const extDevice_t *dev, bool *error)
 
 uint8_t busReadRegister(const extDevice_t *dev, uint8_t reg)
 {
+#ifdef USE_DMA_SPI_DEVICE // HELIOSPRING
+    uint8_t data;
+    busReadRegisterBuffer(busdev, reg, &data, 1);
+    return data;
 #if !defined(USE_SPI) && !defined(USE_I2C)
     UNUSED(dev);
     UNUSED(reg);
@@ -198,6 +206,7 @@ uint8_t busReadRegister(const extDevice_t *dev, uint8_t reg)
     uint8_t data;
     busReadRegisterBuffer(dev, reg, &data, 1);
     return data;
+#endif
 #endif
 }
 

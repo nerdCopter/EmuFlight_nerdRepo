@@ -204,6 +204,7 @@ typedef enum {
     BMI_270_SPI,
     LSM6DSO_SPI,
     L3GD20_SPI,
+    IMUF_9001_SPI, //HELIOSPRING
 } mpuSensor_e;
 
 typedef enum {
@@ -229,3 +230,9 @@ uint8_t mpuGyroReadRegister(const extDevice_t *dev, uint8_t reg);
 struct accDev_s;
 bool mpuAccRead(struct accDev_s *acc);
 bool mpuAccReadSPI(struct accDev_s *acc);
+
+// HELIOSPRING
+#ifdef USE_DMA_SPI_DEVICE
+extern bool mpuGyroDmaSpiReadStart(struct gyroDev_s *gyro);
+extern void mpuGyroDmaSpiReadFinish(struct gyroDev_s *gyro);
+#endif

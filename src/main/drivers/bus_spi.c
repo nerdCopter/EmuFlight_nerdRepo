@@ -39,6 +39,15 @@
 #include "nvic.h"
 #include "pg/bus_spi.h"
 
+// HELIOSPRING
+#ifdef USE_DMA_SPI_DEVICE
+#ifndef GYRO_READ_TIMEOUT
+    #define GYRO_READ_TIMEOUT 20
+#endif //GYRO_READ_TIMEOUT
+#include "drivers/dma_spi.h"
+#include "drivers/time.h"
+#endif //USE_DMA_SPI_DEVICE
+
 #define NUM_QUEUE_SEGS 5
 
 static uint8_t spiRegisteredDeviceCount = 0;

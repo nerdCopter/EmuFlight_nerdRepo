@@ -59,6 +59,7 @@ typedef enum {
     GYRO_BMI160,
     GYRO_BMI270,
     GYRO_LSM6DSO,
+    GYRO_IMUF9001, // HELIOSPRING
     GYRO_FAKE
 } gyroHardware_e;
 
