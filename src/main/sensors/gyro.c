@@ -814,15 +814,16 @@ bool isDynamicFilterActive(void) {
 }
 
 static void gyroInitFilterDynamicNotch(gyroSensor_t *gyroSensor) {
-    gyroSensor->notchFilterDynApplyFn = nullFilterApply;
+    //gyroSensor->notchFilterDynApplyFn = nullFilterApply;
     if (isDynamicFilterActive()) {
         gyroSensor->notchFilterDynApplyFn = (filterApplyFnPtr)biquadFilterApplyDF1; // must be this function, not DF2
-        for (int axis = 0; axis < XYZ_AXIS_COUNT; axis++) {
+        for (int axis = 0; axis < XYZ_AXIS_COUNT-1; axis++) {  //experimental 2D dynamicFilter
             for (int axis2 = 0; axis2 < gyroConfig()->dyn_notch_count; axis2++) {
                 biquadFilterInit(&gyroSensor->gyroAnalyseState.notchFilterDyn[axis][axis2], 400, gyro.targetLooptime, gyroConfig()->dyn_notch_q / 100.0f, FILTER_NOTCH);
             }
         }
     }
+    gyroSensor->notchFilterDynApplyFn = nullFilterApply; // reset ; i.e do not apply notches
 }
 #endif
 
