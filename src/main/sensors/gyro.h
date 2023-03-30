@@ -113,8 +113,8 @@ typedef struct smithPredictor_s {
 
 #ifdef USE_GYRO_DATA_ANALYSE
 typedef enum {
-    RP = 1,
-    RPY = 2
+    RP = 0,
+    RPY = 1
 } dynamicGyroNotchMode_e;
 #endif
 
