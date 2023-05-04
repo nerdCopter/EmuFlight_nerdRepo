@@ -394,8 +394,8 @@ USER_INCLUDE_DIR = $(USER_DIR)
 
 OBJECT_DIR = ../../obj/test
 
-CC  := clang-10
-CXX := clang++-10
+CC  := clang-11
+CXX := clang++-11
 ifeq ($(shell which $(CC) 2>/dev/null),)
 $(info Falling back to 'clang'.)
 CC  := clang
@@ -432,7 +432,7 @@ ifeq ($(shell $(CC) -v 2>&1 | grep -q "clang version" && echo "clang"),clang)
 # Travis reports CC_VERSION of 4.2.1
 CC_VERSION_MAJOR := $(firstword $(subst ., ,$(CC_VERSION)))
 CC_VERSION_CHECK_MIN := 7
-CC_VERSION_CHECK_MAX := 10
+CC_VERSION_CHECK_MAX := 11
 ifeq ($(OSFAMILY), macosx)
 # MacOS comes with Apple's own flavour of clang that does not adhere to the official versioning
 CC_VERSION_CHECK_MAX := 12
