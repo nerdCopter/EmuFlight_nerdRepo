@@ -96,6 +96,7 @@ COMMON_SRC = \
             rx/rx.c \
             rx/rx_spi.c \
             rx/crsf.c \
+            rx/ghst.c \
             rx/sbus.c \
             rx/sbus_channels.c \
             rx/spektrum.c \
@@ -151,6 +152,7 @@ COMMON_SRC = \
             sensors/rangefinder.c \
             telemetry/telemetry.c \
             telemetry/crsf.c \
+            telemetry/ghst.c \
             telemetry/srxl.c \
             telemetry/frsky_hub.c \
             telemetry/hott.c \
@@ -188,6 +190,7 @@ SPEED_OPTIMISED_SRC := $(SPEED_OPTIMISED_SRC) \
             common/encoding.c \
             common/filter.c \
             common/maths.c \
+						common/sdft.c \
             common/typeconversion.c \
             drivers/accgyro/accgyro_fake.c \
             drivers/accgyro/accgyro_mpu.c \
@@ -333,14 +336,6 @@ ifneq ($(DSP_LIB),)
 
 INCLUDE_DIRS += $(DSP_LIB)/Include
 
-SRC += $(DSP_LIB)/Source/BasicMathFunctions/arm_mult_f32.c
-SRC += $(DSP_LIB)/Source/TransformFunctions/arm_rfft_fast_f32.c
-SRC += $(DSP_LIB)/Source/TransformFunctions/arm_cfft_f32.c
-SRC += $(DSP_LIB)/Source/TransformFunctions/arm_rfft_fast_init_f32.c
-SRC += $(DSP_LIB)/Source/TransformFunctions/arm_cfft_radix8_f32.c
-SRC += $(DSP_LIB)/Source/CommonTables/arm_common_tables.c
-
-SRC += $(DSP_LIB)/Source/ComplexMathFunctions/arm_cmplx_mag_f32.c
 SRC += $(DSP_LIB)/Source/StatisticsFunctions/arm_max_f32.c
 
 SRC += $(wildcard $(DSP_LIB)/Source/*/*.S)

@@ -283,7 +283,10 @@ static void backupAndResetConfigs(void) {
     resetConfigs();
 }
 
-static void cliPrint(const char *str) {
+void cliPrint(const char *str) {
+    if (!cliMode) {
+        return;
+    }
     while (*str) {
         if(cliSmartMode) {
             //no carriage returns. Those are dumb.
@@ -299,14 +302,14 @@ static void cliPrint(const char *str) {
     bufWriterFlush(cliWriter);
 }
 
-static void cliPrintLinefeed(void) {
+void cliPrintLinefeed(void) {
     cliPrint("\r\n");
     if(cliSmartMode) {
         bufWriterFlush(cliWriter);
     }
 }
 
-static void cliPrintLine(const char *str) {
+void cliPrintLine(const char *str) {
     cliPrint(str);
     cliPrintLinefeed();
 }
@@ -370,7 +373,10 @@ static bool cliDefaultPrintLinef(uint8_t dumpMask, bool equalsDefault, const cha
     }
 }
 
-static void cliPrintf(const char *format, ...) {
+void cliPrintf(const char *format, ...) {
+    if (!cliMode) {
+        return;
+    }
     va_list va;
     va_start(va, format);
     cliPrintfva(format, va);
@@ -378,7 +384,11 @@ static void cliPrintf(const char *format, ...) {
 }
 
 
-static void cliPrintLinef(const char *format, ...) {
+void cliPrintLinef(const char *format, ...) {
+    if (!cliMode) {
+        return;
+    }
+
     va_list va;
     va_start(va, format);
     cliPrintfva(format, va);
@@ -710,7 +720,7 @@ static const char *processChannelRangeArgs(const char *ptr, channelRange_t *rang
                 }
                 (*validArgumentCount)++;
             }
-        } 
+        }
     }
     return ptr;
 }
@@ -2392,9 +2402,10 @@ void cliRxBind(char *cmdline) {
 #ifdef USE_RX_CC2500_BIND
     case RX_SPI_FRSKY_D:
     case RX_SPI_FRSKY_X:
+    case RX_SPI_REDPINE:
     case RX_SPI_SFHSS:
         cc2500SpiBind();
-        cliPrint("Binding...");
+        cliPrintf("Binding...");
         break;
 #endif
     default:
@@ -3690,18 +3701,6 @@ static void cliRcSmoothing(char *cmdline) {
             cliPrintLine("(auto)");
         } else {
             cliPrintLine("(manual)");
-        }
-        cliPrint("# Derivative filter type: ");
-        cliPrintLinef(lookupTables[TABLE_RC_SMOOTHING_DERIVATIVE_TYPE].values[rxConfig()->rc_smoothing_derivative_type]);
-        cliPrintf("# Active derivative cutoff: %dhz (", rcSmoothingGetValue(RC_SMOOTHING_VALUE_DERIVATIVE_ACTIVE));
-        if (rxConfig()->rc_smoothing_derivative_type == RC_SMOOTHING_DERIVATIVE_OFF) {
-            cliPrintLine("off)");
-        } else {
-            if (rxConfig()->rc_smoothing_derivative_cutoff == 0) {
-                cliPrintLine("auto)");
-            } else {
-                cliPrintLine("manual)");
-            }
         }
     } else {
         cliPrintLine("INTERPOLATION");

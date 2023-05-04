@@ -54,6 +54,7 @@
 
 #include "sensors/battery.h"
 #include "sensors/acceleration.h"
+#include "sensors/gyro.h"
 
 enum {
     ROLL_FLAG = 1 << ROLL,
@@ -163,6 +164,29 @@ float applyRaceFlightRates(const int axis, float rcCommandf, const float rcComma
     // convert to -2000 to 2000 range using acro+ modifier
     float angleRate = 10.0f * currentControlRateProfile->rcRates[axis] * rcCommandf;
     angleRate = angleRate * (1 + rcCommandfAbs * (float)currentControlRateProfile->rates[axis] * 0.01f);
+    return angleRate;
+}
+
+float applyKissRates(const int axis, float rcCommandf, const float rcCommandfAbs)
+{
+    const float rcCurvef = currentControlRateProfile->rcExpo[axis] / 100.0f;
+
+    float kissRpyUseRates = 1.0f / (constrainf(1.0f - (rcCommandfAbs * (currentControlRateProfile->rates[axis] / 100.0f)), 0.01f, 1.00f));
+    float kissRcCommandf = (power3(rcCommandf) * rcCurvef + rcCommandf * (1 - rcCurvef)) * (currentControlRateProfile->rcRates[axis] / 1000.0f);
+    float kissAngle = constrainf(((2000.0f * kissRpyUseRates) * kissRcCommandf), -SETPOINT_RATE_LIMIT, SETPOINT_RATE_LIMIT);
+
+    return kissAngle;
+}
+
+float applyActualRates(const int axis, float rcCommandf, const float rcCommandfAbs)
+{
+    float expof = currentControlRateProfile->rcExpo[axis] / 100.0f;
+    expof = rcCommandfAbs * (powf(rcCommandf, 5) * expof + rcCommandf * (1 - expof));
+
+    const float centerSensitivity = currentControlRateProfile->rcRates[axis] * 10.0f;
+    const float stickMovement = MAX(0, currentControlRateProfile->rates[axis] * 10.0f - centerSensitivity);
+    const float angleRate = rcCommandf * centerSensitivity + stickMovement * expof;
+
     return angleRate;
 }
 
@@ -326,19 +350,30 @@ FAST_CODE_NOINLINE void rcSmoothingSetFilterCutoffs(rcSmoothingFilter_t *smoothi
                         biquadFilterUpdateLPF((biquadFilter_t*) &smoothingData->filter[i], smoothingData->inputCutoffFrequency, targetPidLooptime);
                     }
                     break;
+                case RC_SMOOTHING_INPUT_PT2:
+                    if (!smoothingData->filterInitialized) {
+                        ptnFilterInit((ptnFilter_t*) &smoothingData->filter[i], FILTER_PT2, smoothingData->inputCutoffFrequency, dT);
+                    } else {
+                        ptnFilterUpdate((ptnFilter_t*) &smoothingData->filter[i], smoothingData->inputCutoffFrequency, 1.553773974f, dT);
+                    }
+                    break;
+                case RC_SMOOTHING_INPUT_PT3:
+                    if (!smoothingData->filterInitialized) {
+                        ptnFilterInit((ptnFilter_t*) &smoothingData->filter[i], FILTER_PT3, smoothingData->inputCutoffFrequency, dT);
+                    } else {
+                        ptnFilterUpdate((ptnFilter_t*) &smoothingData->filter[i], smoothingData->inputCutoffFrequency, 1.961459177f, dT);
+                    }
+                    break;
+                case RC_SMOOTHING_INPUT_PT4:
+                    if (!smoothingData->filterInitialized) {
+                        ptnFilterInit((ptnFilter_t*) &smoothingData->filter[i], FILTER_PT4, smoothingData->inputCutoffFrequency, dT);
+                    } else {
+                        ptnFilterUpdate((ptnFilter_t*) &smoothingData->filter[i], smoothingData->inputCutoffFrequency, 2.298959223f, dT);
+                    }
+                    break;
                 }
             }
         }
-    }
-    // update or initialize the derivative filter
-    oldCutoff = smoothingData->derivativeCutoffFrequency;
-    if ((rxConfig()->rc_smoothing_derivative_cutoff == 0) && (rxConfig()->rc_smoothing_derivative_type != RC_SMOOTHING_DERIVATIVE_OFF)) {
-        smoothingData->derivativeCutoffFrequency = calcRcSmoothingCutoff(smoothingData->averageFrameTimeUs, (rxConfig()->rc_smoothing_derivative_type == RC_SMOOTHING_DERIVATIVE_PT1));
-    }
-    if (!smoothingData->filterInitialized) {
-        pidInitSetpointDerivativeLpf(smoothingData->derivativeCutoffFrequency, rxConfig()->rc_smoothing_debug_axis, rxConfig()->rc_smoothing_derivative_type);
-    } else if (smoothingData->derivativeCutoffFrequency != oldCutoff) {
-        pidUpdateSetpointDerivativeLpf(smoothingData->derivativeCutoffFrequency);
     }
 }
 
@@ -374,12 +409,6 @@ FAST_CODE_NOINLINE bool rcSmoothingAutoCalculate(void) {
     if (rxConfig()->rc_smoothing_input_cutoff == 0) {
         ret = true;
     }
-    // if the derivative type isn't OFF and the cutoff is 0 then we need to calculate
-    if (rxConfig()->rc_smoothing_derivative_type != RC_SMOOTHING_DERIVATIVE_OFF) {
-        if (rxConfig()->rc_smoothing_derivative_cutoff == 0) {
-            ret = true;
-        }
-    }
     return ret;
 }
 
@@ -396,9 +425,6 @@ FAST_CODE uint8_t processRcSmoothingFilter(void) {
         rcSmoothingData.averageFrameTimeUs = 0;
         rcSmoothingResetAccumulation(&rcSmoothingData);
         rcSmoothingData.inputCutoffFrequency = rxConfig()->rc_smoothing_input_cutoff;
-        if (rxConfig()->rc_smoothing_derivative_type != RC_SMOOTHING_DERIVATIVE_OFF) {
-            rcSmoothingData.derivativeCutoffFrequency = rxConfig()->rc_smoothing_derivative_cutoff;
-        }
         calculateCutoffs = rcSmoothingAutoCalculate();
         // if we don't need to calculate cutoffs dynamically then the filters can be initialized now
         if (!calculateCutoffs) {
@@ -484,7 +510,12 @@ FAST_CODE uint8_t processRcSmoothingFilter(void) {
                 default:
                     rcCommand[updatedChannel] = biquadFilterApplyDF1((biquadFilter_t*) &rcSmoothingData.filter[updatedChannel], lastRxData[updatedChannel]);
                     break;
-                }
+                case RC_SMOOTHING_INPUT_PT2:
+                case RC_SMOOTHING_INPUT_PT3:
+                case RC_SMOOTHING_INPUT_PT4:
+                    rcCommand[updatedChannel] = ptnFilterApply((ptnFilter_t*) &rcSmoothingData.filter[updatedChannel], lastRxData[updatedChannel]);
+                    break;
+                  }
             } else {
                 // If filter isn't initialized yet then use the actual unsmoothed rx channel data
                 rcCommand[updatedChannel] = lastRxData[updatedChannel];
@@ -563,7 +594,7 @@ static void applyRollYawMix(void) {
 }
 
 static void applyPolarExpo(void) {
-    const float roll_pitch_mag = sqrtf((rcCommand[FD_ROLL] * rcCommand[FD_ROLL] / 250000.0f) + (rcCommand[FD_PITCH] * rcCommand[FD_PITCH] / 250000.0f));
+    const float roll_pitch_mag = fast_fsqrtf((rcCommand[FD_ROLL] * rcCommand[FD_ROLL] / 250000.0f) + (rcCommand[FD_PITCH] * rcCommand[FD_PITCH] / 250000.0f));
 
     float roll_pitch_scale;
     const float rollPitchMagExpo = currentControlRateProfile->rollPitchMagExpo / 100.0f;
@@ -576,6 +607,53 @@ static void applyPolarExpo(void) {
 
     rcCommand[FD_ROLL] *= roll_pitch_scale;
     rcCommand[FD_PITCH] *= roll_pitch_scale;
+}
+
+FAST_CODE static float calculateK(float k, const float dT) {
+    if (k == 0.0f) {
+        return 0;
+    }
+    // scale so it feels like running at 62.5hz (16ms) regardless of the current rx rate
+    const float rxRate = 1.0f / dT;
+    const float rxRateFactor = (rxRate / 62.5f) * rxRate;
+    const float freq = k / ((1.0f / rxRateFactor) * (1.0f - k));
+    const float RC = 1.0f / freq;
+
+    return dT / (RC + dT);
+}
+
+FAST_CODE static float rateDynamics(float rcCommand, const int axis, const float dT) {
+    static FAST_RAM_ZERO_INIT float lastRcCommandData[3];
+    static FAST_RAM_ZERO_INIT float iterm[3];
+    if (((currentControlRateProfile->rateDynamics.rateSensCenter != 100) || (currentControlRateProfile->rateDynamics.rateSensEnd != 100))
+            || ((currentControlRateProfile->rateDynamics.rateWeightCenter > 0) || (currentControlRateProfile->rateDynamics.rateWeightEnd > 0))) {
+        float pterm_centerStick, pterm_endStick, pterm, iterm_centerStick, iterm_endStick, dterm_centerStick, dterm_endStick, dterm;
+        float rcCommandPercent;
+        float rcCommandError;
+        float inverseRcCommandPercent;
+
+        rcCommandPercent = fabsf(rcCommand) / 500.0f; // make rcCommandPercent go from 0 to 1
+        inverseRcCommandPercent = 1.0f - rcCommandPercent;
+
+        pterm_centerStick = inverseRcCommandPercent * rcCommand * (currentControlRateProfile->rateDynamics.rateSensCenter / 100.0f); // valid pterm values are between 50-150
+        pterm_endStick = rcCommandPercent * rcCommand * (currentControlRateProfile->rateDynamics.rateSensEnd / 100.0f);
+        pterm = pterm_centerStick + pterm_endStick;
+        rcCommandError = rcCommand - (pterm + iterm[axis]);
+        rcCommand = pterm; // add this fake pterm to the rcCommand
+
+        iterm_centerStick = inverseRcCommandPercent * rcCommandError * calculateK(currentControlRateProfile->rateDynamics.rateCorrectionCenter / 100.0f, dT); // valid iterm values are between 0-95
+        iterm_endStick = rcCommandPercent * rcCommandError * calculateK(currentControlRateProfile->rateDynamics.rateCorrectionEnd / 100.0f, dT);
+        iterm[axis] += iterm_centerStick + iterm_endStick;
+        rcCommand = rcCommand + iterm[axis]; // add the iterm to the rcCommand
+
+        dterm_centerStick = inverseRcCommandPercent * (lastRcCommandData[axis] - rcCommand) * calculateK(currentControlRateProfile->rateDynamics.rateWeightCenter / 100.0f, dT); // valid dterm values are between 0-95
+        dterm_endStick = rcCommandPercent * (lastRcCommandData[axis] - rcCommand) * calculateK(currentControlRateProfile->rateDynamics.rateWeightEnd / 100.0f, dT);
+        dterm = dterm_centerStick + dterm_endStick;
+        rcCommand = rcCommand + dterm; // add dterm to the rcCommand (this is real dterm)
+
+        lastRcCommandData[axis] = rcCommand;
+    }
+    return rcCommand;
 }
 
 FAST_CODE FAST_CODE_NOINLINE void updateRcCommands(void) {
@@ -617,6 +695,8 @@ FAST_CODE FAST_CODE_NOINLINE void updateRcCommands(void) {
         }
         throttleDAttenuation = propD / 100.0f;
     }
+
+    const float dT = currentRxRefreshRate * 1e-6f;
     for (int axis = 0; axis < 3; axis++) {
         // non coupled PID reduction scaler used in PID controller 1 and PID controller 2.
         int32_t tmp = MIN(ABS(rcData[axis] - rxConfig()->midrc), 500);
@@ -638,7 +718,7 @@ FAST_CODE FAST_CODE_NOINLINE void updateRcCommands(void) {
         if (rcData[axis] < rxConfig()->midrc) {
             rcCommand[axis] = -rcCommand[axis];
         }
-        rcCommand[axis] = rateDynamics(rcCommand[axis], axis, currentRxRefreshRate);
+        rcCommand[axis] = rateDynamics(rcCommand[axis], axis, dT);
     }
 
       applyPolarExpo();
@@ -724,6 +804,12 @@ void initRcProcessing(void) {
     case RATES_TYPE_RACEFLIGHT:
         applyRates = applyRaceFlightRates;
         break;
+    case RATES_TYPE_KISS:
+        applyRates = applyKissRates;
+        break;
+    case RATES_TYPE_ACTUAL:
+        applyRates = applyActualRates;
+        break;
     }
     interpolationChannels = 0;
     switch (rxConfig()->rcInterpolationChannels) {
@@ -743,6 +829,10 @@ void initRcProcessing(void) {
         interpolationChannels |= THROTTLE_FLAG;
         break;
     }
+#ifdef USE_YAW_SPIN_RECOVERY
+    const int maxYawRate = (int)applyRates(FD_YAW, 1.0f, 1.0f);
+    initYawSpinRecovery(maxYawRate);
+#endif
 }
 
 bool rcSmoothingIsEnabled(void) {
@@ -758,8 +848,6 @@ int rcSmoothingGetValue(int whichValue) {
     switch (whichValue) {
     case RC_SMOOTHING_VALUE_INPUT_ACTIVE:
         return rcSmoothingData.inputCutoffFrequency;
-    case RC_SMOOTHING_VALUE_DERIVATIVE_ACTIVE:
-        return rcSmoothingData.derivativeCutoffFrequency;
     case RC_SMOOTHING_VALUE_AVERAGE_FRAME:
         return rcSmoothingData.averageFrameTimeUs;
     default:
@@ -771,51 +859,3 @@ bool rcSmoothingInitializationComplete(void) {
     return (rxConfig()->rc_smoothing_type != RC_SMOOTHING_TYPE_FILTER) || rcSmoothingData.filterInitialized;
 }
 #endif // USE_RC_SMOOTHING_FILTER
-
-FAST_CODE float calculateK(float k, int time) {
-    if (k == 0.0f) {
-        return 0;
-    }
-    // scale so it feels like running at 62.5hz (16ms) regardless of the current rx rate
-    const float dT = time * 1e-6f;
-    const float rxRate = 1.0f / dT;
-    const float rxRateFactor = (rxRate / 62.5f) * rxRate;
-    const float freq = k / ((1.0f / rxRateFactor) * (1.0f - k));
-    const float RC = 1.0f / freq;
-
-    return dT / (RC + dT);
-}
-
-FAST_CODE float rateDynamics(float rcCommand, int axis, int currentRxRefreshRate) {
-    static FAST_RAM_ZERO_INIT float lastRcCommandData[3];
-    static FAST_RAM_ZERO_INIT float iterm[3];
-    if (((currentControlRateProfile->rateDynamics.rateSensCenter != 100) || (currentControlRateProfile->rateDynamics.rateSensEnd != 100))
-            || ((currentControlRateProfile->rateDynamics.rateWeightCenter > 0) || (currentControlRateProfile->rateDynamics.rateWeightEnd > 0))) {
-        float pterm_centerStick, pterm_endStick, pterm, iterm_centerStick, iterm_endStick, dterm_centerStick, dterm_endStick, dterm;
-        float rcCommandPercent;
-        float rcCommandError;
-        float inverseRcCommandPercent;
-
-        rcCommandPercent = fabsf(rcCommand) / 500.0f; // make rcCommandPercent go from 0 to 1
-        inverseRcCommandPercent = 1.0f - rcCommandPercent;
-
-        pterm_centerStick = inverseRcCommandPercent * rcCommand * (currentControlRateProfile->rateDynamics.rateSensCenter / 100.0f); // valid pterm values are between 50-150
-        pterm_endStick = rcCommandPercent * rcCommand * (currentControlRateProfile->rateDynamics.rateSensEnd / 100.0f);
-        pterm = pterm_centerStick + pterm_endStick;
-        rcCommandError = rcCommand - (pterm + iterm[axis]);
-        rcCommand = pterm; // add this fake pterm to the rcCommand
-
-        iterm_centerStick = inverseRcCommandPercent * rcCommandError * calculateK(currentControlRateProfile->rateDynamics.rateCorrectionCenter / 100.0f, currentRxRefreshRate); // valid iterm values are between 0-95
-        iterm_endStick = rcCommandPercent * rcCommandError * calculateK(currentControlRateProfile->rateDynamics.rateCorrectionEnd / 100.0f, currentRxRefreshRate);
-        iterm[axis] += iterm_centerStick + iterm_endStick;
-        rcCommand = rcCommand + iterm[axis]; // add the iterm to the rcCommand
-
-        dterm_centerStick = inverseRcCommandPercent * (lastRcCommandData[axis] - rcCommand) * calculateK(currentControlRateProfile->rateDynamics.rateWeightCenter / 100.0f, currentRxRefreshRate); // valid dterm values are between 0-95
-        dterm_endStick = rcCommandPercent * (lastRcCommandData[axis] - rcCommand) * calculateK(currentControlRateProfile->rateDynamics.rateWeightEnd / 100.0f, currentRxRefreshRate);
-        dterm = dterm_centerStick + dterm_endStick;
-        rcCommand = rcCommand + dterm; // add dterm to the rcCommand (this is real dterm)
-
-        lastRcCommandData[axis] = rcCommand;
-    }
-    return rcCommand;
-}
