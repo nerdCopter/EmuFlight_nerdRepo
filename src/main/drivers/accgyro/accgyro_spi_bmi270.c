@@ -262,7 +262,7 @@ static void bmi270Config(const gyroDev_t *gyro)
 
 extiCallbackRec_t bmi270IntCallbackRec;
 
-#if defined(USE_GYRO_EXTI) && defined(USE_MPU_DATA_READY_SIGNAL)
+//#if defined(USE_GYRO_EXTI) && defined(USE_MPU_DATA_READY_SIGNAL)
 void bmi270ExtiHandler(extiCallbackRec_t *cb)
 {
     gyroDev_t *gyro = container_of(cb, gyroDev_t, exti);
@@ -277,12 +277,12 @@ static void bmi270IntExtiInit(gyroDev_t *gyro)
 
     IO_t mpuIntIO = IOGetByTag(gyro->mpuIntExtiTag);
 
-    IOInit(mpuIntIO, OWNER_GYRO_EXTI, 0);
+    IOInit(mpuIntIO, OWNER_MPU_EXTI, 0);
     EXTIHandlerInit(&gyro->exti, bmi270ExtiHandler);
     EXTIConfig(mpuIntIO, &gyro->exti, NVIC_PRIO_MPU_INT_EXTI, IOCFG_IN_FLOATING );
     EXTIEnable(mpuIntIO, true);
 }
-#endif
+//#endif
 
 static bool bmi270AccRead(accDev_t *acc)
 {
@@ -423,9 +423,9 @@ static void bmi270SpiGyroInit(gyroDev_t *gyro)
 {
     bmi270Config(gyro);
 
-#if defined(USE_GYRO_EXTI) && defined(USE_MPU_DATA_READY_SIGNAL)
+//#if defined(USE_GYRO_EXTI) && defined(USE_MPU_DATA_READY_SIGNAL)
     bmi270IntExtiInit(gyro);
-#endif
+//#endif
 }
 
 static void bmi270SpiAccInit(accDev_t *acc)
