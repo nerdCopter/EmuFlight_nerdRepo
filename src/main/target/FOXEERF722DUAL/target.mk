@@ -12,6 +12,12 @@ TARGET_SRC += \
 drivers/accgyro/accgyro_mpu.c \
 drivers/accgyro/accgyro_spi_mpu6000.c \
 
+else  ifeq ($(TARGET), FOXEERF722V4)
+TARGET_SRC += \
+drivers/accgyro/accgyro_mpu.c \
+drivers/accgyro/accgyro_spi_mpu6000.c \
+drivers/accgyro/accgyro_spi_icm426xx.c \
+
 else
 TARGET_SRC += \
             drivers/accgyro/accgyro_mpu6500.c \
