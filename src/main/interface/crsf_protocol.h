@@ -27,7 +27,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define CRSF_BAUDRATE           420000
+#define CRSF_BAUDRATE           416000
 
 enum { CRSF_SYNC_BYTE = 0xC8 };
 
