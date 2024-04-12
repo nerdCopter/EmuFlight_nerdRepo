@@ -22,6 +22,7 @@
 #define TARGET_BOARD_IDENTIFIER                          "S7X2"
 #define USBD_PRODUCT_STRING                              "ZEEZF7"
 #define TARGET_MANUFACTURER_IDENTIFIER                   "ZEEZ"
+#define FC_TARGET_MCU                                    STM32F7X2     // not used in EmuF
 
 #define USE_TARGET_CONFIG
 
@@ -66,6 +67,7 @@
 
 // Blackbox
 #define ENABLE_BLACKBOX_LOGGING_ON_SPIFLASH_BY_DEFAULT
+#define USE_FLASH
 #define USE_FLASHFS
 #define USE_FLASH_W25M
 #define USE_FLASH_M25P16
