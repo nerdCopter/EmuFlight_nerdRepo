@@ -23,11 +23,16 @@
  
 #pragma once
 
-#define TARGET_MANUFACTURER_IDENTIFIER "SKST"
-#define USBD_PRODUCT_STRING "SKYSTARSF405AIO"
+//#define TARGET_MANUFACTURER_IDENTIFIER "SKST"
+//#define USBD_PRODUCT_STRING "SKYSTARSF405AIO"
 
-#define FC_TARGET_MCU     STM32F405     // not used in EmuF
+//#define FC_TARGET_MCU     STM32F405     // not used in EmuF
+//#define TARGET_BOARD_IDENTIFIER "S405"  // generic ID
+
+#define BOARD_NAME        SKYSTARSF405AIO  //14 chars worked , 15 did not.
+#define MANUFACTURER_ID   SKST
 #define TARGET_BOARD_IDENTIFIER "S405"  // generic ID
+#define FC_TARGET_MCU     STM32F405     // not used in EmuF
 
 #define USE_GYRO
 #define USE_ACC

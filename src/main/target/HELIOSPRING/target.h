@@ -19,6 +19,11 @@
 
 #define TARGET_BOARD_IDENTIFIER "HESP"
 #define USBD_PRODUCT_STRING     "HELIOSPRING"
+
+#define BOARD_NAME        HELIOSPRING
+#define MANUFACTURER_ID   HESP
+
+
 #define MSP_OVER_CLI
 
 #define LED0_PIN                PB7
