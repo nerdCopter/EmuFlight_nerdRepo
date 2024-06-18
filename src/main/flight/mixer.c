@@ -887,7 +887,7 @@ void mixThingsUp(const float scaledAxisPidRoll, const float scaledAxisPidPitch, 
         } else if (controllerMixVal < controllerMixMin) {
             controllerMixMin = controllerMixVal;
         }
-        controllerMix[i] = controllerMixVal * controllerMix3DModeSign;
+        controllerMix[i] = controllerMixVal;
     }
 
     controllerMixRange = controllerMixMax - controllerMixMin; // measures how much the controller is trying to compensate
