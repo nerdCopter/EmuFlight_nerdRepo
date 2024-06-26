@@ -897,6 +897,10 @@ void mixThingsUp(const float scaledAxisPidRoll, const float scaledAxisPidPitch, 
     } else {
         mixWithThrottleLegacy(motorMix, controllerMix, controllerMixMin, controllerMixMax);
     }
+
+    for (int i = 0; i < motorCount; i++) {
+        DEBUG_SET(DEBUG_MOTOR_MIX, i, lrintf(motorMix[i] * 100)) ;
+    }
 }
 
 float convertExternalToMotor(uint16_t externalValue) {
