@@ -715,7 +715,10 @@ static void applyFlipOverAfterCrashModeToMotors(void) {
 static void applyMixToMotors(const float motorMix[MAX_SUPPORTED_MOTORS]) {
     float vbatCompFactor = calculateBatteryCompensationFactor();
     for (int i = 0; i < motorCount; i++) {
-        float motorOutput = motorOutputMin + constrainf(motorMix[i] * vbatCompFactor, 0.0f, 1.0f) * motorOutputRange;
+        //was : float motorOutput = motorOutputMin + (motorOutputRange * (motorOutputMixSign * motorMix[i] + throttle * currentMixer[i].throttle));
+        //now : float motorOutput = motorOutputMin + constrainf(motorMix[i] * vbatCompFactor, 0.0f, 1.0f) * motorOutputRange;
+        //arrange + semi-revert:
+        float motorOutput = motorOutputMin + (motorOutputRange * constrainf(motorMix[i] + throttle * currentMixer[i].throttle * vbatCompFactor, 0.0f, 1.0f));
         if (mixerIsTricopter()) {
             motorOutput += mixerTricopterMotorCorrection(i);
         }
