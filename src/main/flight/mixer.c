@@ -717,8 +717,10 @@ static void applyMixToMotors(const float motorMix[MAX_SUPPORTED_MOTORS]) {
     for (int i = 0; i < motorCount; i++) {
         //was : float motorOutput = motorOutputMin + (motorOutputRange * (motorOutputMixSign * motorMix[i] + throttle * currentMixer[i].throttle));
         //now : float motorOutput = motorOutputMin + constrainf(motorMix[i] * vbatCompFactor, 0.0f, 1.0f) * motorOutputRange;
+        //arrange : float motorOutput = motorOutputMin + (motorOutputRange * constrainf(motorMix[i] * vbatCompFactor, 0.0f, 1.0f));
         //arrange + semi-revert:
-        float motorOutput = motorOutputMin + (motorOutputRange * constrainf(motorMix[i] + throttle * currentMixer[i].throttle * vbatCompFactor, 0.0f, 1.0f));
+        //float motorOutput = motorOutputMin + (motorOutputRange * constrainf(motorMix[i] + throttle * currentMixer[i].throttle * vbatCompFactor, 0.0f, 1.0f));
+        float motorOutput = motorOutputMin + (motorOutputRange * constrainf(motorMix[i] * vbatCompFactor, 0.0f, 1.0f) * currentMixer[i].throttle);
         if (mixerIsTricopter()) {
             motorOutput += mixerTricopterMotorCorrection(i);
         }
