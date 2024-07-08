@@ -898,7 +898,7 @@ void mixThingsUp(const float scaledAxisPidRoll, const float scaledAxisPidPitch, 
         mixWithThrottleLegacy(motorMix, controllerMix, controllerMixMin, controllerMixMax);
     }
 
-    for (int i = 0; i < motorCount; i++) {
+    for (int i = 0; i < constrain(motorCount,0,DEBUG16_VALUE_COUNT); i++) {
         DEBUG_SET(DEBUG_MOTOR_MIX, i, lrintf(motorMix[i] * 100)) ;
     }
 }
