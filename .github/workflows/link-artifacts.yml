@@ -1,0 +1,20 @@
+name: Link PR Artifacts
+
+on:
+  workflow_run:
+    workflows: ["Build EmuFlight"]
+    types: ["completed"]
+
+jobs:
+  artifacts-url-comments:
+    name: Add artifact links
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Add artifact links
+        uses: tonyhallett/artifacts-url-comments@v1.1.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          prefix: "Compiled HEX from this Pull-Request. WARNING: No warranty or guarantee of any kind. Test/Fly at your own risk!"
+          format: name
+          addTo: pull
