@@ -487,6 +487,9 @@ help: Makefile make/tools.mk
 	@echo ""
 	@sed -n 's/^## //p' $?
 
+show-gcc-version:
+	@echo "Compiler version used: $$( $(CROSS_CC) --version | head -n 1 )"
+
 ## targets           : print a list of all valid target platforms (for consumption by scripts)
 targets:
 	@echo "Valid targets:       $(VALID_TARGETS)"
