@@ -55,6 +55,20 @@
 #define STM32F7
 #endif
 
+#elif defined(STM32H750xx)
+#include "stm32h7xx.h"
+#include "stm32h7xx_hal.h"
+#include "system_stm32h7xx.h"
+
+// Chip Unique ID on H7
+#define U_ID_0 (*(uint32_t*)0x1ff0f420)
+#define U_ID_1 (*(uint32_t*)0x1ff0f424)
+#define U_ID_2 (*(uint32_t*)0x1ff0f428)
+
+#ifndef STM32H7
+#define STM32H7
+#endif
+
 #elif defined(STM32F40_41xxx) || defined (STM32F411xE) || defined (STM32F446xx)
 
 #include "stm32f4xx.h"
