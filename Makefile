@@ -123,7 +123,9 @@ USBPERIPH_SRC   = $(notdir $(wildcard $(USBFS_DIR)/src/*.c))
 FATFS_DIR       = $(ROOT)/lib/main/FatFS
 FATFS_SRC       = $(notdir $(wildcard $(FATFS_DIR)/*.c))
 
-CSOURCES        := $(shell find $(SRC_DIR) -name '*.c')
+CSOURCES        := $(shell find $(SRC_DIR) -name '*.c') \
+                   $(SRC_DIR)/drivers/barometer/barometer_dps310.c \
+                   $(SRC_DIR)/drivers/barometer/barometer_bmp388.c
 
 LD_FLAGS        :=
 

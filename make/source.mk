@@ -257,6 +257,8 @@ SIZE_OPTIMISED_SRC := $(SIZE_OPTIMISED_SRC) \
             drivers/barometer/barometer_ms5611.c \
             drivers/barometer/barometer_lps.c \
             drivers/barometer/barometer_qmp6988.c \
+            drivers/barometer/barometer_dps310.c \
+            drivers/barometer/barometer_bmp388.c \
             drivers/beesign.c \
             drivers/bus_i2c_config.c \
             drivers/bus_spi_config.c \
@@ -355,6 +357,9 @@ endif
 
 SRC += $(COMMON_SRC)
 
+SRC += $(SRC_DIR)/drivers/barometer/barometer_dps310.c
+SRC += $(SRC_DIR)/drivers/barometer/barometer_bmp388.c
+
 #excludes
 SRC   := $(filter-out $(MCU_EXCLUDES), $(SRC))
 
@@ -388,3 +393,4 @@ endif
 
 # Search path and source files for the ST stdperiph library
 VPATH        := $(VPATH):$(STDPERIPH_DIR)/src
+VPATH        := $(VPATH):$(SRC_DIR)/drivers/barometer
