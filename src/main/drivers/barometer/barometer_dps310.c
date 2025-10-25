@@ -155,14 +155,27 @@ static int32_t getTwosComplement(uint32_t raw, uint8_t length)
 
 
 
-static void dps310GetUP(baroDev_t *baro)
+static bool dps310GetUP(baroDev_t *baro)
 {
     busDevice_t *dev = &baro->busdev;
     uint8_t buf[3];
     if (!busReadRegisterBuffer(dev, DPS310_REG_PSR_B2, buf, 3)) {
-        return;
+        return false;
     }
     baro->up = (int32_t)buf[0] << 16 | (int32_t)buf[1] << 8 | (int32_t)buf[2];
+    return true;
+}
+
+static bool dps310ReadUT(baroDev_t *baro)
+{
+    UNUSED(baro);
+    return true;
+}
+
+static bool dps310ReadUP(baroDev_t *baro)
+{
+    UNUSED(baro);
+    return true;
 }
 
 static void dps310Calculate(int32_t *pressure, int32_t *temperature)
@@ -195,28 +208,31 @@ static bool deviceDetect(const busDevice_t *dev)
     return false;
 }
 
-static void dps310StartUT(baroDev_t *baro)
+static bool dps310StartUT(baroDev_t *baro)
 {
     busDevice_t *dev = &baro->busdev;
     registerSetBits(dev, DPS310_REG_MEAS_CFG, DPS310_MEAS_CFG_TMP_RDY);
+    return true;
 }
 
 
 
-static void dps310GetUT(baroDev_t *baro)
+static bool dps310GetUT(baroDev_t *baro)
 {
     busDevice_t *dev = &baro->busdev;
     uint8_t buf[3];
     if (!busReadRegisterBuffer(dev, DPS310_REG_TMP_B2, buf, 3)) {
-        return;
+        return false;
     }
     baro->ut = (int32_t)buf[0] << 16 | (int32_t)buf[1] << 8 | (int32_t)buf[2];
+    return true;
 }
 
-static void dps310StartUP(baroDev_t *baro)
+static bool dps310StartUP(baroDev_t *baro)
 {
     busDevice_t *dev = &baro->busdev;
     registerSetBits(dev, DPS310_REG_MEAS_CFG, DPS310_MEAS_CFG_PRS_RDY);
+    return true;
 }
 
 static void deviceInit(const busDevice_t *dev, resourceOwner_e owner)
@@ -263,9 +279,11 @@ bool baroDPS310Detect(baroDev_t *baro)
     // busDeviceRegister(dev); // This function is not present in EmuFlight's bus.h
 
     baro->start_ut = dps310StartUT;
+    baro->read_ut = dps310ReadUT;
     baro->get_ut = dps310GetUT;
 
     baro->start_up = dps310StartUP;
+    baro->read_up = dps310ReadUP;
     baro->get_up = dps310GetUP;
 
     baro->calculate = dps310Calculate;
