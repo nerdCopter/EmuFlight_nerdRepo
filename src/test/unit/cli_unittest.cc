@@ -270,9 +270,8 @@ const box_t *findBoxByBoxId(boxId_e) { return &boxes[0]; }
 int8_t unitTestDataArray[3];
 
 void pgResetFn_unitTestData(int8_t *ptr) {
-    (void)ptr;  // Unused parameter
-    // Reset to default array
-    memset(unitTestDataArray, 0, sizeof(unitTestDataArray));
+    // Reset the PG memory pointed to by ptr  
+    memset(ptr, 0, sizeof(unitTestDataArray));
 }
 
 uint32_t getBeeperOffMask(void) { return 0; }
