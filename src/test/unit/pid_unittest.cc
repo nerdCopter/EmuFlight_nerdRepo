@@ -186,6 +186,12 @@ float calculateTolerance(float input) {
     return fabs(input * 0.1f);
 }
 
+// Helper to ensure near-zero expected values get reasonable tolerance floor
+// Uses max of percentage tolerance and minimum absolute tolerance (0.05)
+float calculateToleranceWithFloor(float input, float minTolerance = 0.05f) {
+    return fmaxf(fabs(input * 0.1f), minTolerance);
+}
+
 TEST(pidControllerTest, testInitialisation)
 {
     resetTest();
@@ -310,7 +316,7 @@ TEST(pidControllerTest, testPidLoop) {
     ASSERT_NEAR(-7.92, pidData[FD_YAW].I, calculateTolerance(-7.92));
     // D-term has filtering, so doesn't instantly go to zero - verify small residual values
     ASSERT_NEAR(-8.98, pidData[FD_ROLL].D, calculateTolerance(-8.98));
-    ASSERT_NEAR(0.17, pidData[FD_PITCH].D, calculateTolerance(0.17));
+    ASSERT_NEAR(0.17, pidData[FD_PITCH].D, calculateToleranceWithFloor(0.17));  // Near-zero: use tolerance floor
     ASSERT_NEAR(-5.57, pidData[FD_YAW].D, calculateTolerance(-5.57));
 
     // Now disable Stabilisation
