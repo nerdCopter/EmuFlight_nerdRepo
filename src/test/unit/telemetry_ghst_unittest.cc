@@ -93,6 +93,7 @@ extern "C" {
     uint8_t *ghstGetTelemetryBuf(void);     // Returns pointer to telemetryBuf
     uint8_t ghstGetTelemetryBufLen(void);   // Returns telemetryBufLen
     void testAdvanceMicros(uint32_t delta); // Advance fake time for scheduler testing
+    void resetFakeMicros(void);             // Reset fake time for test isolation
 }
 
 #include "unittest_macros.h"
@@ -134,6 +135,7 @@ uint16_t    mAh Drawn
 // Optionally stub feature(FEATURE_GPS)=false to keep the schedule minimal (PACK_STAT only).
 TEST(TelemetryGhstTest, DISABLED_TestBattery)
 {
+    resetFakeMicros();  // Ensure test isolation by resetting fake time
     uint16_t voltage;
     uint16_t current;
     uint32_t usedMah;
@@ -201,6 +203,7 @@ TEST(TelemetryGhstTest, DISABLED_TestBattery)
 // NOTE: DISABLED - Same as TestBattery. Requires further scheduler investigation.
 TEST(TelemetryGhstTest, DISABLED_TestBatteryCellVoltage)
 {
+    resetFakeMicros();  // Ensure test isolation by resetting fake time
     uint16_t voltage;
     uint16_t current;
     uint32_t usedMah;
@@ -259,6 +262,7 @@ void beeperConfirmationBeeps(uint8_t beepCount) {UNUSED(beepCount);}
 
 // Fake time for scheduler-driven telemetry
 static uint32_t fakeMicros = 0;
+void resetFakeMicros(void) { fakeMicros = 0; }  // Reset to ensure test isolation
 void testAdvanceMicros(uint32_t delta) { fakeMicros += delta; }
 uint32_t micros(void) { return fakeMicros; }
 uint32_t microsISR(void) { return fakeMicros; }
