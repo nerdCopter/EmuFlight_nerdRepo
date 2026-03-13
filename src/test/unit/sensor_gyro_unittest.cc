@@ -19,6 +19,7 @@
 #include <stdbool.h>
 
 #include <limits.h>
+#include <cmath>
 #include <algorithm>
 
 extern "C" {
@@ -166,10 +167,11 @@ TEST(SensorGyro, Update)
     currentTimeUs += gyroUpdatePeriod;
     gyroUpdate(currentTimeUs);
     
-    // Values should change significantly and be non-zero
-    EXPECT_NE(prevX, gyro.gyroADCf[X]);
-    EXPECT_NE(prevY, gyro.gyroADCf[Y]);
-    EXPECT_NE(prevZ, gyro.gyroADCf[Z]);
+    // Values should change significantly (using threshold-based comparison to tolerate floating-point precision)
+    const float gyroChangeThreshold = 0.1f;  // Allow for filter smoothing and floating-point precision
+    EXPECT_GT(fabsf(gyro.gyroADCf[X] - prevX), gyroChangeThreshold);
+    EXPECT_GT(fabsf(gyro.gyroADCf[Y] - prevY), gyroChangeThreshold);
+    EXPECT_GT(fabsf(gyro.gyroADCf[Z] - prevZ), gyroChangeThreshold);
     
     // Values should be positive (since input increased)
     EXPECT_GT(gyro.gyroADCf[X], 1.0f);
