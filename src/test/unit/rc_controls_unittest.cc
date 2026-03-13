@@ -287,22 +287,6 @@ protected:
         rxConfigMutable()->mincheck = DEFAULT_MIN_CHECK;
         rxConfigMutable()->maxcheck = DEFAULT_MAX_CHECK;
         rxConfigMutable()->midrc = 1500;
-
-        controlRateConfig.rcRates[FD_ROLL] = 90;
-        controlRateConfig.rcRates[FD_PITCH] = 90;
-        controlRateConfig.rcExpo[FD_ROLL] = 0;
-        controlRateConfig.rcExpo[FD_PITCH] = 0;
-        controlRateConfig.thrMid8 = 0;
-        controlRateConfig.thrExpo8 = 0;
-        controlRateConfig.rcExpo[FD_YAW] = 0;
-        controlRateConfig.rates[0] = 0;
-        controlRateConfig.rates[1] = 0;
-        controlRateConfig.rates[2] = 0;
-        controlRateConfig.dynThrP = 0;
-        controlRateConfig.dynThrI = 0;
-        controlRateConfig.dynThrD = 0;
-        controlRateConfig.tpa_breakpoint = 0;
-
     }
 };
 
