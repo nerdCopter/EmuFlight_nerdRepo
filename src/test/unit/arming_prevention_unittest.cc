@@ -46,11 +46,12 @@ extern "C" {
     #include "telemetry/telemetry.h"
 
     // Global variable definitions
-    // rcCommand is defined in rc_controls.c when included  
+    // rcCommand is defined in rc_controls.c and provided at link time
+    // (not via header inclusion - this is an extern declaration)
     extern float rcCommand[4];
     
-    // rcData would be defined in rx.c, but since we don't link rx.c,
-    // we define it here for the test
+    // rcData is normally defined in rx.c, but since rx.c is not linked in this test,
+    // we define it here to satisfy the link dependency
     int16_t rcData[MAX_SUPPORTED_RC_CHANNEL_COUNT];
 
     PG_REGISTER(accelerometerConfig_t, accelerometerConfig, PG_ACCELEROMETER_CONFIG, 0);
