@@ -37,38 +37,23 @@ STATIC_UNIT_TESTED void fastUpdateLEDDMABuffer(ledStripFormatRGB_e ledFormat, rg
 STATIC_UNIT_TESTED void updateLEDDMABuffer(uint8_t componentValue);
 }
 
-TEST(WS2812, updateDMABuffer) {
+TEST(WS2812, updateDMABufferGRB) {
     // given
-    rgbColor24bpp_t color1 = { .raw = {0xFF,0xAA,0x55} };
+    rgbColor24bpp_t color1 = { .raw = {0xFF,0xAA,0x55} };  // G=0xFF, R=0xAA, B=0x55
 
     // and
     dmaBufferOffset = 0;
 
     // when
-#if 0
-    updateLEDDMABuffer(color1.rgb.g);
-    updateLEDDMABuffer(color1.rgb.r);
-    updateLEDDMABuffer(color1.rgb.b);
-#else
-    fastUpdateLEDDMABuffer(LED_GRB, &color1);  // Updated: firmware now requires ledFormat parameter
-#endif
+    fastUpdateLEDDMABuffer(LED_GRB, &color1);  // GRB format: G, R, B byte order
 
-    // then
+    // then: verify byte offset is 24 bits (3 bytes)
     EXPECT_EQ(24, dmaBufferOffset);
 
-    // and
+    // and: verify GRB byte ordering (G first = 0xFF all 1's)
     uint8_t byteIndex = 0;
 
-    EXPECT_EQ(BIT_COMPARE_1, ledStripDMABuffer[(byteIndex * 8) + 0]);
-    EXPECT_EQ(BIT_COMPARE_0, ledStripDMABuffer[(byteIndex * 8) + 1]);
-    EXPECT_EQ(BIT_COMPARE_1, ledStripDMABuffer[(byteIndex * 8) + 2]);
-    EXPECT_EQ(BIT_COMPARE_0, ledStripDMABuffer[(byteIndex * 8) + 3]);
-    EXPECT_EQ(BIT_COMPARE_1, ledStripDMABuffer[(byteIndex * 8) + 4]);
-    EXPECT_EQ(BIT_COMPARE_0, ledStripDMABuffer[(byteIndex * 8) + 5]);
-    EXPECT_EQ(BIT_COMPARE_1, ledStripDMABuffer[(byteIndex * 8) + 6]);
-    EXPECT_EQ(BIT_COMPARE_0, ledStripDMABuffer[(byteIndex * 8) + 7]);
-    byteIndex++;
-
+    // Byte 0: G = 0xFF = 11111111
     EXPECT_EQ(BIT_COMPARE_1, ledStripDMABuffer[(byteIndex * 8) + 0]);
     EXPECT_EQ(BIT_COMPARE_1, ledStripDMABuffer[(byteIndex * 8) + 1]);
     EXPECT_EQ(BIT_COMPARE_1, ledStripDMABuffer[(byteIndex * 8) + 2]);
@@ -79,6 +64,68 @@ TEST(WS2812, updateDMABuffer) {
     EXPECT_EQ(BIT_COMPARE_1, ledStripDMABuffer[(byteIndex * 8) + 7]);
     byteIndex++;
 
+    // Byte 1: R = 0xAA = 10101010
+    EXPECT_EQ(BIT_COMPARE_1, ledStripDMABuffer[(byteIndex * 8) + 0]);
+    EXPECT_EQ(BIT_COMPARE_0, ledStripDMABuffer[(byteIndex * 8) + 1]);
+    EXPECT_EQ(BIT_COMPARE_1, ledStripDMABuffer[(byteIndex * 8) + 2]);
+    EXPECT_EQ(BIT_COMPARE_0, ledStripDMABuffer[(byteIndex * 8) + 3]);
+    EXPECT_EQ(BIT_COMPARE_1, ledStripDMABuffer[(byteIndex * 8) + 4]);
+    EXPECT_EQ(BIT_COMPARE_0, ledStripDMABuffer[(byteIndex * 8) + 5]);
+    EXPECT_EQ(BIT_COMPARE_1, ledStripDMABuffer[(byteIndex * 8) + 6]);
+    EXPECT_EQ(BIT_COMPARE_0, ledStripDMABuffer[(byteIndex * 8) + 7]);
+    byteIndex++;
+
+    // Byte 2: B = 0x55 = 01010101
+    EXPECT_EQ(BIT_COMPARE_0, ledStripDMABuffer[(byteIndex * 8) + 0]);
+    EXPECT_EQ(BIT_COMPARE_1, ledStripDMABuffer[(byteIndex * 8) + 1]);
+    EXPECT_EQ(BIT_COMPARE_0, ledStripDMABuffer[(byteIndex * 8) + 2]);
+    EXPECT_EQ(BIT_COMPARE_1, ledStripDMABuffer[(byteIndex * 8) + 3]);
+    EXPECT_EQ(BIT_COMPARE_0, ledStripDMABuffer[(byteIndex * 8) + 4]);
+    EXPECT_EQ(BIT_COMPARE_1, ledStripDMABuffer[(byteIndex * 8) + 5]);
+    EXPECT_EQ(BIT_COMPARE_0, ledStripDMABuffer[(byteIndex * 8) + 6]);
+    EXPECT_EQ(BIT_COMPARE_1, ledStripDMABuffer[(byteIndex * 8) + 7]);
+    byteIndex++;
+}
+
+TEST(WS2812, updateDMABufferRGB) {
+    // given
+    rgbColor24bpp_t color1 = { .raw = {0xFF,0xAA,0x55} };  // G=0xFF, R=0xAA, B=0x55
+
+    // and
+    dmaBufferOffset = 0;
+
+    // when
+    fastUpdateLEDDMABuffer(LED_RGB, &color1);  // RGB format: R, G, B byte order
+
+    // then: verify byte offset is 24 bits (3 bytes)
+    EXPECT_EQ(24, dmaBufferOffset);
+
+    // and: verify RGB byte ordering (R first = 0xAA)
+    uint8_t byteIndex = 0;
+
+    // Byte 0: R = 0xAA = 10101010
+    EXPECT_EQ(BIT_COMPARE_1, ledStripDMABuffer[(byteIndex * 8) + 0]);
+    EXPECT_EQ(BIT_COMPARE_0, ledStripDMABuffer[(byteIndex * 8) + 1]);
+    EXPECT_EQ(BIT_COMPARE_1, ledStripDMABuffer[(byteIndex * 8) + 2]);
+    EXPECT_EQ(BIT_COMPARE_0, ledStripDMABuffer[(byteIndex * 8) + 3]);
+    EXPECT_EQ(BIT_COMPARE_1, ledStripDMABuffer[(byteIndex * 8) + 4]);
+    EXPECT_EQ(BIT_COMPARE_0, ledStripDMABuffer[(byteIndex * 8) + 5]);
+    EXPECT_EQ(BIT_COMPARE_1, ledStripDMABuffer[(byteIndex * 8) + 6]);
+    EXPECT_EQ(BIT_COMPARE_0, ledStripDMABuffer[(byteIndex * 8) + 7]);
+    byteIndex++;
+
+    // Byte 1: G = 0xFF = 11111111 (all 1's)
+    EXPECT_EQ(BIT_COMPARE_1, ledStripDMABuffer[(byteIndex * 8) + 0]);
+    EXPECT_EQ(BIT_COMPARE_1, ledStripDMABuffer[(byteIndex * 8) + 1]);
+    EXPECT_EQ(BIT_COMPARE_1, ledStripDMABuffer[(byteIndex * 8) + 2]);
+    EXPECT_EQ(BIT_COMPARE_1, ledStripDMABuffer[(byteIndex * 8) + 3]);
+    EXPECT_EQ(BIT_COMPARE_1, ledStripDMABuffer[(byteIndex * 8) + 4]);
+    EXPECT_EQ(BIT_COMPARE_1, ledStripDMABuffer[(byteIndex * 8) + 5]);
+    EXPECT_EQ(BIT_COMPARE_1, ledStripDMABuffer[(byteIndex * 8) + 6]);
+    EXPECT_EQ(BIT_COMPARE_1, ledStripDMABuffer[(byteIndex * 8) + 7]);
+    byteIndex++;
+
+    // Byte 2: B = 0x55 = 01010101
     EXPECT_EQ(BIT_COMPARE_0, ledStripDMABuffer[(byteIndex * 8) + 0]);
     EXPECT_EQ(BIT_COMPARE_1, ledStripDMABuffer[(byteIndex * 8) + 1]);
     EXPECT_EQ(BIT_COMPARE_0, ledStripDMABuffer[(byteIndex * 8) + 2]);
