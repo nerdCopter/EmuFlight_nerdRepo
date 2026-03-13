@@ -180,7 +180,7 @@ uint32_t fixedMillis = 0;
 baro_t baro;
 
 int32_t getEstimatedAltitude(void) { return 0; }
-uint32_t getEstimatedVario() { return 0; }
+int16_t getEstimatedVario(void) { return 0; }
 
 uint32_t millis(void) {
     return fixedMillis;
