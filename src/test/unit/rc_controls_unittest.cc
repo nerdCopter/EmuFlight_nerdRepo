@@ -250,28 +250,34 @@ extern "C" {
         .data = { 1 }
     };
 }
+
+// Helper function to create a default control rate configuration for tests
+static controlRateConfig_t makeDefaultControlRateConfig() {
+    return controlRateConfig_t {
+        .thrMid8 = 0,
+        .thrExpo8 = 0,
+        .rates_type = 0,
+        .rcRates = {90, 90, 0},
+        .rcExpo = {0, 0, 0},
+        .rates = {0, 0, 0},
+        .addRollToYawRc = 0,
+        .addYawToRollRc = 0,
+        .rollPitchMagExpo = 0,
+        .rateDynamics = {0, 0, 0, 0, 0, 0},
+        .dynThrP = 0,
+        .dynThrI = 0,
+        .dynThrD = 0,
+        .tpa_breakpoint = 0,
+        .throttle_limit_type = 0,
+        .throttle_limit_percent = 0,
+        .vbat_comp_type = 0,
+        .vbat_comp_ref = 0
+    };
+}
+
 class RcControlsAdjustmentsTest : public ::testing::Test {
 protected:
-    controlRateConfig_t controlRateConfig = {
-            .thrMid8 = 0,
-            .thrExpo8 = 0,
-            .rates_type = 0,
-            .rcRates = {90, 90, 0},
-            .rcExpo = {0, 0, 0},
-            .rates = {0, 0, 0},
-            .addRollToYawRc = 0,
-            .addYawToRollRc = 0,
-            .rollPitchMagExpo = 0,
-            .rateDynamics = {0, 0, 0, 0, 0, 0},
-            .dynThrP = 0,
-            .dynThrI = 0,
-            .dynThrD = 0,
-            .tpa_breakpoint = 0,
-            .throttle_limit_type = 0,
-            .throttle_limit_percent = 0,
-            .vbat_comp_type = 0,
-            .vbat_comp_ref = 0
-    };
+    controlRateConfig_t controlRateConfig = makeDefaultControlRateConfig();
 
     virtual void SetUp() {
         adjustmentStateMask = 0;
@@ -327,26 +333,7 @@ TEST_F(RcControlsAdjustmentsTest, processRcAdjustmentsSticksInMiddle)
 TEST_F(RcControlsAdjustmentsTest, processRcAdjustmentsWithRcRateFunctionSwitchUp)
 {
     // given
-    controlRateConfig_t controlRateConfig = {
-            .thrMid8 = 0,
-            .thrExpo8 = 0,
-            .rates_type = 0,
-            .rcRates = {90, 90, 0},
-            .rcExpo = {0, 0, 0},
-            .rates = {0, 0, 0},
-            .addRollToYawRc = 0,
-            .addYawToRollRc = 0,
-            .rollPitchMagExpo = 0,
-            .rateDynamics = {0, 0, 0, 0, 0, 0},
-            .dynThrP = 0,
-            .dynThrI = 0,
-            .dynThrD = 0,
-            .tpa_breakpoint = 0,
-            .throttle_limit_type = 0,
-            .throttle_limit_percent = 0,
-            .vbat_comp_type = 0,
-            .vbat_comp_ref = 0
-    };
+    controlRateConfig_t controlRateConfig = makeDefaultControlRateConfig();
 
     // and
     PG_RESET(rxConfig);
