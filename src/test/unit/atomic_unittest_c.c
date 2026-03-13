@@ -5,16 +5,16 @@ struct barrierTrace {
 };
 
 // Cleanup function for atomic barrier testing
-static void __atomic_barrier_cleanup(struct barrierTrace **barrier_ptr) {
+static void atomic_test_barrier_cleanup(struct barrierTrace **barrier_ptr) {
     if (barrier_ptr && *barrier_ptr) {
         (*barrier_ptr)->leave++;
     }
 }
 
 // Macro helper to create unique identifier for each use
-#define __ATOMIC_CONCAT(a, b) a ## b
-#define __ATOMIC_MAKE_UNIQUE(x, line) __ATOMIC_CONCAT(x, line)
-#define __UNIQUE __ATOMIC_MAKE_UNIQUE(__barrier_, __LINE__)
+#define atomic_test_CONCAT(a, b) a ## b
+#define atomic_test_MAKE_UNIQUE(x, line) atomic_test_CONCAT(x, line)
+#define ATOMIC_TEST_UNIQUE atomic_test_MAKE_UNIQUE(atomic_test_barrier_, __LINE__)
 
 int testAtomicBarrier_C(struct barrierTrace *b0, struct barrierTrace *b1, struct barrierTrace sample[][2]) {
     int sIdx = 0;
@@ -27,8 +27,8 @@ int testAtomicBarrier_C(struct barrierTrace *b0, struct barrierTrace *b1, struct
 #define ATOMIC_BARRIER_LEAVE(ptr, refStr) do {(ptr)->leave++; } while(0)
 // For C code, use __cleanup__ to track when we leave scope
 #define ATOMIC_BARRIER(data) \
-    struct barrierTrace *__attribute__((cleanup(__atomic_barrier_cleanup))) __UNIQUE = &(data); \
-    ATOMIC_BARRIER_ENTER(__UNIQUE, #data); \
+    struct barrierTrace *__attribute__((cleanup(atomic_test_barrier_cleanup))) ATOMIC_TEST_UNIQUE = &(data); \
+    ATOMIC_BARRIER_ENTER(ATOMIC_TEST_UNIQUE, #data); \
     do {} while(0)
     b0->enter = 0;
     b0->leave = 0;
