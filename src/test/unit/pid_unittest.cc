@@ -485,9 +485,11 @@ TEST(pidControllerTest, testCrashRecoveryMode) {
     // Loop must persist long enough to satisfy crash_time threshold
     int crashTimeLoops = (int)((pidProfile->crash_time * 1000) / targetPidLooptime) + 20;
     
+    int actualLoopsExecuted = 0;
     for (int loop = 0; loop < crashTimeLoops; loop++) {
         gyro.gyroADCf[FD_ROLL] = 500.0f;
         pidController(pidProfile, &rollAndPitchTrims, currentTestTime());
+        actualLoopsExecuted++;
         
         // Check if crash recovery was triggered
         if (crashRecoveryModeActive()) {
@@ -495,9 +497,24 @@ TEST(pidControllerTest, testCrashRecoveryMode) {
         }
     }
 
-    // Note: This test verifies crash recovery can be activated
-    // The actual triggering depends on all thresholds being met simultaneously
-    EXPECT_TRUE(crashRecoveryModeActive());
+    // Capture diagnostic state for failure context
+    const float controllerMixRange = simulatedControllerMixRange;
+    const float gyroRoll = gyro.gyroADCf[FD_ROLL];
+    const float dTermRoll = pidData[FD_ROLL].D;
+    const uint16_t crashDtermThreshold = pidProfile->crash_dthreshold;
+    const uint16_t crashGyroThreshold = pidProfile->crash_gthreshold;
+    const uint16_t crashSetpointThreshold = pidProfile->crash_setpoint_threshold;
+    const uint16_t crashTime = pidProfile->crash_time;
+
+    // Test with diagnostic context
+    EXPECT_TRUE(crashRecoveryModeActive()) 
+        << "Crash recovery not activated after " << actualLoopsExecuted << " loops\n"
+        << "Controller mix range: " << controllerMixRange << " (threshold: >= 1.0)\n"
+        << "Gyro roll: " << gyroRoll << " (threshold for selection: > " << crashGyroThreshold << ")\n"
+        << "D-term roll: " << dTermRoll << " (threshold: > " << crashDtermThreshold << ")\n"
+        << "Crash time buffer: " << crashTime << "ms\n"
+        << "Expected loops: " << crashTimeLoops << ", Actual: " << actualLoopsExecuted << "\n"
+        << "Setpoint threshold: " << crashSetpointThreshold;
 }
 
 TEST(pidControllerTest, pidSetpointTransition) {
