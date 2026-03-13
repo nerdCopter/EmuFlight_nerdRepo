@@ -345,11 +345,11 @@ bool isBatteryVoltageConfigured(void) { return true; }
 bool isAmperageConfigured(void) { return true; }
 
 // CRSF telemetry stubs (missing from original test)
-void CRSFsetLQ(uint16_t crsflqValue) { (void)crsflqValue; }
-void CRSFsetRFMode(uint8_t crsfrfValue) { (void)crsfrfValue; }
-void CRSFsetSnR(uint16_t crsfsnrValue) { (void)crsfsnrValue; }
-void CRSFsetTXPower(uint16_t crsftxpValue) { (void)crsftxpValue; }
-void CRSFsetRSSI(uint8_t crsfrssiValue) { (void)crsfrssiValue; }
+void CRSFsetLQ(uint16_t crsflqValue) { UNUSED(crsflqValue); }
+void CRSFsetRFMode(uint8_t crsfrfValue) { UNUSED(crsfrfValue); }
+void CRSFsetSnR(uint16_t crsfsnrValue) { UNUSED(crsfsnrValue); }
+void CRSFsetTXPower(uint16_t crsftxpValue) { UNUSED(crsftxpValue); }
+void CRSFsetRSSI(uint8_t crsfrssiValue) { UNUSED(crsfrssiValue); }
 
 // Battery stub (missing from original test)
 uint8_t getBatteryCellCount(void) { return 3; }
