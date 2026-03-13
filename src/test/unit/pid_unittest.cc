@@ -17,6 +17,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 #include <limits.h>
 #include <cmath>
 
@@ -149,6 +150,10 @@ void resetTest(void) {
     simulateMixerSaturated = false;
     simulatedThrottlePIDAttenuation = 1.0f;
     simulatedControllerMixRange = 0.0f;
+
+    // Explicitly initialize gyroConfig_System to zeroed state for deterministic testing
+    // Firmware defaults would be applied via pgResetAll(), but we define defaults here for test isolation
+    memset(&gyroConfig_System, 0, sizeof(gyroConfig_t));
 
     pidStabilisationState(PID_STABILISATION_OFF);
     DISABLE_ARMING_FLAG(ARMED);
