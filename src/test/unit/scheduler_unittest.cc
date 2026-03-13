@@ -279,7 +279,7 @@ TEST(SchedulerUnittest, TestQueue)
     EXPECT_EQ(NULL, queueNext());
     EXPECT_EQ(NULL, taskQueueArray[TASK_COUNT]); // NULL terminator intact
 
-    queueRemove(&cfTasks[TASK_SYSTEM]); // TASK_PRIORITY_HIGH
+    queueRemove(&cfTasks[TASK_SYSTEM]); // TASK_PRIORITY_MEDIUM_HIGH
     EXPECT_EQ(4, taskQueueSize);
     EXPECT_EQ(&cfTasks[TASK_GYROPID], queueFirst());
     EXPECT_EQ(&cfTasks[TASK_RX], queueNext());
