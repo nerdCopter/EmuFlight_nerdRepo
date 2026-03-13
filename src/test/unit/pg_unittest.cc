@@ -62,6 +62,13 @@ TEST(ParameterGroupsfTest, Test_pgResetAll)
     EXPECT_EQ(1850, motorConfig()->maxthrottle);
     EXPECT_EQ(1000, motorConfig()->mincommand);
     EXPECT_EQ(400, motorConfig()->dev.motorPwmRate);
+    // Verify newly initialized fields
+    EXPECT_EQ(0, motorConfig()->digitalIdleOffsetValue);
+    EXPECT_EQ(0, motorConfig()->motorPoleCount);
+    EXPECT_EQ(0, motorConfig()->dev.motorPwmProtocol);
+    EXPECT_EQ(0, motorConfig()->dev.motorPwmInversion);
+    EXPECT_EQ(0, motorConfig()->dev.useUnsyncedPwm);
+    EXPECT_EQ(0, motorConfig()->dev.useBurstDshot);
 }
 
 TEST(ParameterGroupsfTest, Test_pgFind)
@@ -73,6 +80,13 @@ TEST(ParameterGroupsfTest, Test_pgFind)
     EXPECT_EQ(1850, motorConfig()->maxthrottle);
     EXPECT_EQ(1000, motorConfig()->mincommand);
     EXPECT_EQ(400, motorConfig()->dev.motorPwmRate);
+    // Verify newly initialized fields
+    EXPECT_EQ(0, motorConfig()->digitalIdleOffsetValue);
+    EXPECT_EQ(0, motorConfig()->motorPoleCount);
+    EXPECT_EQ(0, motorConfig()->dev.motorPwmProtocol);
+    EXPECT_EQ(0, motorConfig()->dev.motorPwmInversion);
+    EXPECT_EQ(0, motorConfig()->dev.useUnsyncedPwm);
+    EXPECT_EQ(0, motorConfig()->dev.useBurstDshot);
 
     motorConfig_t motorConfig2;
     memset(&motorConfig2, 0, sizeof(motorConfig_t));
@@ -90,6 +104,13 @@ TEST(ParameterGroupsfTest, Test_pgFind)
     EXPECT_EQ(1850, motorConfig3.maxthrottle);
     EXPECT_EQ(1000, motorConfig3.mincommand);
     EXPECT_EQ(400, motorConfig3.dev.motorPwmRate);
+    // Verify newly initialized fields in pgResetCopy
+    EXPECT_EQ(0, motorConfig3.digitalIdleOffsetValue);
+    EXPECT_EQ(0, motorConfig3.motorPoleCount);
+    EXPECT_EQ(0, motorConfig3.dev.motorPwmProtocol);
+    EXPECT_EQ(0, motorConfig3.dev.motorPwmInversion);
+    EXPECT_EQ(0, motorConfig3.dev.useUnsyncedPwm);
+    EXPECT_EQ(0, motorConfig3.dev.useBurstDshot);
 }
 
 // STUBS
