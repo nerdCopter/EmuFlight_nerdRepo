@@ -73,7 +73,7 @@ extern "C" {
     bool gyroOverflowDetected(void) { return false; }
     float getRcDeflection(int axis) { return simulatedRcDeflection[axis]; }
     void beeperConfirmationBeeps(uint8_t) { }
-    
+
     // Additional stubs for pid testing
     void mixerInitProfile(void) { }
     
