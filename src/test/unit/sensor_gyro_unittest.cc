@@ -134,13 +134,19 @@ TEST(SensorGyro, Update)
     EXPECT_EQ(false, isGyroCalibrationComplete());
 
     timeUs_t currentTimeUs = 0;
-    const timeDelta_t gyroUpdatePeriod = 1000; // 1ms = 1kHz update rate
+    const timeDelta_t gyroUpdatePeriod = gyro.targetLooptime;  // Use configured gyro loop time
+    const timeUs_t calibrationTimeoutUs = 2000000;  // 2 seconds timeout for calibration
+    const timeUs_t calibrationStartTime = currentTimeUs;
     
     // Calibrate with constant values
     fakeGyroSet(gyroDevPtr, 5, 6, 7);
     currentTimeUs += gyroUpdatePeriod;
     gyroUpdate(currentTimeUs);
     while (!isGyroCalibrationComplete()) {
+        // Guard against infinite loops - fail if calibration takes too long
+        ASSERT_LE(currentTimeUs - calibrationStartTime, calibrationTimeoutUs) 
+            << "Gyro calibration did not complete within " << (calibrationTimeoutUs / 1000000) << "s";
+        
         fakeGyroSet(gyroDevPtr, 5, 6, 7);
         currentTimeUs += gyroUpdatePeriod;
         gyroUpdate(currentTimeUs);

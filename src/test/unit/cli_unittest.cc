@@ -204,7 +204,7 @@ TEST(CLIUnittest, TestCliVtxInvalidArgumentCount)
 
     cliVtx(correctCmd);  // load some more data into condition 1 so we have something to reset
 
-    char tooManyArgs[] = "1 0 0 0 0 100 200 300";  // 7 arguments, expects 6
+    char tooManyArgs[] = "1 0 0 0 0 100 200 300";  // 8 tokens (index + 7 values), expects 6
     cliVtx(tooManyArgs); //should throw an cli error and reset the line 1
     EXPECT_EQ(0, cac1->auxChannelIndex);
     EXPECT_EQ(0, cac1->band);
@@ -271,7 +271,7 @@ int8_t unitTestDataArray[3];
 
 void pgResetFn_unitTestData(int8_t *ptr) {
     // Reset the PG memory pointed to by ptr  
-    memset(ptr, 0, sizeof(unitTestDataArray));
+    memset(ptr, 0, sizeof(int8_t));  // Clear only the registered single byte, not the full array
 }
 
 uint32_t getBeeperOffMask(void) { return 0; }
