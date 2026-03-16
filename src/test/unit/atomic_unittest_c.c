@@ -59,4 +59,5 @@ int testAtomicBarrier_C(struct barrierTrace *b0, struct barrierTrace *b1, struct
 // ATOMIC_BARRIER is broken in rest of this file
 #undef ATOMIC_BARRIER_ENTER
 #undef ATOMIC_BARRIER_LEAVE
+#undef ATOMIC_BARRIER
 }
