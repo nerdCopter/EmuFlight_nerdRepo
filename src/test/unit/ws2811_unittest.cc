@@ -84,7 +84,6 @@ TEST(WS2812, updateDMABufferGRB) {
     EXPECT_EQ(BIT_COMPARE_1, ledStripDMABuffer[(byteIndex * 8) + 5]);
     EXPECT_EQ(BIT_COMPARE_0, ledStripDMABuffer[(byteIndex * 8) + 6]);
     EXPECT_EQ(BIT_COMPARE_1, ledStripDMABuffer[(byteIndex * 8) + 7]);
-    byteIndex++;
 }
 
 TEST(WS2812, updateDMABufferRGB) {
@@ -134,7 +133,6 @@ TEST(WS2812, updateDMABufferRGB) {
     EXPECT_EQ(BIT_COMPARE_1, ledStripDMABuffer[(byteIndex * 8) + 5]);
     EXPECT_EQ(BIT_COMPARE_0, ledStripDMABuffer[(byteIndex * 8) + 6]);
     EXPECT_EQ(BIT_COMPARE_1, ledStripDMABuffer[(byteIndex * 8) + 7]);
-    byteIndex++;
 }
 
 extern "C" {
