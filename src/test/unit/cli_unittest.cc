@@ -60,10 +60,12 @@ extern "C" {
     void cliGet(char *cmdline);
     void cliVtx(char *cmdline);
 
+    static const int UNIT_TEST_DATA_LENGTH = 3;
+
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wc99-designator"
     const clivalue_t valueTable[] = {
-        { "array_unit_test",             VAR_INT8  | MODE_ARRAY | MASTER_VALUE, .config.array.length = 3, PG_RESERVED_FOR_TESTING_1, 0 }
+        { "array_unit_test",             VAR_INT8  | MODE_ARRAY | MASTER_VALUE, .config.array.length = UNIT_TEST_DATA_LENGTH, PG_RESERVED_FOR_TESTING_1, 0 }
     };
     #pragma GCC diagnostic pop
     const uint16_t valueTableEntryCount = ARRAYLEN(valueTable);
@@ -117,7 +119,7 @@ TEST(CLIUnittest, TestCliSet)
 
     printf("\n===============================\n");
     int8_t *data = (int8_t *)cliGetValuePointer(&cval);
-    for(int i=0; i<3; i++){
+    for(int i=0; i<UNIT_TEST_DATA_LENGTH; i++){
         printf("data[%d] = %d\n", i, data[i]);
     }
     printf("\n===============================\n");
@@ -267,11 +269,11 @@ static const box_t boxes[] = { { 0, "DUMMYBOX", 0 } };
 const box_t *findBoxByPermanentId(uint8_t) { return &boxes[0]; }
 const box_t *findBoxByBoxId(boxId_e) { return &boxes[0]; }
 
-int8_t unitTestDataArray[3];
+int8_t unitTestDataArray[UNIT_TEST_DATA_LENGTH];
 
 void pgResetFn_unitTestData(int8_t *ptr) {
-    // Reset the full PG memory array (3 elements)
-    memset(ptr, 0, 3 * sizeof(int8_t));
+    // Reset the full PG memory array (UNIT_TEST_DATA_LENGTH elements)
+    memset(ptr, 0, UNIT_TEST_DATA_LENGTH * sizeof(int8_t));
 }
 
 uint32_t getBeeperOffMask(void) { return 0; }
