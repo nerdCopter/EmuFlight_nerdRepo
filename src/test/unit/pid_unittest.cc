@@ -483,6 +483,8 @@ TEST(pidControllerTest, testCrashRecoveryMode) {
     
     // Run with high gyro to build D-term and error
     // Loop must persist long enough to satisfy crash_time threshold
+    // crashTimeLoops: pidProfile->crash_time is in seconds; multiply by 1000 to convert to ms,
+    // divide by targetPidLooptime (in µs, so converts ms to loop iterations), +20 adds safety margin
     int crashTimeLoops = (int)((pidProfile->crash_time * 1000) / targetPidLooptime) + 20;
     
     int actualLoopsExecuted = 0;
