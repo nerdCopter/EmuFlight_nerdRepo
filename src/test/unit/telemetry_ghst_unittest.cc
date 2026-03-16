@@ -163,11 +163,11 @@ TEST(TelemetryGhstTest, DISABLED_TestBattery)
     EXPECT_EQ(GHST_DL_PACK_STAT, telemetryBuf[2]);  // type
     
     // Validate battery data (all zeros initially)
-    voltage = (uint16_t)telemetryBuf[4] << 8 | telemetryBuf[3]; // volts * 100 (little-endian: LSB [3], MSB [4])
+    voltage = ((uint16_t)telemetryBuf[4] << 8) | (uint16_t)telemetryBuf[3]; // volts * 100 (little-endian: LSB [3], MSB [4])
     EXPECT_EQ(0, voltage);
-    current = (uint16_t)telemetryBuf[6] << 8 | telemetryBuf[5]; // amps * 100 (little-endian)
+    current = ((uint16_t)telemetryBuf[6] << 8) | (uint16_t)telemetryBuf[5]; // amps * 100 (little-endian)
     EXPECT_EQ(0, current);
-    usedMah = (uint32_t)telemetryBuf[9] << 16 | (uint16_t)telemetryBuf[8] << 8 | telemetryBuf[7]; // mAh (LE: [7]=LSB, [8]=mid, [9]=MSB)
+    usedMah = ((uint32_t)telemetryBuf[9] << 16) | ((uint32_t)telemetryBuf[8] << 8) | (uint32_t)telemetryBuf[7]; // mAh (LE: [7]=LSB, [8]=mid, [9]=MSB)
     EXPECT_EQ(0, usedMah);
 
     // Update battery values and test again
