@@ -69,6 +69,7 @@ TEST(ParameterGroupsfTest, Test_pgResetAll)
     EXPECT_EQ(0, motorConfig()->dev.motorPwmInversion);
     EXPECT_EQ(0, motorConfig()->dev.useUnsyncedPwm);
     EXPECT_EQ(0, motorConfig()->dev.useBurstDshot);
+    EXPECT_EQ(0, motorConfig()->dev.ioTags[0]);  // Verify ioTags array is zero-initialized
 }
 
 TEST(ParameterGroupsfTest, Test_pgFind)
@@ -87,6 +88,7 @@ TEST(ParameterGroupsfTest, Test_pgFind)
     EXPECT_EQ(0, motorConfig()->dev.motorPwmInversion);
     EXPECT_EQ(0, motorConfig()->dev.useUnsyncedPwm);
     EXPECT_EQ(0, motorConfig()->dev.useBurstDshot);
+    EXPECT_EQ(0, motorConfig()->dev.ioTags[0]);  // Verify ioTags array is zero-initialized
 
     motorConfig_t motorConfig2;
     memset(&motorConfig2, 0, sizeof(motorConfig_t));
@@ -111,6 +113,7 @@ TEST(ParameterGroupsfTest, Test_pgFind)
     EXPECT_EQ(0, motorConfig3.dev.motorPwmInversion);
     EXPECT_EQ(0, motorConfig3.dev.useUnsyncedPwm);
     EXPECT_EQ(0, motorConfig3.dev.useBurstDshot);
+    EXPECT_EQ(0, motorConfig3.dev.ioTags[0]);  // Verify ioTags array is zero-initialized
 }
 
 // STUBS
