@@ -25,8 +25,14 @@
 #include "arm_math.h"
 #else
 // Fallback for SITL and non-ARM targets
-static inline void arm_sqrt_f32(float x, float *out) {
+typedef enum {
+    ARM_MATH_SUCCESS = 0,
+    ARM_MATH_ARGUMENT_ERROR = -1
+} arm_status;
+
+static inline arm_status arm_sqrt_f32(float x, float *out) {
     *out = sqrtf(x);
+    return ARM_MATH_SUCCESS;
 }
 #endif
 
