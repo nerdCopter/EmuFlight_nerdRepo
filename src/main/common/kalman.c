@@ -31,6 +31,10 @@ typedef enum {
 } arm_status;
 
 static inline arm_status arm_sqrt_f32(float x, float *out) {
+    if (x < 0.0f) {
+        *out = 0.0f;
+        return ARM_MATH_ARGUMENT_ERROR;
+    }
     *out = sqrtf(x);
     return ARM_MATH_SUCCESS;
 }

@@ -56,7 +56,7 @@ const timerHardware_t timerHardware[1]; // unused
 #include "target/SITL/udplink.h"
 
 // System clock for SITL (fake 500MHz)
-uint32_t SystemCoreClock = 500 * 1e6;
+uint32_t SystemCoreClock = 500000000u;
 
 static fdm_packet fdmPkt;
 static servo_packet pwmPkt;
@@ -189,7 +189,7 @@ void systemInit(void) {
     int ret;
     clock_gettime(CLOCK_MONOTONIC, &start_time);
     printf("[system]Init...\n");
-    SystemCoreClock = 500 * 1e6; // fake 500MHz
+    // SystemCoreClock initialized as static at declaration
     FLASH_Unlock();
     if (pthread_mutex_init(&updateLock, NULL) != 0) {
         printf("Create updateLock error!\n");
