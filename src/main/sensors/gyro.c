@@ -23,6 +23,7 @@
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
+#pragma GCC diagnostic ignored "-Wpedantic"
 
 #include "platform.h"
 
@@ -1456,5 +1457,7 @@ void initYawSpinRecovery(int maxYawRate)
 
     yawSpinRecoveryEnabled = enabledFlag;
     yawSpinRecoveryThreshold = threshold;
+
+#pragma GCC diagnostic pop
 }
 #endif

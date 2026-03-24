@@ -22,6 +22,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <math.h>
+#pragma GCC diagnostic ignored "-Wpedantic"
 
 #include "platform.h"
 
@@ -555,4 +556,6 @@ bool accIsHealthy(quaternion *q) {
     float accModulus = quaternionModulus(q);
     accModulus = accModulus / acc.dev.acc_1G;
     return ((0.93f < accModulus) && (accModulus < 1.07f));
+
+#pragma GCC diagnostic pop
 }
