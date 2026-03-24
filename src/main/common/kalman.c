@@ -21,7 +21,7 @@
 #include <string.h>
 #include <math.h>
 
-#ifdef USE_ARM_MATH
+#ifndef SIMULATOR_BUILD
 #include "arm_math.h"
 #endif
 
