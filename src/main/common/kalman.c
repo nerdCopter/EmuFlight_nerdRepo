@@ -21,8 +21,13 @@
 #include <string.h>
 #include <math.h>
 
-#ifndef SIMULATOR_BUILD
+#ifdef USE_ARM_MATH
 #include "arm_math.h"
+#else
+// Fallback for SITL and non-ARM targets
+static inline void arm_sqrt_f32(float x, float *out) {
+    *out = sqrtf(x);
+}
 #endif
 
 #include "kalman.h"
