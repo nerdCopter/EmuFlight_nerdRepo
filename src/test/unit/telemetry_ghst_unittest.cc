@@ -92,8 +92,6 @@ extern "C" {
 extern "C" {
     uint8_t *ghstGetTelemetryBuf(void);     // Returns pointer to telemetryBuf
     uint8_t ghstGetTelemetryBufLen(void);   // Returns telemetryBufLen
-    void testAdvanceMicros(uint32_t delta); // Advance fake time for scheduler testing
-    void resetFakeMicros(void);             // Reset fake time for test isolation
 }
 
 #include "unittest_macros.h"
@@ -190,7 +188,7 @@ TEST(TelemetryGhstTest, DISABLED_TestBattery)
     EXPECT_EQ(testBatteryVoltage * kVoltScale, voltage);
     current = (uint16_t)telemetryBuf[6] << 8 | telemetryBuf[5]; // amps * 100 (little-endian)
     EXPECT_EQ(testAmperage, current);
-    usedMah = (uint32_t)telemetryBuf[9] << 16 | (uint16_t)telemetryBuf[8] << 8 | telemetryBuf[7]; // mAh (LE)
+    usedMah = ((uint32_t)telemetryBuf[9] << 16) | ((uint32_t)telemetryBuf[8] << 8) | (uint32_t)telemetryBuf[7]; // mAh (LE)
     EXPECT_EQ(testmAhDrawn / kMahScale, usedMah);
 
 }
@@ -238,7 +236,7 @@ TEST(TelemetryGhstTest, DISABLED_TestBatteryCellVoltage)
     current = (uint16_t)telemetryBuf[6] << 8 | telemetryBuf[5]; // amps * 100 (little-endian)
     EXPECT_EQ(testAmperage, current);
     
-    usedMah = (uint32_t)telemetryBuf[9] << 16 | (uint16_t)telemetryBuf[8] << 8 | telemetryBuf[7]; // mAh (LE)
+    usedMah = ((uint32_t)telemetryBuf[9] << 16) | ((uint32_t)telemetryBuf[8] << 8) | (uint32_t)telemetryBuf[7]; // mAh (LE)
     EXPECT_EQ(testmAhDrawn/10, usedMah);
 }
 

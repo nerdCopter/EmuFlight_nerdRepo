@@ -134,7 +134,9 @@ TEST(SensorGyro, Update)
     EXPECT_EQ(false, isGyroCalibrationComplete());
 
     timeUs_t currentTimeUs = 0;
-    const timeDelta_t gyroUpdatePeriod = gyro.targetLooptime;  // Use configured gyro loop time
+    timeDelta_t gyroUpdatePeriod = gyro.targetLooptime;  // Use configured gyro loop time
+    // Guard against zero targetLooptime which would cause infinite loop
+    ASSERT_NE(0, gyroUpdatePeriod) << "gyro.targetLooptime must be non-zero for calibration";
     const timeUs_t calibrationTimeoutUs = 2000000;  // 2 seconds timeout for calibration
     const timeUs_t calibrationStartTime = currentTimeUs;
     
@@ -179,10 +181,10 @@ TEST(SensorGyro, Update)
     EXPECT_GT(fabsf(gyro.gyroADCf[Y] - prevY), gyroChangeThreshold);
     EXPECT_GT(fabsf(gyro.gyroADCf[Z] - prevZ), gyroChangeThreshold);
     
-    // Values should be positive (since input increased)
-    EXPECT_GT(gyro.gyroADCf[X], 1.0f);
-    EXPECT_GT(gyro.gyroADCf[Y], 1.0f);
-    EXPECT_GT(gyro.gyroADCf[Z], 1.0f);
+    // Values should move upward from previous samples
+    EXPECT_GT(gyro.gyroADCf[X], prevX);
+    EXPECT_GT(gyro.gyroADCf[Y], prevY);
+    EXPECT_GT(gyro.gyroADCf[Z], prevZ);
 }
 
 // STUBS

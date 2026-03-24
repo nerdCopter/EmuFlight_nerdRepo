@@ -275,7 +275,7 @@ TEST(TelemetryCrsfTest, TestFlightMode)
     EXPECT_EQ('R', frame[5]);
     EXPECT_EQ(0, frame[6]);
     EXPECT_EQ(crfsCrc(frame, frameLen), frame[7]);
-}
+    DISABLE_ARMING_FLAG(ARMED);}
 
 // STUBS
 

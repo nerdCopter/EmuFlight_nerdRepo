@@ -82,13 +82,6 @@ static void ghstInitializeFrame(sbuf_t *dst)
     sbufWriteU8(dst, GHST_ADDR_RX);
 }
 
-// Unit test accessor function - only used during testing
-#ifdef UNITTEST
-STATIC_UNIT_TESTED uint8_t *getGhstFrame(){
-    return ghstFrame;
-}
-#endif
-
 static void ghstFinalize(sbuf_t *dst)
 {
     crc8_dvb_s2_sbuf_append(dst, &ghstFrame[2]); // start at byte 2, since CRC does not include device address and frame length

@@ -17,7 +17,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <string.h>
+#include <cstring>
 #include <limits.h>
 #include <cmath>
 

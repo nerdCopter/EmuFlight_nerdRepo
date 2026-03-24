@@ -53,8 +53,7 @@ extern "C" {
 
     int16_t rcData[MAX_SUPPORTED_RC_CHANNEL_COUNT];     // interval [1000;2000]
 
-    // switchStates is defined in rcdevice_cam.c which is linked into this test
-    // extern rcdeviceSwitchState_t switchStates[BOXCAMERA3 - BOXCAMERA1 + 1];
+    // switchStates is declared in io/rcdevice_cam.h and defined in rcdevice_cam.c.
     extern runcamDevice_t *camDevice;
     extern bool isButtonPressed;
     extern bool rcdeviceInMenu;

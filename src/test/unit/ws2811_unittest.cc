@@ -41,7 +41,7 @@ STATIC_UNIT_TESTED void updateLEDDMABuffer(uint8_t componentValue);
 static void verifyByteBits(uint8_t byteIndex, uint8_t expectedValue) {
     for (int bit = 7; bit >= 0; --bit) {
         uint8_t expectedBit = (expectedValue >> bit) & 1;
-        uint8_t expectedCompare = expectedBit ? BIT_COMPARE_1 : BIT_COMPARE_0;
+        const auto expectedCompare = expectedBit ? BIT_COMPARE_1 : BIT_COMPARE_0;
         EXPECT_EQ(expectedCompare, ledStripDMABuffer[(byteIndex * 8) + (7 - bit)]);
     }
 }

@@ -317,7 +317,7 @@ TEST_F(RcControlsAdjustmentsTest, processRcAdjustmentsSticksInMiddle)
 TEST_F(RcControlsAdjustmentsTest, processRcAdjustmentsWithRcRateFunctionSwitchUp)
 {
     // given
-    controlRateConfig_t controlRateConfig = makeDefaultControlRateConfig();
+    controlRateConfig_t localControlRateConfig = makeDefaultControlRateConfig();
 
     // and
     PG_RESET(rxConfig);
@@ -350,11 +350,11 @@ TEST_F(RcControlsAdjustmentsTest, processRcAdjustmentsWithRcRateFunctionSwitchUp
     fixedMillis = 496;
 
     // when
-    processRcAdjustments(&controlRateConfig);
+    processRcAdjustments(&localControlRateConfig);
 
     // then
-    EXPECT_EQ(controlRateConfig.rcRates[FD_ROLL], 91);
-    EXPECT_EQ(controlRateConfig.rcRates[FD_PITCH], 91);
+    EXPECT_EQ(localControlRateConfig.rcRates[FD_ROLL], 91);
+    EXPECT_EQ(localControlRateConfig.rcRates[FD_PITCH], 91);
     EXPECT_EQ(CALL_COUNTER(COUNTER_QUEUE_CONFIRMATION_BEEP), 1);
     EXPECT_EQ(adjustmentStateMask, expectedAdjustmentStateMask);
 

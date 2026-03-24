@@ -859,5 +859,5 @@ extern "C" {
     bool usbCableIsInserted(void) { return false; }
     bool usbVcpIsConnected(void) { return false; }
     void pinioBoxTaskControl(void) {}
-    void updateRcRefreshRate(uint16_t) {}
+    void updateRcRefreshRate(timeUs_t) {}
 }
