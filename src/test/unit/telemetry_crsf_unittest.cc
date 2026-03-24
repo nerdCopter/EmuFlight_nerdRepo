@@ -213,15 +213,29 @@ TEST(TelemetryCrsfTest, TestAttitude)
     EXPECT_EQ(crfsCrc(frame, frameLen), frame[9]);
 }
 
-TEST(TelemetryCrsfTest, TestFlightMode)
+// Fixture for flight mode test to ensure proper cleanup of global state
+class TelemetryCrsfFlightModeTest : public ::testing::Test {
+protected:
+    void SetUp() override {
+        // Arm the system so firmware doesn't return "WAIT" mode
+        ENABLE_ARMING_FLAG(ARMED);
+        airMode = false;
+    }
+
+    void TearDown() override {
+        // Clean up global state to prevent test interference
+        DISABLE_ARMING_FLAG(ARMED);
+        disableFlightMode(ANGLE_MODE);
+        disableFlightMode(HORIZON_MODE);
+        airMode = false;
+    }
+};
+
+TEST_F(TelemetryCrsfFlightModeTest, TestFlightMode)
 {
     uint8_t frame[CRSF_FRAME_SIZE_MAX];
 
-    // Arm the system so firmware doesn't return "WAIT" mode
-    ENABLE_ARMING_FLAG(ARMED);
-
-    // nothing set, so ACRO mode
-    airMode = false;
+    // nothing set, so ACRO mode (system already armed from SetUp)
     int frameLen = getCrsfFrame(frame, CRSF_FRAMETYPE_FLIGHT_MODE);
     EXPECT_EQ(5 + FRAME_HEADER_FOOTER_LEN, frameLen);
     EXPECT_EQ(CRSF_SYNC_BYTE, frame[0]); // address
@@ -275,7 +289,6 @@ TEST(TelemetryCrsfTest, TestFlightMode)
     EXPECT_EQ('R', frame[5]);
     EXPECT_EQ(0, frame[6]);
     EXPECT_EQ(crfsCrc(frame, frameLen), frame[7]);
-    DISABLE_ARMING_FLAG(ARMED);
 }
 
 // STUBS

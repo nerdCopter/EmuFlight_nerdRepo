@@ -121,9 +121,9 @@ TEST(SensorGyro, Update)
 {
     pgResetAll();
     // Minimize filtering for more predictable behavior
-    gyroConfigMutable()->gyro_lowpass_hz[0] = 0;
+    gyroConfigMutable()->gyro_lowpass_hz[X] = 0;
 #ifdef USE_GYRO_LPF2
-    gyroConfigMutable()->gyro_lowpass2_hz[0] = 0;
+    gyroConfigMutable()->gyro_lowpass2_hz[X] = 0;
 #endif
     gyroConfigMutable()->gyro_soft_notch_hz_1 = 0;
     gyroConfigMutable()->gyro_soft_notch_hz_2 = 0;

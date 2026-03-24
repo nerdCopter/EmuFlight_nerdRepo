@@ -112,7 +112,7 @@ TEST(CLIUnittest, TestCliSet)
     const clivalue_t cval = {
         .name = "array_unit_test",
         .type = MODE_ARRAY | MASTER_VALUE | VAR_INT8,
-        .config = {.array.length = 3},
+        .config = {.array.length = UNIT_TEST_DATA_LENGTH},
         .pgn = PG_RESERVED_FOR_TESTING_1,
         .offset = 0
     };

@@ -60,18 +60,14 @@ TEST(WS2812, updateDMABufferGRB) {
     EXPECT_EQ(24, dmaBufferOffset);
 
     // and: verify GRB byte ordering (G first = 0xFF all 1's)
-    uint8_t byteIndex = 0;
-
     // Byte 0: G = 0xFF = 11111111
-    verifyByteBits(byteIndex, 0xFF);
-    byteIndex++;
+    verifyByteBits(0, 0xFF);
 
     // Byte 1: R = 0xAA = 10101010
-    verifyByteBits(byteIndex, 0xAA);
-    byteIndex++;
+    verifyByteBits(1, 0xAA);
 
     // Byte 2: B = 0x55 = 01010101
-    verifyByteBits(byteIndex, 0x55);
+    verifyByteBits(2, 0x55);
 }
 
 TEST(WS2812, updateDMABufferRGB) {
@@ -88,18 +84,14 @@ TEST(WS2812, updateDMABufferRGB) {
     EXPECT_EQ(24, dmaBufferOffset);
 
     // and: verify RGB byte ordering (R first = 0xAA)
-    uint8_t byteIndex = 0;
-
     // Byte 0: R = 0xAA = 10101010
-    verifyByteBits(byteIndex, 0xAA);
-    byteIndex++;
+    verifyByteBits(0, 0xAA);
 
     // Byte 1: G = 0xFF = 11111111 (all 1's)
-    verifyByteBits(byteIndex, 0xFF);
-    byteIndex++;
+    verifyByteBits(1, 0xFF);
 
     // Byte 2: B = 0x55 = 01010101
-    verifyByteBits(byteIndex, 0x55);
+    verifyByteBits(2, 0x55);
 }
 
 extern "C" {
