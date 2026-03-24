@@ -203,8 +203,9 @@ TEST(CLIUnittest, TestCliVtxInvalidArgumentCount)
     EXPECT_EQ(900, MODE_STEP_TO_CHANNEL_VALUE(cac1->range.startStep));
     EXPECT_EQ(900, MODE_STEP_TO_CHANNEL_VALUE(cac1->range.endStep));
 
-
-    cliVtx(correctCmd);  // load some more data into condition 1 so we have something to reset
+    // Recreate correctCmd before second call—cliVtx may modify the buffer in-place
+    char correctCmd2[] = "1 1 2 3 4 1000 2000";
+    cliVtx(correctCmd2);  // load some more data into condition 1 so we have something to reset
 
     char tooManyArgs[] = "1 0 0 0 0 100 200 300";  // 8 tokens (index + 7 values), expects 6
     cliVtx(tooManyArgs); //should throw an cli error and reset the line 1

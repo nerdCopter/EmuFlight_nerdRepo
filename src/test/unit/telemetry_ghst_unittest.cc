@@ -131,6 +131,7 @@ uint16_t    mAh Drawn
 // NOTE: Currently disabled pending scheduler rotation details.
 // Infrastructure is ready. To re-enable, drive several GHST windows and break on first nonzero TX.
 // Optionally stub feature(FEATURE_GPS)=false to keep the schedule minimal (PACK_STAT only).
+// TODO(#GHSTBattery-EF-2026): Re-enable battery telemetry tests after scheduler investigation
 TEST(TelemetryGhstTest, DISABLED_TestBattery)
 {
     resetFakeMicros();  // Ensure test isolation by resetting fake time
@@ -199,6 +200,7 @@ TEST(TelemetryGhstTest, DISABLED_TestBattery)
 // when telemetryConfig()->report_cell_voltage is enabled.
 //
 // NOTE: DISABLED - Same as TestBattery. Requires further scheduler investigation.
+// TODO(#GHSTBattery-EF-2026): Re-enable cell voltage test after scheduler investigation
 TEST(TelemetryGhstTest, DISABLED_TestBatteryCellVoltage)
 {
     resetFakeMicros();  // Ensure test isolation by resetting fake time

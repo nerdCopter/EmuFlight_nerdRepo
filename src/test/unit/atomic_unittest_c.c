@@ -26,10 +26,9 @@ int testAtomicBarrier_C(struct barrierTrace *b0, struct barrierTrace *b1, struct
 #define ATOMIC_BARRIER_ENTER(ptr, refStr) do {(ptr)->enter++; } while(0)
 #define ATOMIC_BARRIER_LEAVE(ptr, refStr) do {(ptr)->leave++; } while(0)
 // For C code, use __cleanup__ to track when we leave scope
-#define ATOMIC_BARRIER(data) do { \
+#define ATOMIC_BARRIER(data) \
     struct barrierTrace *__attribute__((cleanup(atomic_test_barrier_cleanup))) ATOMIC_TEST_UNIQUE = &(data); \
-    ATOMIC_BARRIER_ENTER(ATOMIC_TEST_UNIQUE, #data); \
-} while(0)
+    ATOMIC_BARRIER_ENTER(ATOMIC_TEST_UNIQUE, #data)
     b0->enter = 0;
     b0->leave = 0;
     b1->enter = 0;
