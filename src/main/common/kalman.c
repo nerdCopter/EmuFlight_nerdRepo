@@ -73,11 +73,9 @@ void update_kalman_covariance(float rate, int axis) {
     kalmanFilterStateRate[axis].axisMean = kalmanFilterStateRate[axis].axisSumMean * kalmanFilterStateRate[axis].inverseN;
     kalmanFilterStateRate[axis].axisVar = kalmanFilterStateRate[axis].axisSumVar * kalmanFilterStateRate[axis].inverseN;
     float squirt;
-#ifdef USE_ARM_MATH
-    arm_sqrt_f32(kalmanFilterStateRate[axis].axisVar, &squirt);
-#else
-    squirt = sqrtf(fmaxf(kalmanFilterStateRate[axis].axisVar, 0.0f));
-#endif
+    // Clamp variance before sqrt to prevent NaN; arm_sqrt_f32 handles both ARM NEON and C fallback
+    float clampedVar = fmaxf(kalmanFilterStateRate[axis].axisVar, 0.0f);
+    arm_sqrt_f32(clampedVar, &squirt);
     kalmanFilterStateRate[axis].r = squirt * VARIANCE_SCALE;
 }
 
