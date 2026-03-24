@@ -19,7 +19,11 @@
  */
 #ifndef USE_GYRO_IMUF9001
 #include <string.h>
+#include <math.h>
+
+#ifdef USE_ARM_MATH
 #include "arm_math.h"
+#endif
 
 #include "kalman.h"
 #include "fc/fc_rc.h"
@@ -64,7 +68,11 @@ void update_kalman_covariance(float rate, int axis) {
     kalmanFilterStateRate[axis].axisMean = kalmanFilterStateRate[axis].axisSumMean * kalmanFilterStateRate[axis].inverseN;
     kalmanFilterStateRate[axis].axisVar = kalmanFilterStateRate[axis].axisSumVar * kalmanFilterStateRate[axis].inverseN;
     float squirt;
+#ifdef USE_ARM_MATH
     arm_sqrt_f32(kalmanFilterStateRate[axis].axisVar, &squirt);
+#else
+    squirt = sqrtf(kalmanFilterStateRate[axis].axisVar);
+#endif
     kalmanFilterStateRate[axis].r = squirt * VARIANCE_SCALE;
 }
 

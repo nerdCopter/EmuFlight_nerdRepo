@@ -55,6 +55,9 @@ const timerHardware_t timerHardware[1]; // unused
 #include "dyad.h"
 #include "target/SITL/udplink.h"
 
+// System clock for SITL (fake 500MHz)
+uint32_t SystemCoreClock = 500 * 1e6;
+
 static fdm_packet fdmPkt;
 static servo_packet pwmPkt;
 

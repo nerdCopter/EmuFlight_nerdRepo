@@ -22,7 +22,7 @@
 
 #include <stdint.h>
 
-#if !defined(UNIT_TEST)
+#if !defined(UNIT_TEST) && !defined(SIMULATOR_BUILD)
 // BASEPRI manipulation functions
 // only set_BASEPRI is implemented in device library. It does always create memory barrier
 // missing versions are implemented here
@@ -39,8 +39,8 @@ __attribute__( ( always_inline ) ) static inline void __set_BASEPRI_MAX_nb(uint3
 
 #endif
 
-#if defined(UNIT_TEST)
-// atomic related functions for unittest.
+#if defined(UNIT_TEST) || defined(SIMULATOR_BUILD)
+// atomic related functions for unit tests and simulator
 
 extern uint8_t atomic_BASEPRI;
 
