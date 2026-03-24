@@ -144,14 +144,17 @@ TEST(SensorGyro, Update)
     fakeGyroSet(gyroDevPtr, 5, 6, 7);
     currentTimeUs += gyroUpdatePeriod;
     gyroUpdate(currentTimeUs);
+    // Guard against infinite loops - fail if calibration takes too long (check after each update)
+    ASSERT_LE(currentTimeUs - calibrationStartTime, calibrationTimeoutUs) 
+        << "Gyro calibration did not complete within " << (calibrationTimeoutUs / 1000000) << "s";
+    
     while (!isGyroCalibrationComplete()) {
-        // Guard against infinite loops - fail if calibration takes too long
-        ASSERT_LE(currentTimeUs - calibrationStartTime, calibrationTimeoutUs) 
-            << "Gyro calibration did not complete within " << (calibrationTimeoutUs / 1000000) << "s";
-        
         fakeGyroSet(gyroDevPtr, 5, 6, 7);
         currentTimeUs += gyroUpdatePeriod;
         gyroUpdate(currentTimeUs);
+        // Guard against infinite loops - fail if calibration takes too long (check after each update)
+        ASSERT_LE(currentTimeUs - calibrationStartTime, calibrationTimeoutUs) 
+            << "Gyro calibration did not complete within " << (calibrationTimeoutUs / 1000000) << "s";
     }
     
     EXPECT_EQ(true, isGyroCalibrationComplete());
