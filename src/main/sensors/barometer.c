@@ -20,8 +20,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <math.h>
-#pragma GCC diagnostic ignored "-Wpedantic"
+#include <math.h>#pragma GCC diagnostic push#pragma GCC diagnostic ignored "-Wpedantic"
 
 #include "platform.h"
 

@@ -103,7 +103,7 @@ void pgResetFn_motorConfig(motorConfig_t *motorConfig) {
 #ifdef USE_DSHOT
         motorConfig->dev.motorPwmProtocol = PWM_TYPE_DSHOT600;
 #else
-        motorConfig->dev.motorPwmProtocol = PWM_TYPE_ONESHOT42;
+        motorConfig->dev.motorPwmProtocol = PWM_TYPE_STANDARD;
 #endif
     }
 #endif

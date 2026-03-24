@@ -23,6 +23,7 @@
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 
 #include "platform.h"
@@ -649,6 +650,7 @@ static bool gyroInitSensor(gyroSensor_t *gyroSensor) {
 #endif
     return true;
 }
+#pragma GCC diagnostic pop
 
 bool gyroInit(void) {
 #ifdef USE_GYRO_OVERFLOW_CHECK

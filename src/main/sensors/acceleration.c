@@ -22,6 +22,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <math.h>
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 
 #include "platform.h"

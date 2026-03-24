@@ -76,7 +76,7 @@ void update_kalman_covariance(float rate, int axis) {
 #ifdef USE_ARM_MATH
     arm_sqrt_f32(kalmanFilterStateRate[axis].axisVar, &squirt);
 #else
-    squirt = sqrtf(kalmanFilterStateRate[axis].axisVar);
+    squirt = sqrtf(fmaxf(kalmanFilterStateRate[axis].axisVar, 0.0f));
 #endif
     kalmanFilterStateRate[axis].r = squirt * VARIANCE_SCALE;
 }
