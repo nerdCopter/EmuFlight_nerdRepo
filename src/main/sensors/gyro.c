@@ -650,7 +650,6 @@ static bool gyroInitSensor(gyroSensor_t *gyroSensor) {
 #endif
     return true;
 }
-#pragma GCC diagnostic pop
 
 bool gyroInit(void) {
 #ifdef USE_GYRO_OVERFLOW_CHECK
@@ -1450,11 +1449,12 @@ void initYawSpinRecovery(int maxYawRate)
         enabledFlag = true;
         threshold = gyroConfig()->yaw_spin_threshold;
         break;
-    case YAW_SPIN_RECOVERY_AUTO:
+    case YAW_SPIN_RECOVERY_AUTO: {
         enabledFlag = true;
         const int overshootAllowance = MAX(maxYawRate / 4, 200); // Allow a 25% or minimum 200dps overshoot tolerance
         threshold = constrain(maxYawRate + overshootAllowance, YAW_SPIN_RECOVERY_THRESHOLD_MIN, YAW_SPIN_RECOVERY_THRESHOLD_MAX);
         break;
+    }
     }
 
     yawSpinRecoveryEnabled = enabledFlag;
