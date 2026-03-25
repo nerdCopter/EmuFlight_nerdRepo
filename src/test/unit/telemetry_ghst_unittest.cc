@@ -97,6 +97,11 @@ extern "C" {
 #include "unittest_macros.h"
 #include "gtest/gtest.h"
 
+// Fake time for scheduler-driven telemetry
+static uint32_t fakeMicros = 0;
+void resetFakeMicros(void) { fakeMicros = 0; }  // Reset to ensure test isolation
+void testAdvanceMicros(uint32_t delta) { fakeMicros += delta; }
+
 // Helper to drive GHST scheduler until telemetry TX occurs
 static bool driveGhstUntilTx(int maxTries) {
     for (int i = 0; i < maxTries; ++i) {
@@ -260,10 +265,6 @@ gpsSolutionData_t gpsSol;
 
 void beeperConfirmationBeeps(uint8_t beepCount) {UNUSED(beepCount);}
 
-// Fake time for scheduler-driven telemetry
-static uint32_t fakeMicros = 0;
-void resetFakeMicros(void) { fakeMicros = 0; }  // Reset to ensure test isolation
-void testAdvanceMicros(uint32_t delta) { fakeMicros += delta; }
 uint32_t micros(void) { return fakeMicros; }
 uint32_t microsISR(void) { return fakeMicros; }
 

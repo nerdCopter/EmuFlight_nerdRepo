@@ -366,10 +366,10 @@ TEST_F(RcControlsAdjustmentsTest, processRcAdjustmentsWithRcRateFunctionSwitchUp
     fixedMillis = 497;
 
     // when
-    processRcAdjustments(&controlRateConfig);
+    processRcAdjustments(&localControlRateConfig);
 
-    EXPECT_EQ(controlRateConfig.rcRates[FD_ROLL], 91);
-    EXPECT_EQ(controlRateConfig.rcRates[FD_PITCH], 91);
+    EXPECT_EQ(localControlRateConfig.rcRates[FD_ROLL], 91);
+    EXPECT_EQ(localControlRateConfig.rcRates[FD_PITCH], 91);
     EXPECT_EQ(adjustmentStateMask, expectedAdjustmentStateMask);
 
 
@@ -389,10 +389,10 @@ TEST_F(RcControlsAdjustmentsTest, processRcAdjustmentsWithRcRateFunctionSwitchUp
             ~(1 << 0);
 
     // when
-    processRcAdjustments(&controlRateConfig);
+    processRcAdjustments(&localControlRateConfig);
 
-    EXPECT_EQ(controlRateConfig.rcRates[FD_ROLL], 91);
-    EXPECT_EQ(controlRateConfig.rcRates[FD_PITCH], 91);
+    EXPECT_EQ(localControlRateConfig.rcRates[FD_ROLL], 91);
+    EXPECT_EQ(localControlRateConfig.rcRates[FD_PITCH], 91);
     EXPECT_EQ(adjustmentStateMask, expectedAdjustmentStateMask);
 
 
@@ -410,11 +410,11 @@ TEST_F(RcControlsAdjustmentsTest, processRcAdjustmentsWithRcRateFunctionSwitchUp
     fixedMillis = 499;
 
     // when
-    processRcAdjustments(&controlRateConfig);
+    processRcAdjustments(&localControlRateConfig);
 
     // then
-    EXPECT_EQ(controlRateConfig.rcRates[FD_ROLL], 92);
-    EXPECT_EQ(controlRateConfig.rcRates[FD_PITCH], 92);
+    EXPECT_EQ(localControlRateConfig.rcRates[FD_ROLL], 92);
+    EXPECT_EQ(localControlRateConfig.rcRates[FD_PITCH], 92);
     EXPECT_EQ(CALL_COUNTER(COUNTER_QUEUE_CONFIRMATION_BEEP), 2);
     EXPECT_EQ(adjustmentStateMask, expectedAdjustmentStateMask);
 
@@ -427,11 +427,11 @@ TEST_F(RcControlsAdjustmentsTest, processRcAdjustmentsWithRcRateFunctionSwitchUp
     fixedMillis = 500;
 
     // when
-    processRcAdjustments(&controlRateConfig);
+    processRcAdjustments(&localControlRateConfig);
 
     // then
-    EXPECT_EQ(controlRateConfig.rcRates[FD_ROLL], 92);
-    EXPECT_EQ(controlRateConfig.rcRates[FD_PITCH], 92);
+    EXPECT_EQ(localControlRateConfig.rcRates[FD_ROLL], 92);
+    EXPECT_EQ(localControlRateConfig.rcRates[FD_PITCH], 92);
     EXPECT_EQ(adjustmentStateMask, expectedAdjustmentStateMask);
 
     //
@@ -442,11 +442,11 @@ TEST_F(RcControlsAdjustmentsTest, processRcAdjustmentsWithRcRateFunctionSwitchUp
     fixedMillis = 997;
 
     // when
-    processRcAdjustments(&controlRateConfig);
+    processRcAdjustments(&localControlRateConfig);
 
     // then
-    EXPECT_EQ(controlRateConfig.rcRates[FD_ROLL], 92);
-    EXPECT_EQ(controlRateConfig.rcRates[FD_PITCH], 92);
+    EXPECT_EQ(localControlRateConfig.rcRates[FD_ROLL], 92);
+    EXPECT_EQ(localControlRateConfig.rcRates[FD_PITCH], 92);
     EXPECT_EQ(adjustmentStateMask, expectedAdjustmentStateMask);
 
     //
@@ -459,11 +459,11 @@ TEST_F(RcControlsAdjustmentsTest, processRcAdjustmentsWithRcRateFunctionSwitchUp
     fixedMillis = 998;
 
     // when
-    processRcAdjustments(&controlRateConfig);
+    processRcAdjustments(&localControlRateConfig);
 
     // then
-    EXPECT_EQ(controlRateConfig.rcRates[FD_ROLL], 93);
-    EXPECT_EQ(controlRateConfig.rcRates[FD_PITCH], 93);
+    EXPECT_EQ(localControlRateConfig.rcRates[FD_ROLL], 93);
+    EXPECT_EQ(localControlRateConfig.rcRates[FD_PITCH], 93);
     EXPECT_EQ(CALL_COUNTER(COUNTER_QUEUE_CONFIRMATION_BEEP), 3);
     EXPECT_EQ(adjustmentStateMask, expectedAdjustmentStateMask);
 }
