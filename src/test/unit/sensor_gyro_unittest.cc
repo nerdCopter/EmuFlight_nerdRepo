@@ -184,9 +184,9 @@ TEST(SensorGyro, Update)
     
     // Values should change significantly (using threshold-based comparison to tolerate floating-point precision)
     const float gyroChangeThreshold = 0.1f;  // Allow for filter smoothing and floating-point precision
-    EXPECT_GT(fabsf(gyro.gyroADCf[X] - prevX), gyroChangeThreshold);
-    EXPECT_GT(fabsf(gyro.gyroADCf[Y] - prevY), gyroChangeThreshold);
-    EXPECT_GT(fabsf(gyro.gyroADCf[Z] - prevZ), gyroChangeThreshold);
+    EXPECT_GT(std::fabs(gyro.gyroADCf[X] - prevX), gyroChangeThreshold);
+    EXPECT_GT(std::fabs(gyro.gyroADCf[Y] - prevY), gyroChangeThreshold);
+    EXPECT_GT(std::fabs(gyro.gyroADCf[Z] - prevZ), gyroChangeThreshold);
     
     // Values should move upward from previous samples
     EXPECT_GT(gyro.gyroADCf[X], prevX);
