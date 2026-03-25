@@ -79,13 +79,15 @@ extern "C" {
     void mixerInitProfile(void) { }
     
     bool linearThrustEnabled = false;
-    float getThrottlePAttenuation(void) { return 1.0f; }
-    float getThrottleIAttenuation(void) { return 1.0f; }
-    float getThrottleDAttenuation(void) { return 1.0f; }
+    float getThrottlePAttenuation(void) { return simulatedThrottlePIDAttenuation; }
+    float getThrottleIAttenuation(void) { return simulatedThrottlePIDAttenuation; }
+    float getThrottleDAttenuation(void) { return simulatedThrottlePIDAttenuation; }
+    
+    // Test-controlled angle targets for angle/horizon mode testing
+    static float testAngleModeAngles[XYZ_AXIS_COUNT] = { 0.0f, 0.0f, 0.0f };
     
     float getAngleModeAngles(int axis) { 
-        (void)axis;
-        return 0.0f; 
+        return (axis < XYZ_AXIS_COUNT) ? testAngleModeAngles[axis] : 0.0f;
     }
     
     float howUpsideDown(void) { 
@@ -150,6 +152,11 @@ void resetTest(void) {
     simulateMixerSaturated = false;
     simulatedThrottlePIDAttenuation = 1.0f;
     simulatedControllerMixRange = 0.0f;
+
+    // Reset test angle targets (used by angle/horizon mode tests)
+    testAngleModeAngles[FD_ROLL] = 0.0f;
+    testAngleModeAngles[FD_PITCH] = 0.0f;
+    testAngleModeAngles[FD_YAW] = 0.0f;
 
     // Explicitly initialize gyroConfig_System to zeroed state for deterministic testing
     // Firmware defaults would be applied via pgResetAll(), but we define defaults here for test isolation
