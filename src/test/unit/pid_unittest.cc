@@ -520,13 +520,132 @@ TEST(pidControllerTest, testCrashRecoveryMode) {
 }
 
 TEST(pidControllerTest, pidSetpointTransition) {
-// TODO
+    // Verify SetPoint Attenuation (SPA): scale applied to P/I/D based on stick deflection.
+    // Default firmware values: setPointPTransition=110 (1.1x boost), setPointITransition=85 (0.85x cut)
+    resetTest();
+    ENABLE_ARMING_FLAG(ARMED);
+    pidStabilisationState(PID_STABILISATION_ON);
+
+    // Run with constant gyro error and zero stick deflection
+    gyro.gyroADCf[FD_ROLL] = 100.0f;
+    simulatedRcDeflection[FD_ROLL] = 0.0f;
+    pidController(pidProfile, &rollAndPitchTrims, currentTestTime());
+    const float pAtZeroStick = pidData[FD_ROLL].P;
+
+    // Run with full stick deflection, same gyro error
+    simulatedRcDeflection[FD_ROLL] = 1.0f;
+    pidController(pidProfile, &rollAndPitchTrims, currentTestTime());
+    const float pAtFullStick = pidData[FD_ROLL].P;
+
+    // P should be ~10% larger at full stick (transition=110 → factor=1.1)
+    EXPECT_GT(fabsf(pAtFullStick), fabsf(pAtZeroStick))
+        << "P at full stick (" << pAtFullStick << ") should be boosted vs zero stick ("
+        << pAtZeroStick << ") with default setPointPTransition=110";
+    EXPECT_NEAR(fabsf(pAtFullStick), fabsf(pAtZeroStick) * 1.1f, fabsf(pAtZeroStick) * 0.02f)
+        << "Expected ~10% P boost at full stick with setPointPTransition=110";
+
+    // Build I-term with zero stick, then verify attenuation at full stick
+    simulatedRcDeflection[FD_ROLL] = 0.0f;
+    for (int i = 0; i < 10; i++) {
+        pidController(pidProfile, &rollAndPitchTrims, currentTestTime());
+    }
+    const float iAtZeroStick = pidData[FD_ROLL].I;
+
+    // I at full stick should be reduced: attenuation = 1 + 1*(0.85-1) = 0.85
+    simulatedRcDeflection[FD_ROLL] = 1.0f;
+    pidController(pidProfile, &rollAndPitchTrims, currentTestTime());
+    const float iAtFullStick = pidData[FD_ROLL].I;
+
+    EXPECT_LT(fabsf(iAtFullStick), fabsf(iAtZeroStick))
+        << "I at full stick (" << iAtFullStick << ") should be attenuated vs zero stick ("
+        << iAtZeroStick << ") with default setPointITransition=85";
 }
 
 TEST(pidControllerTest, testDtermFiltering) {
-// TODO
+    // Verify D-term filter attenuates the step response vs no filter.
+    // Default test setup: dFilter[ROLL].dLpf=100Hz biquad; dLpf=0 disables all LPFs.
+
+    // Measure D with biquad filter enabled (default)
+    resetTest();
+    ENABLE_ARMING_FLAG(ARMED);
+    pidStabilisationState(PID_STABILISATION_ON);
+    gyro.gyroADCf[FD_ROLL] = 100.0f;  // step from 0 → 100
+    pidController(pidProfile, &rollAndPitchTrims, currentTestTime());
+    const float dWithFilter = pidData[FD_ROLL].D;
+
+    // Measure D with filter disabled
+    resetTest();
+    // dtermLowpassApplyFn is a single shared pointer set by the last axis with dLpf>0.
+    // Must disable ALL three axes so no axis overrides it back to biquadFilterApply.
+    pidProfile->dFilter[ROLL].dLpf  = 0;
+    pidProfile->dFilter[PITCH].dLpf = 0;
+    pidProfile->dFilter[YAW].dLpf   = 0;
+    pidProfile->dFilter[ROLL].dLpf2  = 0;
+    pidProfile->dFilter[PITCH].dLpf2 = 0;
+    pidProfile->dFilter[YAW].dLpf2   = 0;
+    pidInit(pidProfile);  // reinit so dtermLowpassApplyFn → nullFilterApply
+    ENABLE_ARMING_FLAG(ARMED);
+    pidStabilisationState(PID_STABILISATION_ON);
+    gyro.gyroADCf[FD_ROLL] = 100.0f;
+    pidController(pidProfile, &rollAndPitchTrims, currentTestTime());
+    const float dWithoutFilter = pidData[FD_ROLL].D;
+
+    // Filtered D must be smaller in magnitude: biquad passes only ~b0 of the step on first sample
+    EXPECT_LT(fabsf(dWithFilter), fabsf(dWithoutFilter))
+        << "D-term with biquad filter (" << dWithFilter
+        << ") should be attenuated vs no filter (" << dWithoutFilter << ")";
+    // Both must be non-zero (D should react to the gyro step)
+    EXPECT_NE(0.0f, dWithoutFilter) << "Unfiltered D should be non-zero on gyro step";
+    EXPECT_NE(0.0f, dWithFilter)    << "Filtered D should still be non-zero on gyro step";
 }
 
 TEST(pidControllerTest, testItermRotationHandling) {
-// TODO
+    // Verify iterm_rotation: when enabled, a YAW gyro rate rotates the iterm vector,
+    // transferring accumulated ROLL iterm into PITCH even with zero PITCH error.
+
+    // --- Without rotation: PITCH iterm stays near zero despite YAW gyro ---
+    resetTest();
+    pidProfile->iterm_rotation = false;
+    pidInit(pidProfile);
+    ENABLE_ARMING_FLAG(ARMED);
+    pidStabilisationState(PID_STABILISATION_ON);
+
+    // Build ROLL iterm; keep PITCH and YAW at zero error
+    gyro.gyroADCf[FD_ROLL]  = 100.0f;
+    gyro.gyroADCf[FD_PITCH] = 0.0f;
+    gyro.gyroADCf[FD_YAW]   = 0.0f;
+    for (int i = 0; i < 20; i++) {
+        pidController(pidProfile, &rollAndPitchTrims, currentTestTime());
+    }
+    // Apply large YAW rate: without rotation, PITCH iterm must not change
+    gyro.gyroADCf[FD_YAW] = 500.0f;
+    pidController(pidProfile, &rollAndPitchTrims, currentTestTime());
+    const float pitchItermNoRotation = pidData[FD_PITCH].I;
+
+    EXPECT_NEAR(0.0f, pitchItermNoRotation, 0.5f)
+        << "With iterm_rotation=false, PITCH iterm should stay near zero despite YAW gyro input";
+
+    // --- With rotation: YAW gyro rotates ROLL iterm into PITCH ---
+    resetTest();
+    pidProfile->iterm_rotation = true;
+    pidInit(pidProfile);
+    ENABLE_ARMING_FLAG(ARMED);
+    pidStabilisationState(PID_STABILISATION_ON);
+
+    gyro.gyroADCf[FD_ROLL]  = 100.0f;
+    gyro.gyroADCf[FD_PITCH] = 0.0f;
+    gyro.gyroADCf[FD_YAW]   = 0.0f;
+    for (int i = 0; i < 20; i++) {
+        pidController(pidProfile, &rollAndPitchTrims, currentTestTime());
+    }
+    // Apply same large YAW rate: rotation must push ROLL iterm into PITCH
+    gyro.gyroADCf[FD_YAW] = 500.0f;
+    pidController(pidProfile, &rollAndPitchTrims, currentTestTime());
+    const float pitchItermWithRotation = pidData[FD_PITCH].I;
+
+    EXPECT_GT(fabsf(pitchItermWithRotation), 0.5f)
+        << "With iterm_rotation=true, PITCH iterm should be non-zero after YAW rotation of ROLL iterm"
+        << " (pitchItermWithRotation=" << pitchItermWithRotation << ")";
+    EXPECT_GT(fabsf(pitchItermWithRotation), fabsf(pitchItermNoRotation))
+        << "iterm_rotation=true must produce larger |PITCH iterm| than rotation=false";
 }
