@@ -189,7 +189,7 @@ void systemInit(void) {
     int ret;
     clock_gettime(CLOCK_MONOTONIC, &start_time);
     printf("[system]Init...\n");
-    // SystemCoreClock initialized as static at declaration
+    // SystemCoreClock initialized at declaration (external linkage)
     FLASH_Unlock();
     if (pthread_mutex_init(&updateLock, NULL) != 0) {
         printf("Create updateLock error!\n");
