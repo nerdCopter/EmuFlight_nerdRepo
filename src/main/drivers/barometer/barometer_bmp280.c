@@ -39,9 +39,6 @@
 
 #if defined(USE_BARO) && (defined(USE_BARO_BMP280) || defined(USE_BARO_SPI_BMP280))
 
-typedef struct bmp280_calib_param_s {
-// now in barometer_bmp280.h
-
 static uint8_t bmp280_chip_id = 0;
 STATIC_UNIT_TESTED bmp280_calib_param_t bmp280_cal;
 // uncompensated pressure and temperature

@@ -21,6 +21,7 @@ extern "C" {
 #include "platform.h"
 #include "target.h"
 #include "drivers/barometer/barometer.h"
+#include "drivers/barometer/barometer_bmp280.h"
 #include "drivers/bus.h"
 
 void bmp280_calculate(int32_t *pressure, int32_t *temperature);
