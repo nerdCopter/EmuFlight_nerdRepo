@@ -128,6 +128,10 @@ uint16_t    mAh Drawn
 */
 #define FRAME_HEADER_FOOTER_LEN 4
 
+// Shared test constants for battery telemetry conversion
+constexpr int kVoltScale = 10;  // 0.1V → 0.01V
+constexpr int kMahScale = 10;   // 0.1mAh → 1mAh
+
 
 // Tests GHST battery telemetry frame generation and transmission.
 // The firmware flow: processGhst() → writes to ghstFrame → ghstFinalize() → ghstRxWriteTelemetryData() → telemetryBuf
@@ -187,9 +191,6 @@ TEST(TelemetryGhstTest, DISABLED_TestBattery)
     ASSERT_GT(telemetryBufLen, 0);
 
     // Validate updated values with explicit unit conversion
-    constexpr int kVoltScale = 10;  // 0.1V → 0.01V
-    constexpr int kMahScale = 10;   // 0.1mAh → 1mAh
-    
     voltage = (uint16_t)telemetryBuf[4] << 8 | telemetryBuf[3]; // volts * 100 (little-endian)
     EXPECT_EQ(testBatteryVoltage * kVoltScale, voltage);
     current = (uint16_t)telemetryBuf[6] << 8 | telemetryBuf[5]; // amps * 100 (little-endian)
@@ -244,7 +245,7 @@ TEST(TelemetryGhstTest, DISABLED_TestBatteryCellVoltage)
     EXPECT_EQ(testAmperage, current);
     
     usedMah = ((uint32_t)telemetryBuf[9] << 16) | ((uint32_t)telemetryBuf[8] << 8) | (uint32_t)telemetryBuf[7]; // mAh (LE)
-    EXPECT_EQ(testmAhDrawn/10, usedMah);
+    EXPECT_EQ(testmAhDrawn / kMahScale, usedMah);
 }
 
 // STUBS

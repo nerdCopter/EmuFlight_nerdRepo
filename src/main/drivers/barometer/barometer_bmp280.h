@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include <stdint.h>
+
 #define BMP280_I2C_ADDR                      (0x76)
 #define BMP280_DEFAULT_CHIP_ID               (0x58)
 
