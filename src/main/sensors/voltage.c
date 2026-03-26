@@ -128,8 +128,8 @@ void pgResetFn_voltageSensorADCConfig(voltageSensorADCConfig_t *instance) {
     }
 }
 
-
-static const uint8_t voltageMeterAdcChannelMap[] __attribute__((unused)) = {
+#ifdef USE_ADC
+static const uint8_t voltageMeterAdcChannelMap[] = {
     ADC_BATTERY,
 #ifdef ADC_POWER_12V
     ADC_POWER_12V,
@@ -141,6 +141,7 @@ static const uint8_t voltageMeterAdcChannelMap[] __attribute__((unused)) = {
     ADC_POWER_5V,
 #endif
 };
+#endif
 
 STATIC_UNIT_TESTED uint16_t voltageAdcToVoltage(const uint16_t src, const voltageSensorADCConfig_t *config) {
     // calculate battery voltage based on ADC reading

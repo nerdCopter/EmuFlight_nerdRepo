@@ -21,6 +21,10 @@
 #include <string.h>
 #include <math.h>
 
+#if defined(UNIT_TEST) || defined(SIMULATOR_BUILD)
+#include <assert.h>
+#endif
+
 #ifdef USE_ARM_MATH
 #include "arm_math.h"
 #else
@@ -86,7 +90,6 @@ void update_kalman_covariance(float rate, int axis) {
     // Clamp variance before sqrt to prevent NaN; arm_sqrt_f32 handles both ARM NEON and C fallback
     float clampedVar = fmaxf(kalmanFilterStateRate[axis].axisVar, 0.0f);
 #if defined(UNIT_TEST) || defined(SIMULATOR_BUILD)
-#include <assert.h>
     // Debug: catch unexpectedly large negative variance (suggests calculation bug)
     assert(kalmanFilterStateRate[axis].axisVar > -1e-6f);
 #endif

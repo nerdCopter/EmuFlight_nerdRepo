@@ -401,7 +401,7 @@ void pidInitConfig(const pidProfile_t *pidProfile) {
     DF_angle_low = DIRECT_FF_SCALE * pidProfile->pid[PID_LEVEL_LOW].I;
     DF_angle_high = DIRECT_FF_SCALE * pidProfile->pid[PID_LEVEL_HIGH].I;
     feathered_pids = pidProfile->feathered_pids / 100.0f;
-    dtermBoostMultiplier = (pidProfile->dtermBoost * pidProfile->dtermBoost / 1000000) * 0.003;
+    dtermBoostMultiplier = (pidProfile->dtermBoost * pidProfile->dtermBoost / 1000000) * 0.003f;
     dtermBoostLimitPercent = pidProfile->dtermBoostLimit / 100.0f;
     P_angle_low = pidProfile->pid[PID_LEVEL_LOW].P * 0.1f;
     D_angle_low = pidProfile->pid[PID_LEVEL_LOW].D * 0.00002428571f;

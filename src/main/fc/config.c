@@ -246,6 +246,11 @@ static void validateAndFixConfig(void) {
         }
     }
 #endif
+    // Validate failsafe_procedure range unconditionally
+    if (failsafeConfig()->failsafe_procedure >= FAILSAFE_PROCEDURE_COUNT) {
+        failsafeConfigMutable()->failsafe_procedure = FAILSAFE_PROCEDURE_DROP_IT;
+    }
+
     if (
         featureConfigured(FEATURE_3D) || !featureConfigured(FEATURE_GPS)
 #if !defined(USE_GPS) || !defined(USE_GPS_RESCUE)
