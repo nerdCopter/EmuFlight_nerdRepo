@@ -85,6 +85,11 @@ void update_kalman_covariance(float rate, int axis) {
     float squirt;
     // Clamp variance before sqrt to prevent NaN; arm_sqrt_f32 handles both ARM NEON and C fallback
     float clampedVar = fmaxf(kalmanFilterStateRate[axis].axisVar, 0.0f);
+#if defined(UNIT_TEST) || defined(SIMULATOR_BUILD)
+#include <assert.h>
+    // Debug: catch unexpectedly large negative variance (suggests calculation bug)
+    assert(kalmanFilterStateRate[axis].axisVar > -1e-6f);
+#endif
     arm_sqrt_f32(clampedVar, &squirt);
     kalmanFilterStateRate[axis].r = squirt * VARIANCE_SCALE;
 }
