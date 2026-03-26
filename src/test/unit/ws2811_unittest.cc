@@ -48,7 +48,7 @@ static void verifyByteBits(uint8_t byteIndex, uint8_t expectedValue) {
 
 TEST(WS2812, updateDMABufferGRB) {
     // given
-    rgbColor24bpp_t color1 = { .raw = {0xFF,0xAA,0x55} };  // G=0xFF, R=0xAA, B=0x55
+    rgbColor24bpp_t color1 = { .raw = {0xFF,0xAA,0x55} };  // R=0xFF, G=0xAA, B=0x55
 
     // and
     dmaBufferOffset = 0;
@@ -72,7 +72,7 @@ TEST(WS2812, updateDMABufferGRB) {
 
 TEST(WS2812, updateDMABufferRGB) {
     // given
-    rgbColor24bpp_t color1 = { .raw = {0xFF,0xAA,0x55} };  // G=0xFF, R=0xAA, B=0x55
+    rgbColor24bpp_t color1 = { .raw = {0xFF,0xAA,0x55} };  // R=0xFF, G=0xAA, B=0x55
 
     // and
     dmaBufferOffset = 0;

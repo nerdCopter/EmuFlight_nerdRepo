@@ -98,6 +98,14 @@ TEST(ParameterGroupsfTest, Test_pgFind)
     EXPECT_EQ(1850, motorConfig2.maxthrottle);
     EXPECT_EQ(1000, motorConfig2.mincommand);
     EXPECT_EQ(500, motorConfig2.dev.motorPwmRate);
+    // Verify newly initialized fields in pgStore
+    EXPECT_EQ(0, motorConfig2.digitalIdleOffsetValue);
+    EXPECT_EQ(0, motorConfig2.motorPoleCount);
+    EXPECT_EQ(0, motorConfig2.dev.motorPwmProtocol);
+    EXPECT_EQ(0, motorConfig2.dev.motorPwmInversion);
+    EXPECT_EQ(0, motorConfig2.dev.useUnsyncedPwm);
+    EXPECT_EQ(0, motorConfig2.dev.useBurstDshot);
+    EXPECT_EQ(0, motorConfig2.dev.ioTags[0]);  // Verify ioTags array is zero-initialized
 
     motorConfig_t motorConfig3;
     memset(&motorConfig3, 0xFF, sizeof(motorConfig_t));  // Use non-zero sentinel to verify pgResetCopy actually initializes all fields

@@ -11,6 +11,11 @@ on:
     types: [test]
 
 name: Test Suite
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     continue-on-error: false
@@ -37,7 +42,7 @@ jobs:
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.x'
+        python-version: '3.12'
 
     - name: Clean test artifacts
       run: make clean_test

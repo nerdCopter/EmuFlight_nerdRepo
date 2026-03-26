@@ -95,7 +95,7 @@ extern "C" {
                       .halfDuplex = true
                      );
 
-    PG_REGISTER_WITH_RESET_FN(int8_t, unitTestData, PG_RESERVED_FOR_TESTING_1, 0);
+    PG_REGISTER_ARRAY_WITH_RESET_FN(int8_t, UNIT_TEST_DATA_LENGTH, unitTestData, PG_RESERVED_FOR_TESTING_1, 0);
 }
 
 #include "unittest_macros.h"

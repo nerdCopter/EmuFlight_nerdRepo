@@ -162,7 +162,7 @@ TEST(FilterUnittest, TestBiquadFilterLPFApplyDC)
 TEST(FilterUnittest, TestBiquadFilterLPFAttenuation)
 {
     biquadFilter_t filter;
-    // 100 Hz Butterworth LPF at 1 kHz: gain at Nyquist (500 Hz) = 0 exactly
+    // 100 Hz Butterworth LPF at 1 kHz: LPF strongly attenuates Nyquist (500 Hz), gain approaches 0
     biquadFilterInitLPF(&filter, 100.0f, 1000);
 
     // Feed alternating ±1000 (Nyquist-frequency signal) for 100 cycles to settle
