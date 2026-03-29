@@ -1,0 +1,16 @@
+name: Hide artifacts links comments
+
+on:
+  pull_request_target:
+    types: [synchronize, reopened]
+
+jobs:
+  hide-artifacts-link-comments:
+    name: Hide artifacts links
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Hide artifacts links from comments.
+        uses: int128/hide-comment-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          contains: "Compiled HEX from this Pull-Request. WARNING: No warranty or guarantee of any kind. Test/Fly at your own risk!"
