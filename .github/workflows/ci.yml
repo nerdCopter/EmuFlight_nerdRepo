@@ -12,7 +12,7 @@ on:
   repository_dispatch:
     types: [ci]
 
-name: CI Compile Validation
+name: "02 CI Compile Validation"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -27,37 +27,69 @@ jobs:
       fail-fast: false
       matrix:
         # Keep in sync with CI_TARGETS in make/targets.mk
-        target: [CI_STM32F405, CI_STM32F411, CI_STM32F446, CI_STM32F7X2, CI_STM32F7X6, HELIOSPRING, STRIXF10]
+        # STRIXF10 removed: IMUF9001 covered by HELIOSPRING; F7X2RE MCU covered by CI_STM32F7X2
+        target: [CI_STM32F405, CI_STM32F411, CI_STM32F446, CI_STM32F7X2, CI_STM32F7X6, HELIOSPRING]
 
     steps:
-    - name: curl fix
-      run: function curl () { command curl --connect-timeout 30 --retry 10 "$@" ; }
-
-    - name: Checkout
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         fetch-depth: 0
 
-    - name: Cache build toolchain
-      uses: actions/cache@v4
-      id: cache-toolchain
-      with:
-        path: tools
-        key: ${{ runner.os }}-${{ hashFiles('make/tools.mk') }}
-
-    - name: Download and install toolchain
-      if: steps.cache-toolchain.outputs.cache-hit != 'true'
-      run: make arm_sdk_install
-
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.x'
+    - uses: ./.github/actions/ef-toolchain
 
     - name: Compile ${{ matrix.target }}
       run: make ${{ matrix.target }}
 
-  ci-changed-targets:
+  ci-sitl:
+    continue-on-error: false
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
+
+    - uses: actions/setup-python@v6
+      with:
+        python-version: '3.x'
+
+    - name: Compile SITL
+      run: make SITL
+
+  ci-new-targets:
+    if: github.event_name == 'pull_request'
+    # Hard gate: a newly introduced target directory that fails to compile blocks merge.
+    # New targets have no prior state — a compile failure is always a PR regression.
+    continue-on-error: false
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
+
+    - uses: ./.github/actions/ef-toolchain
+
+    - name: Fetch base branch
+      run: git fetch origin ${{ github.base_ref }} --no-tags --prune
+
+    - name: Detect new real targets
+      id: detect
+      run: |
+        # --diff-filter=A: only files Added in this PR (new target directories)
+        NEW=$(git diff --name-only --diff-filter=A origin/${{ github.base_ref }}...HEAD \
+          | awk -F/ '/^src\/main\/target\/[^\/]+\// { t=$4; if (t !~ /^CI_/) print t }' \
+          | sort -u | tr '\n' ' ' | xargs)
+        echo "new_targets=${NEW}" >> $GITHUB_OUTPUT
+        echo "New real targets: ${NEW}"
+
+    - name: Compile new real targets
+      if: steps.detect.outputs.new_targets != ''
+      run: make ${{ steps.detect.outputs.new_targets }}
+
+  ci-modified-targets:
     if: github.event_name == 'pull_request'
     # Advisory: a touched target may have pre-existing issues unrelated to this PR.
     # Failures here are informational and do not block merge.
@@ -66,46 +98,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: curl fix
-      run: function curl () { command curl --connect-timeout 30 --retry 10 "$@" ; }
-
-    - name: Checkout
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         fetch-depth: 0
 
-    - name: Cache build toolchain
-      uses: actions/cache@v4
-      id: cache-toolchain
-      with:
-        path: tools
-        key: ${{ runner.os }}-${{ hashFiles('make/tools.mk') }}
-
-    - name: Download and install toolchain
-      if: steps.cache-toolchain.outputs.cache-hit != 'true'
-      run: make arm_sdk_install
-
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.x'
+    - uses: ./.github/actions/ef-toolchain
 
     - name: Fetch base branch
       run: git fetch origin ${{ github.base_ref }} --no-tags --prune
 
     - name: Detect modified real targets
-      id: changed
+      id: detect
       run: |
-        # awk replaces grep|sed|grep pipeline — each grep can exit 1 (no match) under
-        # bash -eo pipefail, failing the step on PRs that touch no target files.
-        # CI_ prefixed directories (synthetic targets) are excluded by the awk condition.
-        CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD \
+        # --diff-filter=M: only files Modified in this PR (existing target directories)
+        MOD=$(git diff --name-only --diff-filter=M origin/${{ github.base_ref }}...HEAD \
           | awk -F/ '/^src\/main\/target\/[^\/]+\// { t=$4; if (t !~ /^CI_/) print t }' \
-          | sort -u \
-          | tr '\n' ' ')
-        echo "extra_targets=${CHANGED}" >> $GITHUB_OUTPUT
-        echo "Changed real targets: ${CHANGED}"
+          | sort -u | tr '\n' ' ' | xargs)
+        echo "modified_targets=${MOD}" >> $GITHUB_OUTPUT
+        echo "Modified real targets: ${MOD}"
 
-    - name: Compile changed real targets
-      if: steps.changed.outputs.extra_targets != ''
-      run: make ${{ steps.changed.outputs.extra_targets }}
+    - name: Compile modified real targets
+      if: steps.detect.outputs.modified_targets != ''
+      run: make ${{ steps.detect.outputs.modified_targets }}

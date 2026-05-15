@@ -1,19 +1,24 @@
 on:
-  # Runs automatically after Build EmuFlight Full completes on any trigger.
+  # Runs automatically after "03 Build EmuFlight Full" completes on any trigger.
   # Conditions inside each step gate which release destinations are published.
   workflow_run:
-    workflows: ["Build EmuFlight Full"]
+    workflows: ["03 Build EmuFlight Full"]
     types: [completed]
   workflow_dispatch:
     inputs:
+      fresh_build:
+        description: 'Trigger a fresh build before releasing'
+        required: false
+        type: boolean
+        default: true
       build_run_id:
-        description: 'build.yml run ID to pull artifacts from (required for workflow_dispatch)'
-        required: true
+        description: 'Re-release: specific build run ID (overrides fresh_build; leave blank for latest)'
+        required: false
         type: string
   repository_dispatch:
     types: [release]
 
-name: Release EmuFlight
+name: "04 Release EmuFlight"
 
 jobs:
   releases:
@@ -21,11 +26,11 @@ jobs:
       github.event_name != 'workflow_run' ||
       github.event.workflow_run.conclusion == 'success'
     permissions:
-      actions: read
+      actions: write
       contents: write
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    timeout-minutes: 10
+    timeout-minutes: 120
     runs-on: ubuntu-latest
     continue-on-error: false
     steps:
@@ -33,7 +38,53 @@ jobs:
         id: run_id
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "RUN_ID=${{ github.event.inputs.build_run_id }}" >> $GITHUB_ENV
+            INPUT_ID="${{ github.event.inputs.build_run_id }}"
+            if [[ -n "$INPUT_ID" ]]; then
+              # Explicit re-release by run ID
+              echo "RUN_ID=${INPUT_ID}" >> $GITHUB_ENV
+            elif [[ "${{ github.event.inputs.fresh_build }}" == "true" ]]; then
+              # Trigger a new build and wait for it
+              BEFORE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+              echo "Triggering fresh build at ${BEFORE}..."
+              gh workflow run build.yml \
+                --repo "${{ github.repository }}" \
+                --ref "${{ github.ref_name }}"
+
+              RUN_ID=""
+              for attempt in $(seq 1 18); do
+                sleep 10
+                RUN_ID=$(gh run list --repo "${{ github.repository }}" \
+                  --workflow build.yml --limit 5 \
+                  --json databaseId,createdAt \
+                  --jq "[.[] | select(.createdAt >= \"${BEFORE}\")] | first | .databaseId // empty")
+                [[ -n "$RUN_ID" ]] && { echo "Build started: $RUN_ID"; break; }
+                echo "Waiting for build to start (attempt ${attempt}/18)..."
+              done
+              if [[ -z "$RUN_ID" ]]; then
+                echo "::error::Build did not start within 3 minutes"
+                exit 1
+              fi
+
+              echo "Watching build $RUN_ID (this takes ~75 min)..."
+              gh run watch "$RUN_ID" \
+                --repo "${{ github.repository }}" \
+                --interval 30 \
+                --exit-status || {
+                echo "::error::Build failed — aborting release"
+                exit 1
+              }
+              echo "RUN_ID=${RUN_ID}" >> $GITHUB_ENV
+            else
+              # fresh_build=false and no run ID — use latest successful build
+              RUN_ID=$(gh run list --repo "${{ github.repository }}" \
+                --workflow build.yml --status success --limit 1 \
+                --json databaseId --jq '.[0].databaseId')
+              if [[ -z "$RUN_ID" ]]; then
+                echo "::error::No successful build.yml run found in this repository"
+                exit 1
+              fi
+              echo "RUN_ID=${RUN_ID}" >> $GITHUB_ENV
+            fi
           elif [[ "${{ github.event_name }}" == "repository_dispatch" ]]; then
             RUN_ID="${{ github.event.client_payload.run_id }}"
             if [[ -z "$RUN_ID" ]]; then
@@ -90,17 +141,17 @@ jobs:
         run: |
           find ./ -name "*.hex"
 
-      # Draft Dev-Unstable releases to emuflight/dev-unstable via ncipollo/release-action
-      # softprops/action-gh-release fails to release on separate repo
-      - name: Draft Release emuflight/dev-unstable
-        if: |
-          contains(env.BRANCH, 'test') ||
-          contains(env.BRANCH, 'unstab')
+      # Draft dev-unstable releases.
+      # Any branch / any build — no restriction.
+      # On any fork: releases to the fork repo using GITHUB_TOKEN.
+      # On emuflight/EmuFlight: releases to emuflight/dev-unstable using NC_PAT_EMUF.
+      # Old-style tag compat: tags like 'forTesting' on any branch also trigger this.
+      - name: Draft Release dev-unstable
         uses: ncipollo/release-action@v1
         with:
-          repo: dev-unstable
-          owner: emuflight
-          token: ${{ secrets.NC_PAT_EMUF }}
+          repo: ${{ github.repository == 'emuflight/EmuFlight' && 'dev-unstable' || github.event.repository.name }}
+          owner: ${{ github.repository_owner }}
+          token: ${{ github.repository == 'emuflight/EmuFlight' && secrets.NC_PAT_EMUF || secrets.GITHUB_TOKEN }}
           tag: "${{ env.NOW }}-hex"
           draft: true
           prerelease: true
@@ -124,15 +175,18 @@ jobs:
             </details>
         continue-on-error: true
 
-      # Draft Dev-Master releases to emuflight/dev-master via ncipollo/release-action
-      # softprops/action-gh-release fails to release on separate repo
-      - name: Draft Release emuflight/dev-master
-        if: contains(env.BRANCH, 'master')
+      # Draft dev-master releases.
+      # master branch only (new way). Old-style tag compat: tags on the master branch
+      # also satisfy env.BRANCH == 'master' since head_branch reflects the branch, not the tag name.
+      # On any fork: releases to the fork repo using GITHUB_TOKEN.
+      # On emuflight/EmuFlight: releases to emuflight/dev-master using NC_PAT_EMUF.
+      - name: Draft Release dev-master
+        if: env.BRANCH == 'master'
         uses: ncipollo/release-action@v1
         with:
-          repo: dev-master
-          owner: emuflight
-          token: ${{ secrets.NC_PAT_EMUF }}
+          repo: ${{ github.repository == 'emuflight/EmuFlight' && 'dev-master' || github.event.repository.name }}
+          owner: ${{ github.repository_owner }}
+          token: ${{ github.repository == 'emuflight/EmuFlight' && secrets.NC_PAT_EMUF || secrets.GITHUB_TOKEN }}
           tag: "${{ env.NOW }}-hex"
           draft: true
           prerelease: true
@@ -165,10 +219,11 @@ jobs:
           rename 's/_Build_.*/.hex/' *.hex
         continue-on-error: true
 
-      # Draft Releases on emuflight/EmuFlight
-      # could potentially change to ncipollo/release-action as well
+      # Official releases to emuflight/EmuFlight — master branch only, upstream repo only.
+      # Skipped on all forks. Old-style 'releas' tag compat: tag on master branch still
+      # satisfies env.BRANCH == 'master'; the emuflight/EmuFlight guard prevents fork accidents.
       - name: Draft Release emuflight/EmuFlight
-        if: contains(env.BRANCH, 'releas')
+        if: env.BRANCH == 'master' && github.repository == 'emuflight/EmuFlight'
         uses: ncipollo/release-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
