@@ -34,12 +34,14 @@
 #include "rx/rx.h"
 #include "rx/rx_spi.h"
 
-// PG bump 3->5: removes rc_smoothing_1euro_beta/fc_min/fc_max/deriv_hz (now fully internal,
-// auto-calculated from rate profile/link rate — matches feat/2euro's de4cd98fd4). Version jumps
-// to 5 (not 4) because feat/1euro-double still shares this branch's old layout at version 3, and
-// feat/1euro-stage2 already uses version 4 for a different layout -- 5 keeps this branch's new
-// layout numerically distinct from every other currently-coexisting branch on the same hardware.
-PG_REGISTER_WITH_RESET_FN(rxConfig_t, rxConfig, PG_RX_CONFIG, 5);
+// PG stays at 3 (not bumped further): removing rc_smoothing_1euro_beta/fc_min/fc_max/deriv_hz
+// (now fully internal, auto-calculated from rate profile/link rate) makes this branch's
+// rxConfig_t byte-identical to feat/2euro's current layout (verified via diff — only the enum's
+// compile-time display string differs, "1EURO" vs "2EURO", which isn't stored data). Since the
+// actual layout now matches feat/2euro's version-3 layout exactly, sharing version 3 is correct,
+// not risky: pgLoad() only needs version to differ when the byte layout differs (see pg.c).
+// feat/1euro-stage2 genuinely differs (one extra field) and correctly uses a different version (4).
+PG_REGISTER_WITH_RESET_FN(rxConfig_t, rxConfig, PG_RX_CONFIG, 3);
 void pgResetFn_rxConfig(rxConfig_t *rxConfig) {
     RESET_CONFIG_2(rxConfig_t, rxConfig,
                    .halfDuplex = 0,
