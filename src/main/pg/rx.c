@@ -34,7 +34,12 @@
 #include "rx/rx.h"
 #include "rx/rx_spi.h"
 
-PG_REGISTER_WITH_RESET_FN(rxConfig_t, rxConfig, PG_RX_CONFIG, 3);
+// PG bump 3->5: removes rc_smoothing_1euro_beta/fc_min/fc_max/deriv_hz (now fully internal,
+// auto-calculated from rate profile/link rate — matches feat/2euro's de4cd98fd4). Version jumps
+// to 5 (not 4) because feat/1euro-double still shares this branch's old layout at version 3, and
+// feat/1euro-stage2 already uses version 4 for a different layout -- 5 keeps this branch's new
+// layout numerically distinct from every other currently-coexisting branch on the same hardware.
+PG_REGISTER_WITH_RESET_FN(rxConfig_t, rxConfig, PG_RX_CONFIG, 5);
 void pgResetFn_rxConfig(rxConfig_t *rxConfig) {
     RESET_CONFIG_2(rxConfig_t, rxConfig,
                    .halfDuplex = 0,
@@ -69,10 +74,6 @@ void pgResetFn_rxConfig(rxConfig_t *rxConfig) {
                    .rc_smoothing_input_cutoff = 50,      // automatically calculate the cutoff by default
                    .rc_smoothing_debug_axis = ROLL,     // default to debug logging for the roll axis
                    .rc_smoothing_input_type = RC_SMOOTHING_INPUT_1EURO,
-                   .rc_smoothing_1euro_beta = 5,            // beta = 5/1000 = 0.005
-                   .rc_smoothing_1euro_fc_min = 0,          // 0 = auto (rx_hz/12 clamped [6,40] Hz)
-                   .rc_smoothing_1euro_fc_max = 200,        // 200 Hz cap on adaptive cutoff (safety ceiling)
-                   .rc_smoothing_1euro_deriv_hz = 0,        // 0 = auto (rx_hz/19); manual: tenths of Hz, e.g. 10 = 1.0 Hz
                    .showAlteredRc = 0,
                    .sbus_baud_fast = false,
                   );
