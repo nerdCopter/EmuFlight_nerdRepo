@@ -34,7 +34,12 @@
 #include "rx/rx.h"
 #include "rx/rx_spi.h"
 
-PG_REGISTER_WITH_RESET_FN(rxConfig_t, rxConfig, PG_RX_CONFIG, 3);
+// PG bump 3->4 relative to feat/2euro (adds rc_smoothing_2euro_stage2 field). Distinct from
+// feat/2euro's own version so the two branches' EEPROM layouts don't collide while both are
+// live testing candidates on the same hardware. If this branch is ever chosen as the actual
+// merge candidate, renormalize this to master's-current-value+1 (see feat/2euro's PG cleanup,
+// commit fa17e0c4e6) as the very last step before merge — do not ship the accumulated number.
+PG_REGISTER_WITH_RESET_FN(rxConfig_t, rxConfig, PG_RX_CONFIG, 4);
 void pgResetFn_rxConfig(rxConfig_t *rxConfig) {
     RESET_CONFIG_2(rxConfig_t, rxConfig,
                    .halfDuplex = 0,
@@ -69,6 +74,7 @@ void pgResetFn_rxConfig(rxConfig_t *rxConfig) {
                    .rc_smoothing_input_cutoff = 50,      // automatically calculate the cutoff by default
                    .rc_smoothing_debug_axis = ROLL,     // default to debug logging for the roll axis
                    .rc_smoothing_input_type = RC_SMOOTHING_INPUT_2EURO,
+                   .rc_smoothing_2euro_stage2 = 1,       // default ON — matches feat/2euro's dual-stage design
                    .showAlteredRc = 0,
                    .sbus_baud_fast = false,
                   );

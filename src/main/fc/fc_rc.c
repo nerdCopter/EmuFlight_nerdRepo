@@ -406,10 +406,11 @@ FAST_CODE_NOINLINE void rcSmoothingSetFilterCutoffs(rcSmoothingFilter_t *smoothi
                                          : 180.0f / 19.0f;
                     // fc_fixed: 2× fc_min → fixed stage ~1 RC-frame group delay per stage at any link rate.
                     const float fc_fixed = fc_min * 2.0f;
+                    const bool stage2Enabled = rxConfig()->rc_smoothing_2euro_stage2 != 0;
                     if (!smoothingData->filterInitialized) {
-                        twoEuroFilterInit((twoEuroFilter_t*) &smoothingData->filter[i], fc_min, fc_max, beta, fc_d, fc_fixed, rc_dT, dT);
+                        twoEuroFilterInit((twoEuroFilter_t*) &smoothingData->filter[i], fc_min, fc_max, beta, fc_d, fc_fixed, rc_dT, dT, stage2Enabled);
                     } else {
-                        twoEuroFilterUpdate((twoEuroFilter_t*) &smoothingData->filter[i], fc_min, fc_max, beta, fc_d, fc_fixed, rc_dT, dT);
+                        twoEuroFilterUpdate((twoEuroFilter_t*) &smoothingData->filter[i], fc_min, fc_max, beta, fc_d, fc_fixed, rc_dT, dT, stage2Enabled);
                     }
                     break;
                 }

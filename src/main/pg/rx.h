@@ -57,6 +57,7 @@ typedef struct rxConfig_s {
     uint8_t rc_smoothing_input_type;        // Input filter type (0 = PT1, 1 = 2EURO, 2 = PT2, 3 = PT3)
     // 2EURO fc_min/fc_max/deriv_hz are fully internal/computed-only (no CLI fields) — see
     // rcSmoothingSetFilterCutoffs() in fc_rc.c. beta is likewise fully computed with no field.
+    uint8_t rc_smoothing_2euro_stage2;      // 2EURO stage 2 (static fixed-cutoff PT1) ON/OFF; OFF = single-stage adaptive-only
 
     uint8_t showAlteredRc;               // allow you to see rate dynamics in the configurator
     uint8_t sbus_baud_fast; // Select SBus fast baud rate
