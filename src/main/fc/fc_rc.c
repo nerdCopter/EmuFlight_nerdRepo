@@ -322,6 +322,8 @@ FAST_CODE bool rcSmoothingRxRateValid(int currentRxRefreshRate) {
     return (currentRxRefreshRate >= RC_SMOOTHING_RX_RATE_MIN_US && currentRxRefreshRate <= RC_SMOOTHING_RX_RATE_MAX_US);
 }
 
+#define RC_SMOOTHING_1EURO_FC_MAX 200.0f
+
 // Initialize or update the filters base on either the manually selected cutoff, or
 // the auto-calculated cutoff frequency based on detected rx frame rate.
 FAST_CODE_NOINLINE void rcSmoothingSetFilterCutoffs(rcSmoothingFilter_t *smoothingData) {
@@ -332,14 +334,14 @@ FAST_CODE_NOINLINE void rcSmoothingSetFilterCutoffs(rcSmoothingFilter_t *smoothi
         // 1EURO uses its own fc_min field — fully independent of rc_smoothing_input_cutoff.
         // Store computed fc_min in inputCutoffFrequency for change detection.
         if (rxConfig()->rc_smoothing_1euro_fc_min == 0) {
-            // Auto: rx_hz / 12 clamped [6, 40] Hz; 180 Hz fallback gives 15 Hz before RX is known.
-            // The /12 divisor gives fc_min ≈ Nyquist/6. For single PT1 this yields ~92% attenuation
-            // of a 1-tick jitter component at the RC frame rate — sufficient for practical use.
-            // Ceiling of 40 Hz keeps centre-stick latency bounded at 500+ Hz links (τ ≈ 4 ms)
-            // while giving the same jitter rejection ratio as the 250 Hz case (fc_min = 20.8 Hz).
+            // Auto: rx_hz / 12, floored at 6 Hz; 180 Hz fallback gives 15 Hz before RX is known.
+            // The /12 divisor gives fc_min ≈ Nyquist/6 — this ratio holds constant across the
+            // entire link-rate range (no fixed ceiling), not just up to some cutoff rate. The
+            // only remaining bound is RC_SMOOTHING_1EURO_FC_MAX itself, which only matters for RX
+            // rates implausibly fast for any real protocol.
             const float rx_hz = (smoothingData->averageFrameTimeUs > 0)
                                 ? 1e6f / smoothingData->averageFrameTimeUs : 180.0f;
-            smoothingData->inputCutoffFrequency = (uint16_t)constrainf(rx_hz / 12.0f, 6.0f, 40.0f);
+            smoothingData->inputCutoffFrequency = (uint16_t)lrintf(constrainf(rx_hz / 12.0f, 6.0f, RC_SMOOTHING_1EURO_FC_MAX));
         } else {
             smoothingData->inputCutoffFrequency = rxConfig()->rc_smoothing_1euro_fc_min;
         }
@@ -390,9 +392,9 @@ FAST_CODE_NOINLINE void rcSmoothingSetFilterCutoffs(rcSmoothingFilter_t *smoothi
                                            ? 1e6f / smoothingData->averageFrameTimeUs / 19.0f
                                            : 180.0f / 19.0f;
                     if (!smoothingData->filterInitialized) {
-                        oneEuroFilterInit((oneEuroFilter_t*) &smoothingData->filter[i], fc_min, fc_max, beta, fc_d, rc_dT);
+                        oneEuroFilterInit((oneEuroFilter_t*) &smoothingData->filter[i], fc_min, fc_max, beta, fc_d, rc_dT, dT);
                     } else {
-                        oneEuroFilterUpdate((oneEuroFilter_t*) &smoothingData->filter[i], fc_min, fc_max, beta, fc_d, rc_dT);
+                        oneEuroFilterUpdate((oneEuroFilter_t*) &smoothingData->filter[i], fc_min, fc_max, beta, fc_d, rc_dT, dT);
                     }
                     break;
                 }
@@ -549,7 +551,7 @@ FAST_CODE uint8_t processRcSmoothingFilter(void) {
                     break;
                 case RC_SMOOTHING_INPUT_1EURO:
                 default:
-                    rcCommand[updatedChannel] = oneEuroFilterApply((oneEuroFilter_t*) &rcSmoothingData.filter[updatedChannel], lastRxData[updatedChannel]);
+                    rcCommand[updatedChannel] = oneEuroFilterApply((oneEuroFilter_t*) &rcSmoothingData.filter[updatedChannel], lastRxData[updatedChannel], isRXDataNew);
                     break;
                 }
             } else {
