@@ -1,7 +1,7 @@
 # CLI Parameters Reference
 
 > **Auto-generated** — do not edit manually.
-> Source: `src/main/interface/settings.c` | Generated: 2026-07-06 | Commit: `fa17e0c4e6` | Firmware: `0.4.3` | MSP: `0.1.54`
+> Source: `src/main/interface/settings.c` | Generated: 2026-07-06 | Commit: `e9de8e2683` | Firmware: `0.4.3` | MSP: `0.1.54`
 
 ---
 
@@ -179,8 +179,8 @@
 | `rc_smoothing_type` | uint8 | master | `INTERPOLATION`, `FILTER` |
 | `rc_smoothing_input_hz` | uint8 | master | `0` – `UINT8_MAX` |
 | `rc_smoothing_debug_axis` | uint8 | master | `ROLL`, `PITCH`, `YAW`, `THROTTLE` |
-| `rc_smoothing_input_type` | uint8 | master | `PT1`, `2EURO`, `PT2`, `PT3` |
-| `rc_smoothing_2euro_stage2` | uint8 | master | `OFF`, `ON` |
+| `rc_smoothing_input_type` | uint8 | master | `PT1`, `1EURO`, `PT2`, `PT3` |
+| `rc_smoothing_1euro_stage2` | uint8 | master | `OFF`, `ON` |
 | `fpv_mix_degrees` | uint8 | master | `0` – `90` |
 | `cinematic_yaw` | uint8 | master | `OFF`, `ON` |
 | `max_aux_channels` | uint8 | master | `0` – `MAX_AUX_CHANNEL_COUNT` |

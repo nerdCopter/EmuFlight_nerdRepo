@@ -344,9 +344,9 @@ FAST_CODE float ptnFilterApply(ptnFilter_t *filter, float input) {
 	  return filter->state[filter->order];
 } // ptnFilterApply
 
-// 2€ filter — dual-stage adaptive + fixed low-pass, derived from the 1€ filter
+// 1€ filter — adaptive low-pass, with an optional second (fixed low-pass) stage
 // Reference: Géry Casiez et al. "1€ Filter: A Simple Speed-based Low-pass Filter for Noisy Input"
-void twoEuroFilterInit(twoEuroFilter_t *filter, float fc_min, float fc_max, float beta, float fc_d, float fc_fixed, float rc_dT, float pid_dT, bool stage2Enabled)
+void oneEuroFilterInit(oneEuroFilter_t *filter, float fc_min, float fc_max, float beta, float fc_d, float fc_fixed, float rc_dT, float pid_dT, bool stage2Enabled)
 {
     filter->fc_min     = fc_min;
     filter->fc_max     = fc_max;
@@ -369,7 +369,7 @@ void twoEuroFilterInit(twoEuroFilter_t *filter, float fc_min, float fc_max, floa
     pt1FilterInit(&filter->x_filter_fixed, k_fixed);
 }
 
-void twoEuroFilterUpdate(twoEuroFilter_t *filter, float fc_min, float fc_max, float beta, float fc_d, float fc_fixed, float rc_dT, float pid_dT, bool stage2Enabled)
+void oneEuroFilterUpdate(oneEuroFilter_t *filter, float fc_min, float fc_max, float beta, float fc_d, float fc_fixed, float rc_dT, float pid_dT, bool stage2Enabled)
 {
     filter->fc_min     = fc_min;
     filter->fc_max     = fc_max;
@@ -386,7 +386,7 @@ void twoEuroFilterUpdate(twoEuroFilter_t *filter, float fc_min, float fc_max, fl
     pt1FilterUpdateCutoff(&filter->x_filter_fixed, two_pi_fc_fixed / (two_pi_fc_fixed + filter->pid_dT_inv));
 }
 
-FAST_CODE float twoEuroFilterApply(twoEuroFilter_t *filter, float input, bool newSample)
+FAST_CODE float oneEuroFilterApply(oneEuroFilter_t *filter, float input, bool newSample)
 {
     if (filter->dT_inv <= 0.0f) {
         return input;
@@ -420,7 +420,7 @@ FAST_CODE float twoEuroFilterApply(twoEuroFilter_t *filter, float input, bool ne
         const float two_pi_fc = 2.0f * M_PIf * cutoff;
         const float k = two_pi_fc / (two_pi_fc + filter->pid_dT_inv);
         pt1FilterUpdateCutoff(&filter->x_filter, k);
-        // x_filter_fixed k is maintained by twoEuroFilterUpdate; no per-sample update needed
+        // x_filter_fixed k is maintained by oneEuroFilterUpdate; no per-sample update needed
     }
 
     const float stage1Output = pt1FilterApply(&filter->x_filter, input);

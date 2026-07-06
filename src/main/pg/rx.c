@@ -34,7 +34,7 @@
 #include "rx/rx.h"
 #include "rx/rx_spi.h"
 
-// PG bump 3->4 relative to feat/2euro (adds rc_smoothing_2euro_stage2 field). Distinct from
+// PG bump 3->4 relative to feat/2euro (adds rc_smoothing_1euro_stage2 field). Distinct from
 // feat/2euro's own version so the two branches' EEPROM layouts don't collide while both are
 // live testing candidates on the same hardware. If this branch is ever chosen as the actual
 // merge candidate, renormalize this to master's-current-value+1 (see feat/2euro's PG cleanup,
@@ -67,14 +67,14 @@ void pgResetFn_rxConfig(rxConfig_t *rxConfig) {
                    .airModeActivateThreshold = 32,
                    .max_aux_channel = DEFAULT_AUX_CHANNEL_COUNT,
                    // TESTING DEFAULT — DO NOT MERGE: rc_smoothing_type/input_type below are set for
-                   // 2EURO flight validation on this design-variant branch. Mergeable defaults are
+                   // 1EURO flight validation on this design-variant branch. Mergeable defaults are
                    // rc_smoothing_type = RC_SMOOTHING_TYPE_INTERPOLATION and
                    // rc_smoothing_input_type = RC_SMOOTHING_INPUT_PT2 (see CONTEXT_2euro.md).
                    .rc_smoothing_type = RC_SMOOTHING_TYPE_FILTER,
                    .rc_smoothing_input_cutoff = 50,      // automatically calculate the cutoff by default
                    .rc_smoothing_debug_axis = ROLL,     // default to debug logging for the roll axis
-                   .rc_smoothing_input_type = RC_SMOOTHING_INPUT_2EURO,
-                   .rc_smoothing_2euro_stage2 = 1,       // default ON — matches feat/2euro's dual-stage design
+                   .rc_smoothing_input_type = RC_SMOOTHING_INPUT_1EURO,
+                   .rc_smoothing_1euro_stage2 = 1,       // default ON — matches feat/2euro's dual-stage design
                    .showAlteredRc = 0,
                    .sbus_baud_fast = false,
                   );

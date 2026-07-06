@@ -1074,9 +1074,9 @@ bool mspProcessOutCommand(uint8_t cmdMSP, sbuf_t *dst) {
 #if defined(USE_RC_SMOOTHING_FILTER)
         sbufWriteU8(dst, rxConfig()->rc_smoothing_type);
         sbufWriteU8(dst, rxConfig()->rc_smoothing_input_cutoff);
-        sbufWriteU8(dst, 0); // was rc_smoothing_2euro_beta — now auto-calculated from rate profile
+        sbufWriteU8(dst, 0); // was rc_smoothing_1euro_beta — now auto-calculated from rate profile
         sbufWriteU8(dst, rxConfig()->rc_smoothing_input_type);
-        sbufWriteU8(dst, rxConfig()->rc_smoothing_2euro_stage2); // was rc_smoothing_derivative_type (dead) — reused for 2EURO stage-2 on/off
+        sbufWriteU8(dst, rxConfig()->rc_smoothing_1euro_stage2); // was rc_smoothing_derivative_type (dead) — reused for 1EURO stage-2 on/off
 #else
         sbufWriteU8(dst, 0);
         sbufWriteU8(dst, 0);
@@ -2224,9 +2224,9 @@ mspResult_e mspProcessInCommand(mspDescriptor_t srcDesc, uint8_t cmdMSP, sbuf_t 
 #if defined(USE_RC_SMOOTHING_FILTER)
         rxConfigMutable()->rc_smoothing_type = sbufReadU8(src);
         rxConfigMutable()->rc_smoothing_input_cutoff = sbufReadU8(src);
-        sbufReadU8(src); // was rc_smoothing_2euro_beta — now auto-calculated from rate profile; consumed for wire compat
+        sbufReadU8(src); // was rc_smoothing_1euro_beta — now auto-calculated from rate profile; consumed for wire compat
         rxConfigMutable()->rc_smoothing_input_type = sbufReadU8(src);
-        rxConfigMutable()->rc_smoothing_2euro_stage2 = sbufReadU8(src); // was rc_smoothing_derivative_type (dead) — reused for 2EURO stage-2 on/off
+        rxConfigMutable()->rc_smoothing_1euro_stage2 = sbufReadU8(src); // was rc_smoothing_derivative_type (dead) — reused for 1EURO stage-2 on/off
 #else
         sbufReadU8(src);
         sbufReadU8(src);
