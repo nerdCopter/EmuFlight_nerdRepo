@@ -134,11 +134,14 @@ typedef struct oneEuroFilter_s {
     float fc_max;           // maximum cutoff frequency Hz; 0 = no cap
     float beta;             // speed coefficient
     float fc_d;             // derivative filter cutoff (Hz)
-    float dT_inv;           // 1/dT — stored as frequency to avoid per-sample divide
-    float lastInput;        // last RC input — cutoff only updated when input changes
+    float dT_inv;           // 1/rc_dT — for dx velocity estimate and d_filter k (d_filter runs once per RC frame)
+    float pid_dT_inv;       // 1/pid_dT — for x_filter/x_filter2 k (applied every PID loop)
     float lastCutoff;       // last computed adaptive cutoff Hz (for blackbox debug)
 } oneEuroFilter_t;
 
-void oneEuroFilterInit(oneEuroFilter_t *filter, float fc_min, float fc_max, float beta, float fc_d, float dT);
-void oneEuroFilterUpdate(oneEuroFilter_t *filter, float fc_min, float fc_max, float beta, float fc_d, float dT);
-float oneEuroFilterApply(oneEuroFilter_t *filter, float input);
+void oneEuroFilterInit(oneEuroFilter_t *filter, float fc_min, float fc_max, float beta, float fc_d, float rc_dT, float pid_dT);
+void oneEuroFilterUpdate(oneEuroFilter_t *filter, float fc_min, float fc_max, float beta, float fc_d, float rc_dT, float pid_dT);
+// newSample: true exactly once per genuine new RX frame (not once per PID loop, not on raw-value
+// change) — see twoEuroFilterApply() in feat/2euro for why value-based gating lets the adaptive
+// cutoff freeze indefinitely.
+float oneEuroFilterApply(oneEuroFilter_t *filter, float input, bool newSample);
