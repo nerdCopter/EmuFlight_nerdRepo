@@ -1,7 +1,7 @@
 # CLI Parameters Reference
 
 > **Auto-generated** — do not edit manually.
-> Source: `src/main/interface/settings.c` | Generated: 2026-06-13 | Commit: `47a13a7155` | Firmware: `0.4.3` | MSP: `0.1.54`
+> Source: `src/main/interface/settings.c` | Generated: 2026-07-06 | Commit: `804dfcd6e5` | Firmware: `0.4.3` | MSP: `0.1.54`
 
 ---
 
@@ -36,6 +36,7 @@
 - [Arming Config](#arming-config)
 - [GPS Config](#gps-config)
 - [GPS Rescue](#gps-rescue)
+- [Position Config](#position-config)
 - [RC Controls Config](#rc-controls-config)
 - [PID Config](#pid-config)
 - [PID Profile](#pid-profile)
@@ -179,10 +180,6 @@
 | `rc_smoothing_input_hz` | uint8 | master | `0` – `UINT8_MAX` |
 | `rc_smoothing_debug_axis` | uint8 | master | `ROLL`, `PITCH`, `YAW`, `THROTTLE` |
 | `rc_smoothing_input_type` | uint8 | master | `PT1`, `1EURO`, `PT2`, `PT3` |
-| `rc_smoothing_1euro_beta` | uint8 | master | `1` – `20` |
-| `rc_smoothing_1euro_fc_min` | uint8 | master | `0` – `100` |
-| `rc_smoothing_1euro_fc_max` | uint8 | master | `0` – `200` |
-| `rc_smoothing_1euro_deriv_hz` | uint8 | master | `0` – `50` |
 | `fpv_mix_degrees` | uint8 | master | `0` – `90` |
 | `cinematic_yaw` | uint8 | master | `OFF`, `ON` |
 | `max_aux_channels` | uint8 | master | `0` – `MAX_AUX_CHANNEL_COUNT` |
@@ -450,6 +447,12 @@
 | `gps_rescue_throttle_hover` | uint16 | master | `1000` – `2000` |
 | `gps_rescue_sanity_checks` | uint8 | master | `RESCUE_SANITY_OFF`, `RESCUE_SANITY_ON`, `RESCUE_SANITY_FS_ONLY` |
 | `gps_rescue_min_sats` | uint8 | master | `0` – `50` |
+
+## Position Config
+
+| Parameter | Type | Scope | Range / Values |
+|-----------|------|-------|----------------|
+| `altitude_limit` | uint16 | master | `0` – `10000` |
 
 ## RC Controls Config
 
