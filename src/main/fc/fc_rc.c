@@ -324,19 +324,22 @@ FAST_CODE bool rcSmoothingRxRateValid(int currentRxRefreshRate) {
 
 // Initialize or update the filters base on either the manually selected cutoff, or
 // the auto-calculated cutoff frequency based on detected rx frame rate.
-// 1EURO stage-1 adaptive-cutoff safety ceiling (Hz). Fully internal/computed-only — no CLI field.
-// Also bounds fc_min itself (see rcSmoothingSetFilterCutoffs()) so fc_min can never exceed the
-// ceiling meant to bound the cutoff above it, for RX rates so implausibly fast (>2400 Hz) that
-// rx_hz/12 alone would otherwise push fc_min past this value.
+// 1EURO/2EURO stage-1 adaptive-cutoff safety ceiling (Hz). Fully internal/computed-only — no CLI
+// field. Also bounds fc_min itself (see below) so fc_min can never exceed the ceiling meant to
+// bound the cutoff above it, for RX rates so implausibly fast (>2400 Hz) that rx_hz/12 alone
+// would otherwise push fc_min past this value.
 #define RC_SMOOTHING_1EURO_FC_MAX 200.0f
 
 FAST_CODE_NOINLINE void rcSmoothingSetFilterCutoffs(rcSmoothingFilter_t *smoothingData) {
     const float dT = targetPidLooptime * 1e-6f;
     uint16_t oldCutoff = smoothingData->inputCutoffFrequency;
 
-    if (rxConfig()->rc_smoothing_input_type == RC_SMOOTHING_INPUT_1EURO) {
-        // 1EURO fc_min is fully internal/computed-only — no CLI field, no manual override.
-        // Store computed fc_min in inputCutoffFrequency for change detection.
+    const bool isEuroFamily = rxConfig()->rc_smoothing_input_type == RC_SMOOTHING_INPUT_1EURO
+                            || rxConfig()->rc_smoothing_input_type == RC_SMOOTHING_INPUT_2EURO;
+
+    if (isEuroFamily) {
+        // fc_min is fully internal/computed-only for both 1EURO and 2EURO — no CLI field, no
+        // manual override. Store computed fc_min in inputCutoffFrequency for change detection.
         // rx_hz / 12, floored at 6 Hz; 180 Hz fallback gives 15 Hz before RX is known.
         // The /12 divisor sizes fc_min so the dual-stage cascade (fc_min, fc_fixed=2×fc_min)
         // gives ~95% attenuation at the Nyquist frequency (Nyquist/fc_min = 6 by construction).
@@ -358,11 +361,11 @@ FAST_CODE_NOINLINE void rcSmoothingSetFilterCutoffs(rcSmoothingFilter_t *smoothi
                                                rxConfig()->rc_smoothing_input_type == RC_SMOOTHING_INPUT_PT1);
     }
 
-    const bool is1Euro = rxConfig()->rc_smoothing_input_type == RC_SMOOTHING_INPUT_1EURO;
     // initialize or update the input filter
-    // For 1EURO: always recompute when called — beta depends on rate profile (not just fc_min),
-    // so a rate-profile change must update beta even when fc_min (and thus inputCutoffFrequency) is unchanged.
-    if ((smoothingData->inputCutoffFrequency != oldCutoff) || !smoothingData->filterInitialized || is1Euro) {
+    // For 1EURO/2EURO: always recompute when called — beta depends on rate profile (not just
+    // fc_min), so a rate-profile change must update beta even when fc_min (and thus
+    // inputCutoffFrequency) is unchanged.
+    if ((smoothingData->inputCutoffFrequency != oldCutoff) || !smoothingData->filterInitialized || isEuroFamily) {
         for (int i = 0; i < PRIMARY_CHANNEL_COUNT; i++) {
             if ((1 << i) & interpolationChannels) {  // only update channels specified by rc_interp_ch
                 switch (rxConfig()->rc_smoothing_input_type) {
@@ -380,14 +383,8 @@ FAST_CODE_NOINLINE void rcSmoothingSetFilterCutoffs(rcSmoothingFilter_t *smoothi
                         ptnFilterUpdate((ptnFilter_t*) &smoothingData->filter[i], smoothingData->inputCutoffFrequency, 1.553773974f, dT);
                     }
                     break;
-                case RC_SMOOTHING_INPUT_PT3:
-                    if (!smoothingData->filterInitialized) {
-                        ptnFilterInit((ptnFilter_t*) &smoothingData->filter[i], FILTER_PT3, smoothingData->inputCutoffFrequency, dT);
-                    } else {
-                        ptnFilterUpdate((ptnFilter_t*) &smoothingData->filter[i], smoothingData->inputCutoffFrequency, 1.961459177f, dT);
-                    }
-                    break;
                 case RC_SMOOTHING_INPUT_1EURO:
+                case RC_SMOOTHING_INPUT_2EURO:
                 default: {
                     // Use RC frame time for derivative — correct time scale for stick velocity
                     const float rc_dT  = (smoothingData->averageFrameTimeUs > 0)
@@ -406,7 +403,9 @@ FAST_CODE_NOINLINE void rcSmoothingSetFilterCutoffs(rcSmoothingFilter_t *smoothi
                                          : 180.0f / 19.0f;
                     // fc_fixed: 2× fc_min → fixed stage ~1 RC-frame group delay per stage at any link rate.
                     const float fc_fixed = fc_min * 2.0f;
-                    const bool stage2Enabled = rxConfig()->rc_smoothing_1euro_stage2 != 0;
+                    // 1EURO and 2EURO are independent peer selections (not a toggle): 2EURO always
+                    // runs the dual-stage cascade, 1EURO always runs single-stage adaptive-only.
+                    const bool stage2Enabled = rxConfig()->rc_smoothing_input_type == RC_SMOOTHING_INPUT_2EURO;
                     if (!smoothingData->filterInitialized) {
                         oneEuroFilterInit((oneEuroFilter_t*) &smoothingData->filter[i], fc_min, fc_max, beta, fc_d, fc_fixed, rc_dT, dT, stage2Enabled);
                     } else {
@@ -451,9 +450,10 @@ FAST_CODE_NOINLINE bool rcSmoothingAutoCalculate(void) {
     if (rxConfig()->rc_smoothing_input_cutoff == 0) {
         return true;
     }
-    // 1EURO fc_min is always auto-calculated (no CLI override), so it always needs training
-    // to get averageFrameTimeUs. rc_smoothing_input_cutoff is irrelevant for 1EURO.
-    if (rxConfig()->rc_smoothing_input_type == RC_SMOOTHING_INPUT_1EURO) {
+    // 1EURO/2EURO fc_min is always auto-calculated (no CLI override), so it always needs
+    // training to get averageFrameTimeUs. rc_smoothing_input_cutoff is irrelevant for both.
+    if (rxConfig()->rc_smoothing_input_type == RC_SMOOTHING_INPUT_1EURO
+        || rxConfig()->rc_smoothing_input_type == RC_SMOOTHING_INPUT_2EURO) {
         return true;
     }
     return false;
@@ -541,10 +541,11 @@ FAST_CODE uint8_t processRcSmoothingFilter(void) {
     }
     if (rcSmoothingData.filterInitialized && (debugMode == DEBUG_RC_SMOOTHING)) {
         const uint8_t dbgAxis = rxConfig()->rc_smoothing_debug_axis;
-        // [0] raw input, [1] filtered output, [2] adaptive cutoff x10 (1EURO only), [3] avg frame µs
+        // [0] raw input, [1] filtered output, [2] adaptive cutoff x10 (1EURO/2EURO only), [3] avg frame µs
         DEBUG_SET(DEBUG_RC_SMOOTHING, 0, lrintf(lastRxData[dbgAxis]));
         DEBUG_SET(DEBUG_RC_SMOOTHING, 1, lrintf(rcCommand[dbgAxis]));
-        if (rxConfig()->rc_smoothing_input_type == RC_SMOOTHING_INPUT_1EURO) {
+        if (rxConfig()->rc_smoothing_input_type == RC_SMOOTHING_INPUT_1EURO
+            || rxConfig()->rc_smoothing_input_type == RC_SMOOTHING_INPUT_2EURO) {
             const oneEuroFilter_t *f = (const oneEuroFilter_t*) &rcSmoothingData.filter[dbgAxis];
             DEBUG_SET(DEBUG_RC_SMOOTHING, 2, lrintf(f->lastCutoff * 10.0f)); // Hz × 10 for resolution
         } else {
@@ -561,10 +562,10 @@ FAST_CODE uint8_t processRcSmoothingFilter(void) {
                     rcCommand[updatedChannel] = pt1FilterApply((pt1Filter_t*) &rcSmoothingData.filter[updatedChannel], lastRxData[updatedChannel]);
                     break;
                 case RC_SMOOTHING_INPUT_PT2:
-                case RC_SMOOTHING_INPUT_PT3:
                     rcCommand[updatedChannel] = ptnFilterApply((ptnFilter_t*) &rcSmoothingData.filter[updatedChannel], lastRxData[updatedChannel]);
                     break;
                 case RC_SMOOTHING_INPUT_1EURO:
+                case RC_SMOOTHING_INPUT_2EURO:
                 default:
                     rcCommand[updatedChannel] = oneEuroFilterApply((oneEuroFilter_t*) &rcSmoothingData.filter[updatedChannel], lastRxData[updatedChannel], isRXDataNew);
                     break;

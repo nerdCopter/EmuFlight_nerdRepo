@@ -380,7 +380,7 @@ static const char * const lookupTableRcSmoothingDebug[] = {
     "ROLL", "PITCH", "YAW", "THROTTLE"
 };
 static const char * const lookupTableRcSmoothingInputType[] = {
-    "PT1", "1EURO", "PT2", "PT3"
+    "PT1", "1EURO", "PT2", "2EURO"
 };
 #endif
 
@@ -628,10 +628,8 @@ const clivalue_t valueTable[] = {
     { "rc_smoothing_input_hz",      VAR_UINT8  | MASTER_VALUE, .config.minmax = { 0, UINT8_MAX }, PG_RX_CONFIG, offsetof(rxConfig_t, rc_smoothing_input_cutoff) },
     { "rc_smoothing_debug_axis",    VAR_UINT8  | MASTER_VALUE | MODE_LOOKUP, .config.lookup = { TABLE_RC_SMOOTHING_DEBUG }, PG_RX_CONFIG, offsetof(rxConfig_t, rc_smoothing_debug_axis) },
     { "rc_smoothing_input_type",    VAR_UINT8  | MASTER_VALUE | MODE_LOOKUP, .config.lookup = { TABLE_RC_SMOOTHING_INPUT_TYPE }, PG_RX_CONFIG, offsetof(rxConfig_t, rc_smoothing_input_type) },
-    // 1EURO fc_min/fc_max/deriv_hz (and beta) are fully internal/computed-only — no CLI fields.
-    // rc_smoothing_1euro_stage2: OFF disables 1EURO's static fixed-cutoff second stage, running
-    // single-stage adaptive-only (equivalent to feat/1euro-single's design). Default ON.
-    { "rc_smoothing_1euro_stage2",  VAR_UINT8  | MASTER_VALUE | MODE_LOOKUP, .config.lookup = { TABLE_OFF_ON }, PG_RX_CONFIG, offsetof(rxConfig_t, rc_smoothing_1euro_stage2) },
+    // 1EURO (single-stage) and 2EURO (dual-stage) are independent peer selections, same as
+    // PT1/PT2. fc_min/fc_max/fc_d/beta are fully internal/computed-only for both — no CLI fields.
 #endif // USE_RC_SMOOTHING_FILTER
 
     { "fpv_mix_degrees",            VAR_UINT8  | MASTER_VALUE, .config.minmax = { 0, 90 }, PG_RX_CONFIG, offsetof(rxConfig_t, fpvCamAngleDegrees) },

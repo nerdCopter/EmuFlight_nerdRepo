@@ -125,13 +125,15 @@ void ptnFilterInit(ptnFilter_t *filter, uint8_t order, uint16_t f_cut, float dT)
 void ptnFilterUpdate(ptnFilter_t *filter, float f_cut, float ScaleF, float dt);
 float ptnFilterApply(ptnFilter_t *filter, float input);
 
-// 1€ filter (Casiez et al.) with an optional second (fixed low-pass) stage.
+// 1€ filter (Casiez et al.) with an optional second (fixed low-pass) stage. Backs both the
+// RC_SMOOTHING_INPUT_1EURO (single-stage) and RC_SMOOTHING_INPUT_2EURO (dual-stage) CLI
+// selections — they are independent peer choices, not a toggle; stage2Enabled is set once at
+// init/update time based on which enum value is active (see rcSmoothingSetFilterCutoffs()).
 // Stage 1 (x_filter) is the original 1€ adaptive PT1: cutoff rises with signal velocity,
-// transparent at full stick, tight at rest. Stage 2 (x_filter_fixed), when enabled via
-// stage2Enabled, is a static PT1 at a fixed cutoff (fc_fixed = 2 × fc_min) cascaded after
-// stage 1 — an always-on quantization floor that stage 1 alone cannot provide, since stage 1's
-// own cutoff opens during fast input precisely when a fixed floor is most needed to suppress
-// RC-frame steps. Disabling it (stage2Enabled = false) runs the plain single-stage 1€ filter.
+// transparent at full stick, tight at rest. Stage 2 (x_filter_fixed), when enabled, is a static
+// PT1 at a fixed cutoff (fc_fixed = 2 × fc_min) cascaded after stage 1 — an always-on
+// quantization floor that stage 1 alone cannot provide, since stage 1's own cutoff opens during
+// fast input precisely when a fixed floor is most needed to suppress RC-frame steps.
 typedef struct oneEuroFilter_s {
     pt1Filter_t x_filter;        // main signal PT1 stage 1 (1€ adaptive cutoff)
     pt1Filter_t x_filter_fixed;  // main signal PT1 stage 2 (fixed cutoff fc_fixed — always-on step floor)
