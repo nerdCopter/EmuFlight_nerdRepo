@@ -330,12 +330,15 @@ FAST_CODE bool rcSmoothingRxRateValid(int currentRxRefreshRate) {
 // would otherwise push fc_min past this value.
 #define RC_SMOOTHING_1EURO_FC_MAX 200.0f
 
+static bool isRcSmoothingEuroFamily(uint8_t inputType) {
+    return inputType == RC_SMOOTHING_INPUT_1EURO || inputType == RC_SMOOTHING_INPUT_2EURO;
+}
+
 FAST_CODE_NOINLINE void rcSmoothingSetFilterCutoffs(rcSmoothingFilter_t *smoothingData) {
     const float dT = targetPidLooptime * 1e-6f;
     uint16_t oldCutoff = smoothingData->inputCutoffFrequency;
 
-    const bool isEuroFamily = rxConfig()->rc_smoothing_input_type == RC_SMOOTHING_INPUT_1EURO
-                            || rxConfig()->rc_smoothing_input_type == RC_SMOOTHING_INPUT_2EURO;
+    const bool isEuroFamily = isRcSmoothingEuroFamily(rxConfig()->rc_smoothing_input_type);
 
     if (isEuroFamily) {
         // fc_min is fully internal/computed-only for both 1EURO and 2EURO — no CLI field, no
@@ -452,8 +455,7 @@ FAST_CODE_NOINLINE bool rcSmoothingAutoCalculate(void) {
     }
     // 1EURO/2EURO fc_min is always auto-calculated (no CLI override), so it always needs
     // training to get averageFrameTimeUs. rc_smoothing_input_cutoff is irrelevant for both.
-    if (rxConfig()->rc_smoothing_input_type == RC_SMOOTHING_INPUT_1EURO
-        || rxConfig()->rc_smoothing_input_type == RC_SMOOTHING_INPUT_2EURO) {
+    if (isRcSmoothingEuroFamily(rxConfig()->rc_smoothing_input_type)) {
         return true;
     }
     return false;
@@ -544,8 +546,7 @@ FAST_CODE uint8_t processRcSmoothingFilter(void) {
         // [0] raw input, [1] filtered output, [2] adaptive cutoff x10 (1EURO/2EURO only), [3] avg frame µs
         DEBUG_SET(DEBUG_RC_SMOOTHING, 0, lrintf(lastRxData[dbgAxis]));
         DEBUG_SET(DEBUG_RC_SMOOTHING, 1, lrintf(rcCommand[dbgAxis]));
-        if (rxConfig()->rc_smoothing_input_type == RC_SMOOTHING_INPUT_1EURO
-            || rxConfig()->rc_smoothing_input_type == RC_SMOOTHING_INPUT_2EURO) {
+        if (isRcSmoothingEuroFamily(rxConfig()->rc_smoothing_input_type)) {
             const oneEuroFilter_t *f = (const oneEuroFilter_t*) &rcSmoothingData.filter[dbgAxis];
             DEBUG_SET(DEBUG_RC_SMOOTHING, 2, lrintf(f->lastCutoff * 10.0f)); // Hz × 10 for resolution
         } else {
