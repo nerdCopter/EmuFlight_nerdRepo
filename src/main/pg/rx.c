@@ -34,7 +34,8 @@
 #include "rx/rx.h"
 #include "rx/rx_spi.h"
 
-PG_REGISTER_WITH_RESET_FN(rxConfig_t, rxConfig, PG_RX_CONFIG, 2);
+// PG version is master's-current-value (2) + 1.
+PG_REGISTER_WITH_RESET_FN(rxConfig_t, rxConfig, PG_RX_CONFIG, 3);
 void pgResetFn_rxConfig(rxConfig_t *rxConfig) {
     RESET_CONFIG_2(rxConfig_t, rxConfig,
                    .halfDuplex = 0,
@@ -61,10 +62,14 @@ void pgResetFn_rxConfig(rxConfig_t *rxConfig) {
                    .cinematicYaw = 0,
                    .airModeActivateThreshold = 32,
                    .max_aux_channel = DEFAULT_AUX_CHANNEL_COUNT,
-                   .rc_smoothing_type = RC_SMOOTHING_TYPE_INTERPOLATION,
+                   // TESTING DEFAULT — DO NOT MERGE: rc_smoothing_type/input_type below are set for
+                   // 2EURO flight validation on this design-variant branch. Mergeable defaults are
+                   // rc_smoothing_type = RC_SMOOTHING_TYPE_INTERPOLATION and
+                   // rc_smoothing_input_type = RC_SMOOTHING_INPUT_PT2 (see CONTEXT_2euro.md).
+                   .rc_smoothing_type = RC_SMOOTHING_TYPE_FILTER,
                    .rc_smoothing_input_cutoff = 50,      // automatically calculate the cutoff by default
                    .rc_smoothing_debug_axis = ROLL,     // default to debug logging for the roll axis
-                   .rc_smoothing_input_type = RC_SMOOTHING_INPUT_PT2,
+                   .rc_smoothing_input_type = RC_SMOOTHING_INPUT_2EURO,
                    .showAlteredRc = 0,
                    .sbus_baud_fast = false,
                   );
