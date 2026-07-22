@@ -67,12 +67,11 @@ typedef enum {
 } rcSmoothingType_e;
 
 typedef enum {
-    RC_SMOOTHING_INPUT_PT1,    // 0 — light smoothing, low latency
-    RC_SMOOTHING_INPUT_1EURO,  // 1 — adaptive, single-stage (was BIQUAD; also default fallback)
-    RC_SMOOTHING_INPUT_PT2,    // 2 — standard fixed-cutoff (BF-equivalent default)
-    RC_SMOOTHING_INPUT_2EURO,  // 3 — adaptive, dual-stage (was PT3; PT3 dropped — no real-world usage found,
-                               // and upstream Betaflight itself retired the whole PT1/PT2/PT3/BIQUAD
-                               // selector model in favor of a different auto-smoothing architecture)
+    RC_SMOOTHING_INPUT_1EURO,  // 0 — adaptive, single-stage (default fallback)
+    RC_SMOOTHING_INPUT_2EURO,  // 1 — adaptive, dual-stage
+    // PT1/PT2/PT3/BIQUAD/PT4 all dropped — 1EURO/2EURO are the only rc_smoothing_input_type
+    // selections on this branch. Fixed-cutoff filtering is not offered as an input-filter choice
+    // here; rc_smoothing_type still offers INTERPOLATION as the non-FILTER alternative.
 } rcSmoothingInputFilter_e;
 
 typedef enum {

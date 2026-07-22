@@ -89,7 +89,6 @@ volatile uint16_t currentRxRefreshRate;
 
 
 #ifdef USE_RC_SMOOTHING_FILTER
-#define RC_SMOOTHING_IDENTITY_FREQUENCY         80    // Used in the formula to convert a BIQUAD cutoff frequency to PT1
 #define RC_SMOOTHING_FILTER_STARTUP_DELAY_MS    5000  // Time to wait after power to let the PID loop stabilize before starting average frame rate calculation
 #define RC_SMOOTHING_FILTER_TRAINING_SAMPLES    50    // Number of rx frame rate samples to average
 #define RC_SMOOTHING_FILTER_TRAINING_DELAY_MS   1000  // Additional time to wait after receiving first valid rx frame before initial training starts
@@ -301,21 +300,6 @@ void updateRcRefreshRate(timeUs_t currentTimeUs) {
 }
 
 #ifdef USE_RC_SMOOTHING_FILTER
-// Determine a cutoff frequency based on filter type and the calculated
-// average rx frame time
-FAST_CODE_NOINLINE int calcRcSmoothingCutoff(int avgRxFrameTimeUs, bool pt1) {
-    if (avgRxFrameTimeUs > 0) {
-        float cutoff = (1 / (avgRxFrameTimeUs * 1e-6f)) / 2;  // calculate the nyquist frequency
-        cutoff = cutoff * 0.90f;  // Use 90% of the calculated nyquist frequency
-        if (pt1) {
-            cutoff = sq(cutoff) / RC_SMOOTHING_IDENTITY_FREQUENCY; // convert to a cutoff for pt1 that has similar characteristics
-        }
-        return lrintf(cutoff);
-    } else {
-        return 0;
-    }
-}
-
 // Preforms a reasonableness check on the rx frame time to avoid bad data
 // skewing the average.
 FAST_CODE bool rcSmoothingRxRateValid(int currentRxRefreshRate) {
@@ -330,93 +314,58 @@ FAST_CODE bool rcSmoothingRxRateValid(int currentRxRefreshRate) {
 // would otherwise push fc_min past this value.
 #define RC_SMOOTHING_1EURO_FC_MAX 200.0f
 
-static bool isRcSmoothingEuroFamily(uint8_t inputType) {
-    return inputType == RC_SMOOTHING_INPUT_1EURO || inputType == RC_SMOOTHING_INPUT_2EURO;
-}
-
 FAST_CODE_NOINLINE void rcSmoothingSetFilterCutoffs(rcSmoothingFilter_t *smoothingData) {
     const float dT = targetPidLooptime * 1e-6f;
-    uint16_t oldCutoff = smoothingData->inputCutoffFrequency;
 
-    const bool isEuroFamily = isRcSmoothingEuroFamily(rxConfig()->rc_smoothing_input_type);
+    // fc_min is fully internal/computed-only for both 1EURO and 2EURO — no CLI field, no manual
+    // override (rc_smoothing_input_type has no other selectable value on this branch). Store
+    // computed fc_min in inputCutoffFrequency for change detection.
+    // rx_hz / 12, floored at 6 Hz; 180 Hz fallback gives 15 Hz before RX is known.
+    // The /12 divisor sizes fc_min so the dual-stage cascade (fc_min, fc_fixed=2×fc_min)
+    // gives ~95% attenuation at the Nyquist frequency (Nyquist/fc_min = 6 by construction).
+    // Floor of 6 Hz trades attenuation for bounded group delay at very slow links (SBUS/50Hz:
+    // ~90% attenuation instead of the ~95% the unclamped formula would give — deliberate).
+    // No fixed upper Hz value: fc_min scales as rx_hz/12 for ANY link rate (72 Hz through
+    // 1000+ Hz ELRS full-rate and beyond), keeping the 6:1 ratio — and thus ~95% attenuation
+    // and proportionally shrinking group delay — mathematically consistent across the whole
+    // range, rather than freezing at a fixed Hz value above some cutoff rate. The only upper
+    // bound is RC_SMOOTHING_1EURO_FC_MAX itself, which only matters for RX rates so
+    // implausibly fast (rx_hz > 2400 Hz) that fc_min would otherwise exceed it.
+    const float rx_hz = (smoothingData->averageFrameTimeUs > 0)
+                        ? 1e6f / smoothingData->averageFrameTimeUs : 180.0f;
+    // Round (not truncate) to nearest Hz — truncation was silently discarding up to ~1 Hz
+    // of the intended value (e.g. 500/12=41.67 truncated to 41, not the nearest 42).
+    smoothingData->inputCutoffFrequency = (uint16_t)lrintf(constrainf(rx_hz / 12.0f, 6.0f, RC_SMOOTHING_1EURO_FC_MAX));
 
-    if (isEuroFamily) {
-        // fc_min is fully internal/computed-only for both 1EURO and 2EURO — no CLI field, no
-        // manual override. Store computed fc_min in inputCutoffFrequency for change detection.
-        // rx_hz / 12, floored at 6 Hz; 180 Hz fallback gives 15 Hz before RX is known.
-        // The /12 divisor sizes fc_min so the dual-stage cascade (fc_min, fc_fixed=2×fc_min)
-        // gives ~95% attenuation at the Nyquist frequency (Nyquist/fc_min = 6 by construction).
-        // Floor of 6 Hz trades attenuation for bounded group delay at very slow links (SBUS/50Hz:
-        // ~90% attenuation instead of the ~95% the unclamped formula would give — deliberate).
-        // No fixed upper Hz value: fc_min scales as rx_hz/12 for ANY link rate (72 Hz through
-        // 1000+ Hz ELRS full-rate and beyond), keeping the 6:1 ratio — and thus ~95% attenuation
-        // and proportionally shrinking group delay — mathematically consistent across the whole
-        // range, rather than freezing at a fixed Hz value above some cutoff rate. The only upper
-        // bound is RC_SMOOTHING_1EURO_FC_MAX itself, which only matters for RX rates so
-        // implausibly fast (rx_hz > 2400 Hz) that fc_min would otherwise exceed it.
-        const float rx_hz = (smoothingData->averageFrameTimeUs > 0)
-                            ? 1e6f / smoothingData->averageFrameTimeUs : 180.0f;
-        // Round (not truncate) to nearest Hz — truncation was silently discarding up to ~1 Hz
-        // of the intended value (e.g. 500/12=41.67 truncated to 41, not the nearest 42).
-        smoothingData->inputCutoffFrequency = (uint16_t)lrintf(constrainf(rx_hz / 12.0f, 6.0f, RC_SMOOTHING_1EURO_FC_MAX));
-    } else if (rxConfig()->rc_smoothing_input_cutoff == 0) {
-        smoothingData->inputCutoffFrequency = calcRcSmoothingCutoff(smoothingData->averageFrameTimeUs,
-                                               rxConfig()->rc_smoothing_input_type == RC_SMOOTHING_INPUT_PT1);
-    }
-
-    // initialize or update the input filter
-    // For 1EURO/2EURO: always recompute when called — beta depends on rate profile (not just
-    // fc_min), so a rate-profile change must update beta even when fc_min (and thus
-    // inputCutoffFrequency) is unchanged.
-    if ((smoothingData->inputCutoffFrequency != oldCutoff) || !smoothingData->filterInitialized || isEuroFamily) {
-        for (int i = 0; i < PRIMARY_CHANNEL_COUNT; i++) {
-            if ((1 << i) & interpolationChannels) {  // only update channels specified by rc_interp_ch
-                switch (rxConfig()->rc_smoothing_input_type) {
-                case RC_SMOOTHING_INPUT_PT1:
-                    if (!smoothingData->filterInitialized) {
-                        pt1FilterInit((pt1Filter_t*) &smoothingData->filter[i], pt1FilterGain(smoothingData->inputCutoffFrequency, dT));
-                    } else {
-                        pt1FilterUpdateCutoff((pt1Filter_t*) &smoothingData->filter[i], pt1FilterGain(smoothingData->inputCutoffFrequency, dT));
-                    }
-                    break;
-                case RC_SMOOTHING_INPUT_PT2:
-                    if (!smoothingData->filterInitialized) {
-                        ptnFilterInit((ptnFilter_t*) &smoothingData->filter[i], FILTER_PT2, smoothingData->inputCutoffFrequency, dT);
-                    } else {
-                        ptnFilterUpdate((ptnFilter_t*) &smoothingData->filter[i], smoothingData->inputCutoffFrequency, 1.553773974f, dT);
-                    }
-                    break;
-                case RC_SMOOTHING_INPUT_1EURO:
-                case RC_SMOOTHING_INPUT_2EURO:
-                default: {
-                    // Use RC frame time for derivative — correct time scale for stick velocity
-                    const float rc_dT  = (smoothingData->averageFrameTimeUs > 0)
-                                         ? smoothingData->averageFrameTimeUs * 1e-6f : dT;
-                    const float fc_min = (float)smoothingData->inputCutoffFrequency; // already computed above
-                    const float fc_max = RC_SMOOTHING_1EURO_FC_MAX; // fully internal/computed-only
-                    const float rcRate = (float)MAX(MAX(currentControlRateProfile->rcRates[FD_ROLL],
-                                                        currentControlRateProfile->rcRates[FD_PITCH]), 10);
-                    const float sRate  = 1.0f + MAX(currentControlRateProfile->rates[FD_ROLL],
-                                                    currentControlRateProfile->rates[FD_PITCH]) * 0.005f;
-                    const float beta   = 0.5f / (rcRate * sRate);
-                    // fc_d auto: rx_hz/19 keeps derivative detection at ~3 RC frames at all rates.
-                    // Fully internal/computed-only — no CLI field, no manual override.
-                    const float fc_d   = (smoothingData->averageFrameTimeUs > 0)
-                                         ? 1e6f / smoothingData->averageFrameTimeUs / 19.0f
-                                         : 180.0f / 19.0f;
-                    // fc_fixed: 2× fc_min → fixed stage ~1 RC-frame group delay per stage at any link rate.
-                    const float fc_fixed = fc_min * 2.0f;
-                    // 1EURO and 2EURO are independent peer selections (not a toggle): 2EURO always
-                    // runs the dual-stage cascade, 1EURO always runs single-stage adaptive-only.
-                    const bool stage2Enabled = rxConfig()->rc_smoothing_input_type == RC_SMOOTHING_INPUT_2EURO;
-                    if (!smoothingData->filterInitialized) {
-                        oneEuroFilterInit((oneEuroFilter_t*) &smoothingData->filter[i], fc_min, fc_max, beta, fc_d, fc_fixed, rc_dT, dT, stage2Enabled);
-                    } else {
-                        oneEuroFilterUpdate((oneEuroFilter_t*) &smoothingData->filter[i], fc_min, fc_max, beta, fc_d, fc_fixed, rc_dT, dT, stage2Enabled);
-                    }
-                    break;
-                }
-                }
+    // Always recompute when called — beta depends on rate profile (not just fc_min), so a
+    // rate-profile change must update beta even when fc_min (and thus inputCutoffFrequency) is
+    // unchanged.
+    for (int i = 0; i < PRIMARY_CHANNEL_COUNT; i++) {
+        if ((1 << i) & interpolationChannels) {  // only update channels specified by rc_interp_ch
+            // Use RC frame time for derivative — correct time scale for stick velocity
+            const float rc_dT  = (smoothingData->averageFrameTimeUs > 0)
+                                 ? smoothingData->averageFrameTimeUs * 1e-6f : dT;
+            const float fc_min = (float)smoothingData->inputCutoffFrequency; // already computed above
+            const float fc_max = RC_SMOOTHING_1EURO_FC_MAX; // fully internal/computed-only
+            const float rcRate = (float)MAX(MAX(currentControlRateProfile->rcRates[FD_ROLL],
+                                                currentControlRateProfile->rcRates[FD_PITCH]), 10);
+            const float sRate  = 1.0f + MAX(currentControlRateProfile->rates[FD_ROLL],
+                                            currentControlRateProfile->rates[FD_PITCH]) * 0.005f;
+            const float beta   = 0.5f / (rcRate * sRate);
+            // fc_d auto: rx_hz/19 keeps derivative detection at ~3 RC frames at all rates.
+            // Fully internal/computed-only — no CLI field, no manual override.
+            const float fc_d   = (smoothingData->averageFrameTimeUs > 0)
+                                 ? 1e6f / smoothingData->averageFrameTimeUs / 19.0f
+                                 : 180.0f / 19.0f;
+            // fc_fixed: 2× fc_min → fixed stage ~1 RC-frame group delay per stage at any link rate.
+            const float fc_fixed = fc_min * 2.0f;
+            // 1EURO and 2EURO are independent peer selections (not a toggle): 2EURO always
+            // runs the dual-stage cascade, 1EURO always runs single-stage adaptive-only.
+            const bool stage2Enabled = rxConfig()->rc_smoothing_input_type == RC_SMOOTHING_INPUT_2EURO;
+            if (!smoothingData->filterInitialized) {
+                oneEuroFilterInit((oneEuroFilter_t*) &smoothingData->filter[i], fc_min, fc_max, beta, fc_d, fc_fixed, rc_dT, dT, stage2Enabled);
+            } else {
+                oneEuroFilterUpdate((oneEuroFilter_t*) &smoothingData->filter[i], fc_min, fc_max, beta, fc_d, fc_fixed, rc_dT, dT, stage2Enabled);
             }
         }
     }
@@ -449,16 +398,9 @@ FAST_CODE bool rcSmoothingAccumulateSample(rcSmoothingFilter_t *smoothingData, i
 // Determine if we need to caclulate filter cutoffs. If not then we can avoid
 // examining the rx frame times completely
 FAST_CODE_NOINLINE bool rcSmoothingAutoCalculate(void) {
-    // PT1/PT2: auto when input_cutoff == 0
-    if (rxConfig()->rc_smoothing_input_cutoff == 0) {
-        return true;
-    }
-    // 1EURO/2EURO fc_min is always auto-calculated (no CLI override), so it always needs
-    // training to get averageFrameTimeUs. rc_smoothing_input_cutoff is irrelevant for both.
-    if (isRcSmoothingEuroFamily(rxConfig()->rc_smoothing_input_type)) {
-        return true;
-    }
-    return false;
+    // 1EURO/2EURO fc_min is always auto-calculated (no CLI override) — the only two
+    // rc_smoothing_input_type selections on this branch — so training is always required.
+    return true;
 }
 
 FAST_CODE uint8_t processRcSmoothingFilter(void) {
@@ -473,7 +415,7 @@ FAST_CODE uint8_t processRcSmoothingFilter(void) {
         rcSmoothingData.filterInitialized = false;
         rcSmoothingData.averageFrameTimeUs = 0;
         rcSmoothingResetAccumulation(&rcSmoothingData);
-        rcSmoothingData.inputCutoffFrequency = rxConfig()->rc_smoothing_input_cutoff;
+        rcSmoothingData.inputCutoffFrequency = 0; // fc_min is auto-computed; no manual override exists
         calculateCutoffs = rcSmoothingAutoCalculate();
         // if we don't need to calculate cutoffs dynamically then the filters can be initialized now
         if (!calculateCutoffs) {
@@ -543,34 +485,18 @@ FAST_CODE uint8_t processRcSmoothingFilter(void) {
     }
     if (rcSmoothingData.filterInitialized && (debugMode == DEBUG_RC_SMOOTHING)) {
         const uint8_t dbgAxis = rxConfig()->rc_smoothing_debug_axis;
-        // [0] raw input, [1] filtered output, [2] adaptive cutoff x10 (1EURO/2EURO only), [3] avg frame µs
+        // [0] raw input, [1] filtered output, [2] adaptive cutoff x10, [3] avg frame µs
         DEBUG_SET(DEBUG_RC_SMOOTHING, 0, lrintf(lastRxData[dbgAxis]));
         DEBUG_SET(DEBUG_RC_SMOOTHING, 1, lrintf(rcCommand[dbgAxis]));
-        if (isRcSmoothingEuroFamily(rxConfig()->rc_smoothing_input_type)) {
-            const oneEuroFilter_t *f = (const oneEuroFilter_t*) &rcSmoothingData.filter[dbgAxis];
-            DEBUG_SET(DEBUG_RC_SMOOTHING, 2, lrintf(f->lastCutoff * 10.0f)); // Hz × 10 for resolution
-        } else {
-            DEBUG_SET(DEBUG_RC_SMOOTHING, 2, rcSmoothingData.inputCutoffFrequency);
-        }
+        const oneEuroFilter_t *f = (const oneEuroFilter_t*) &rcSmoothingData.filter[dbgAxis];
+        DEBUG_SET(DEBUG_RC_SMOOTHING, 2, lrintf(f->lastCutoff * 10.0f)); // Hz × 10 for resolution
         DEBUG_SET(DEBUG_RC_SMOOTHING, 3, rcSmoothingData.averageFrameTimeUs);
     }
     // each pid loop continue to apply the last received channel value to the filter
     for (updatedChannel = 0; updatedChannel < PRIMARY_CHANNEL_COUNT; updatedChannel++) {
         if ((1 << updatedChannel) & interpolationChannels) {  // only smooth selected channels base on the rc_interp_ch value
             if (rcSmoothingData.filterInitialized) {
-                switch (rxConfig()->rc_smoothing_input_type) {
-                case RC_SMOOTHING_INPUT_PT1:
-                    rcCommand[updatedChannel] = pt1FilterApply((pt1Filter_t*) &rcSmoothingData.filter[updatedChannel], lastRxData[updatedChannel]);
-                    break;
-                case RC_SMOOTHING_INPUT_PT2:
-                    rcCommand[updatedChannel] = ptnFilterApply((ptnFilter_t*) &rcSmoothingData.filter[updatedChannel], lastRxData[updatedChannel]);
-                    break;
-                case RC_SMOOTHING_INPUT_1EURO:
-                case RC_SMOOTHING_INPUT_2EURO:
-                default:
-                    rcCommand[updatedChannel] = oneEuroFilterApply((oneEuroFilter_t*) &rcSmoothingData.filter[updatedChannel], lastRxData[updatedChannel], isRXDataNew);
-                    break;
-                }
+                rcCommand[updatedChannel] = oneEuroFilterApply((oneEuroFilter_t*) &rcSmoothingData.filter[updatedChannel], lastRxData[updatedChannel], isRXDataNew);
             } else {
                 // If filter isn't initialized yet then use the actual unsmoothed rx channel data
                 rcCommand[updatedChannel] = lastRxData[updatedChannel];
