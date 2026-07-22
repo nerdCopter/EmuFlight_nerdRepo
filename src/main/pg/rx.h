@@ -51,10 +51,10 @@ typedef struct rxConfig_s {
     uint8_t max_aux_channel;
     uint8_t rssi_src_frame_errors;          // true to use frame drop flags in the rx protocol
     int8_t rssi_offset;                     // offset applied to the RSSI value before it is returned
-    uint8_t rc_smoothing_type;              // Determines the smoothing algorithm to use: INTERPOLATION or FILTER
+    uint8_t rc_smoothing_type;              // Smoothing algorithm: 0 = INTERPOLATION, 1 = 1EURO, 2 = 2EURO
     uint8_t rc_smoothing_debug_axis;        // Axis to log as debug values when debug_mode = RC_SMOOTHING
-    uint8_t rc_smoothing_input_type;        // Input filter type (0 = 1EURO, 1 = 2EURO) — only selections on this branch
-    // 1EURO (single-stage) and 2EURO (dual-stage) are independent peer selections, not a toggle.
+    // rc_smoothing_type and the former rc_smoothing_input_type are unified into one field. 1EURO
+    // (single-stage) and 2EURO (dual-stage) are independent peer selections, not a toggle.
     // fc_min/fc_max/fc_d/beta are fully internal/computed-only for both (no CLI fields) — see
     // rcSmoothingSetFilterCutoffs() in fc_rc.c. PT1/PT2/PT3/BIQUAD/PT4 and the manual input-cutoff
     // field (rc_smoothing_input_cutoff) are removed entirely on this branch.

@@ -176,9 +176,8 @@
 | `rc_interp` | uint8 | master | `OFF`, `PRESET`, `AUTO`, `MANUAL` |
 | `rc_interp_ch` | uint8 | master | `RP`, `RPY`, `RPYT`, `T`, `RPT` |
 | `rc_interp_int` | uint8 | master | `1` – `50` |
-| `rc_smoothing_type` | uint8 | master | `INTERPOLATION`, `FILTER` |
+| `rc_smoothing_type` | uint8 | master | `INTERPOLATION`, `1EURO`, `2EURO` |
 | `rc_smoothing_debug_axis` | uint8 | master | `ROLL`, `PITCH`, `YAW`, `THROTTLE` |
-| `rc_smoothing_input_type` | uint8 | master | `1EURO`, `2EURO` |
 | `fpv_mix_degrees` | uint8 | master | `0` – `90` |
 | `cinematic_yaw` | uint8 | master | `OFF`, `ON` |
 | `max_aux_channels` | uint8 | master | `0` – `MAX_AUX_CHANNEL_COUNT` |

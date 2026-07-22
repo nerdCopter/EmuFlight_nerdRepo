@@ -62,14 +62,11 @@ void pgResetFn_rxConfig(rxConfig_t *rxConfig) {
                    .cinematicYaw = 0,
                    .airModeActivateThreshold = 32,
                    .max_aux_channel = DEFAULT_AUX_CHANNEL_COUNT,
-                   // TESTING DEFAULT — DO NOT MERGE: rc_smoothing_type/input_type below are set for
-                   // 2EURO flight validation on this design-variant branch. Mergeable default is
-                   // rc_smoothing_type = RC_SMOOTHING_TYPE_INTERPOLATION (input_type is irrelevant
-                   // when type = INTERPOLATION; PT1/PT2 no longer exist as fallback choices on this
-                   // branch — see CONTEXT_2euro.md).
-                   .rc_smoothing_type = RC_SMOOTHING_TYPE_FILTER,
+                   // TESTING DEFAULT — DO NOT MERGE: rc_smoothing_type below is set for 2EURO
+                   // flight validation on this design-variant branch. Mergeable default is
+                   // RC_SMOOTHING_TYPE_INTERPOLATION — see CONTEXT_2euro.md.
+                   .rc_smoothing_type = RC_SMOOTHING_TYPE_2EURO,
                    .rc_smoothing_debug_axis = ROLL,     // default to debug logging for the roll axis
-                   .rc_smoothing_input_type = RC_SMOOTHING_INPUT_2EURO,
                    .showAlteredRc = 0,
                    .sbus_baud_fast = false,
                   );

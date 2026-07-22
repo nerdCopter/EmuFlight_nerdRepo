@@ -374,13 +374,10 @@ static const char * const lookupTableVideoSystem[] = {
 
 #ifdef USE_RC_SMOOTHING_FILTER
 static const char * const lookupTableRcSmoothingType[] = {
-    "INTERPOLATION", "FILTER"
+    "INTERPOLATION", "1EURO", "2EURO"
 };
 static const char * const lookupTableRcSmoothingDebug[] = {
     "ROLL", "PITCH", "YAW", "THROTTLE"
-};
-static const char * const lookupTableRcSmoothingInputType[] = {
-    "1EURO", "2EURO"
 };
 #endif
 
@@ -480,7 +477,6 @@ const lookupTableEntry_t lookupTables[] = {
 #ifdef USE_RC_SMOOTHING_FILTER
     LOOKUP_TABLE_ENTRY(lookupTableRcSmoothingType),
     LOOKUP_TABLE_ENTRY(lookupTableRcSmoothingDebug),
-    LOOKUP_TABLE_ENTRY(lookupTableRcSmoothingInputType),
 #endif // USE_RC_SMOOTHING_FILTER
     LOOKUP_TABLE_ENTRY(lookupTableThrottleVbatCompType),
 #ifdef USE_OSD
@@ -626,9 +622,9 @@ const clivalue_t valueTable[] = {
 #ifdef USE_RC_SMOOTHING_FILTER
     { "rc_smoothing_type",          VAR_UINT8  | MASTER_VALUE | MODE_LOOKUP, .config.lookup = { TABLE_RC_SMOOTHING_TYPE }, PG_RX_CONFIG, offsetof(rxConfig_t, rc_smoothing_type) },
     { "rc_smoothing_debug_axis",    VAR_UINT8  | MASTER_VALUE | MODE_LOOKUP, .config.lookup = { TABLE_RC_SMOOTHING_DEBUG }, PG_RX_CONFIG, offsetof(rxConfig_t, rc_smoothing_debug_axis) },
-    { "rc_smoothing_input_type",    VAR_UINT8  | MASTER_VALUE | MODE_LOOKUP, .config.lookup = { TABLE_RC_SMOOTHING_INPUT_TYPE }, PG_RX_CONFIG, offsetof(rxConfig_t, rc_smoothing_input_type) },
-    // 1EURO (single-stage) and 2EURO (dual-stage) are independent peer selections, same as
-    // PT1/PT2. fc_min/fc_max/fc_d/beta are fully internal/computed-only for both — no CLI fields.
+    // rc_smoothing_type unifies the former rc_smoothing_type + rc_smoothing_input_type split:
+    // INTERPOLATION, or 1EURO (single-stage) / 2EURO (dual-stage) as independent peer selections.
+    // fc_min/fc_max/fc_d/beta are fully internal/computed-only for both — no CLI fields.
 #endif // USE_RC_SMOOTHING_FILTER
 
     { "fpv_mix_degrees",            VAR_UINT8  | MASTER_VALUE, .config.minmax = { 0, 90 }, PG_RX_CONFIG, offsetof(rxConfig_t, fpvCamAngleDegrees) },

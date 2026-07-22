@@ -62,17 +62,12 @@ typedef enum {
 } rcSmoothing_t;
 
 typedef enum {
-    RC_SMOOTHING_TYPE_INTERPOLATION,
-    RC_SMOOTHING_TYPE_FILTER
+    RC_SMOOTHING_TYPE_INTERPOLATION,  // 0
+    RC_SMOOTHING_TYPE_1EURO,          // 1 — adaptive, single-stage (was a separate rc_smoothing_input_type value)
+    RC_SMOOTHING_TYPE_2EURO,          // 2 — adaptive, dual-stage (was a separate rc_smoothing_input_type value)
+    // rc_smoothing_type and rc_smoothing_input_type are unified into this single setting —
+    // PT1/PT2/PT3/BIQUAD/PT4 and the old two-field FILTER+input_type split are all gone.
 } rcSmoothingType_e;
-
-typedef enum {
-    RC_SMOOTHING_INPUT_1EURO,  // 0 — adaptive, single-stage (default fallback)
-    RC_SMOOTHING_INPUT_2EURO,  // 1 — adaptive, dual-stage
-    // PT1/PT2/PT3/BIQUAD/PT4 all dropped — 1EURO/2EURO are the only rc_smoothing_input_type
-    // selections on this branch. Fixed-cutoff filtering is not offered as an input-filter choice
-    // here; rc_smoothing_type still offers INTERPOLATION as the non-FILTER alternative.
-} rcSmoothingInputFilter_e;
 
 typedef enum {
     RC_SMOOTHING_VALUE_INPUT_ACTIVE,

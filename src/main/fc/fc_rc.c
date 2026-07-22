@@ -318,8 +318,7 @@ FAST_CODE_NOINLINE void rcSmoothingSetFilterCutoffs(rcSmoothingFilter_t *smoothi
     const float dT = targetPidLooptime * 1e-6f;
 
     // fc_min is fully internal/computed-only for both 1EURO and 2EURO — no CLI field, no manual
-    // override (rc_smoothing_input_type has no other selectable value on this branch). Store
-    // computed fc_min in inputCutoffFrequency for change detection.
+    // override. Store computed fc_min in inputCutoffFrequency for change detection.
     // rx_hz / 12, floored at 6 Hz; 180 Hz fallback gives 15 Hz before RX is known.
     // The /12 divisor sizes fc_min so the dual-stage cascade (fc_min, fc_fixed=2×fc_min)
     // gives ~95% attenuation at the Nyquist frequency (Nyquist/fc_min = 6 by construction).
@@ -361,7 +360,7 @@ FAST_CODE_NOINLINE void rcSmoothingSetFilterCutoffs(rcSmoothingFilter_t *smoothi
             const float fc_fixed = fc_min * 2.0f;
             // 1EURO and 2EURO are independent peer selections (not a toggle): 2EURO always
             // runs the dual-stage cascade, 1EURO always runs single-stage adaptive-only.
-            const bool stage2Enabled = rxConfig()->rc_smoothing_input_type == RC_SMOOTHING_INPUT_2EURO;
+            const bool stage2Enabled = rxConfig()->rc_smoothing_type == RC_SMOOTHING_TYPE_2EURO;
             if (!smoothingData->filterInitialized) {
                 oneEuroFilterInit((oneEuroFilter_t*) &smoothingData->filter[i], fc_min, fc_max, beta, fc_d, fc_fixed, rc_dT, dT, stage2Enabled);
             } else {
@@ -398,8 +397,8 @@ FAST_CODE bool rcSmoothingAccumulateSample(rcSmoothingFilter_t *smoothingData, i
 // Determine if we need to caclulate filter cutoffs. If not then we can avoid
 // examining the rx frame times completely
 FAST_CODE_NOINLINE bool rcSmoothingAutoCalculate(void) {
-    // 1EURO/2EURO fc_min is always auto-calculated (no CLI override) — the only two
-    // rc_smoothing_input_type selections on this branch — so training is always required.
+    // Called only when rc_smoothing_type is 1EURO or 2EURO (see processRcCommand()); fc_min is
+    // always auto-calculated for both (no CLI override), so training is always required.
     return true;
 }
 
@@ -511,7 +510,8 @@ FAST_CODE void processRcCommand(void) {
     uint8_t updatedChannel;
     switch (rxConfig()->rc_smoothing_type) {
 #ifdef USE_RC_SMOOTHING_FILTER
-    case RC_SMOOTHING_TYPE_FILTER:
+    case RC_SMOOTHING_TYPE_1EURO:
+    case RC_SMOOTHING_TYPE_2EURO:
         updatedChannel = processRcSmoothingFilter();
         break;
 #endif // USE_RC_SMOOTHING_FILTER
@@ -843,6 +843,6 @@ int rcSmoothingGetValue(int whichValue) {
 }
 
 bool rcSmoothingInitializationComplete(void) {
-    return (rxConfig()->rc_smoothing_type != RC_SMOOTHING_TYPE_FILTER) || rcSmoothingData.filterInitialized;
+    return (rxConfig()->rc_smoothing_type == RC_SMOOTHING_TYPE_INTERPOLATION) || rcSmoothingData.filterInitialized;
 }
 #endif // USE_RC_SMOOTHING_FILTER

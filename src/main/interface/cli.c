@@ -3682,8 +3682,8 @@ static void cliVersion(char *cmdline) {
 static void cliRcSmoothing(char *cmdline) {
     UNUSED(cmdline);
     cliPrint("# RC Smoothing Type: ");
-    if (rxConfig()->rc_smoothing_type == RC_SMOOTHING_TYPE_FILTER) {
-        cliPrintLine("FILTER");
+    cliPrintLinef(lookupTables[TABLE_RC_SMOOTHING_TYPE].values[rxConfig()->rc_smoothing_type]);
+    if (rxConfig()->rc_smoothing_type != RC_SMOOTHING_TYPE_INTERPOLATION) {
         uint16_t avgRxFrameMs = rcSmoothingGetValue(RC_SMOOTHING_VALUE_AVERAGE_FRAME);
         if (rcSmoothingAutoCalculate()) {
             cliPrint("# Detected RX frame rate: ");
@@ -3693,11 +3693,7 @@ static void cliRcSmoothing(char *cmdline) {
                 cliPrintLinef("%d.%dms", avgRxFrameMs / 1000, avgRxFrameMs % 1000);
             }
         }
-        cliPrint("# Input filter type: ");
-        cliPrintLinef(lookupTables[TABLE_RC_SMOOTHING_INPUT_TYPE].values[rxConfig()->rc_smoothing_input_type]);
         cliPrintLinef("# Active input cutoff: %dhz (auto)", rcSmoothingGetValue(RC_SMOOTHING_VALUE_INPUT_ACTIVE));
-    } else {
-        cliPrintLine("INTERPOLATION");
     }
 }
 #endif // USE_RC_SMOOTHING_FILTER
