@@ -198,6 +198,27 @@ void busSwitchInit(void) {
 }
 #endif
 
+// TEMPORARY DIAGNOSTIC ONLY - not part of the migration, never commit to the
+// real refactor branch (lives in debug/imuf9001-boot-checkpoints only).
+// Signature: 1s SOLID ON (unmistakable "attention" flash - nothing else in
+// the firmware holds LED0 solidly on for a full second), then a 1s dark gap,
+// then `count` SLOW blinks (500ms on/500ms off - much slower than EmuFlight's
+// own indicateFailure pattern, which uses 50ms and 250ms). Ignore anything
+// fast/short - only count slow blinks that come right after the long flash.
+static void debugBootMarker(int count) {
+    LED0_ON;
+    delay(1000);
+    LED0_OFF;
+    delay(1000);
+    for (int i = 0; i < count; i++) {
+        LED0_ON;
+        delay(500);
+        LED0_OFF;
+        delay(500);
+    }
+    delay(2000);
+}
+
 void init(void) {
 #if defined(USE_ITCM_RAM) && !defined(STM32H7)
     /* Load functions into ITCM RAM */
@@ -370,6 +391,8 @@ void init(void) {
 #ifdef USE_SPI_DEVICE_4
     spiInit(SPIDEV_4);
 #endif
+    spiInitBusDMA();
+    debugBootMarker(1);   // CHECKPOINT 1: spiInitBusDMA() returned (SPI1 skipped this run)
 #endif // USE_SPI
 #if defined(USE_SDCARD_SDIO) && !defined(CONFIG_IN_SDCARD) && defined(STM32H7)
     sdioPinConfigure();
@@ -442,6 +465,7 @@ void init(void) {
         indicateFailure(FAILURE_MISSING_ACC, 2);
         setArmingDisabled(ARMING_DISABLED_NO_GYRO);
     }
+    debugBootMarker(2);   // CHECKPOINT 2: sensorsAutodetect() returned
     systemState |= SYSTEM_STATE_SENSORS_READY;
     // gyro.targetLooptime set in sensorsAutodetect(),
     // so we are ready to call validateAndFixGyroConfig(), pidInit(), and setAccelerationFilter()
@@ -490,6 +514,7 @@ void init(void) {
     imuInit();
     mspInit();
     mspSerialInit();
+    debugBootMarker(3);   // CHECKPOINT 3: mspSerialInit() returned
 #ifdef USE_CLI
     cliInit(serialConfig());
 #endif
