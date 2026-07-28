@@ -198,36 +198,6 @@ void busSwitchInit(void) {
 }
 #endif
 
-// TEMPORARY DIAGNOSTIC ONLY - not part of the migration, never commit to the
-// real refactor branch (lives in debug/imuf9001-boot-checkpoints only).
-// Drives BEEPER_PIN directly (raw IO, bypasses beeperInit()/systemBeep() so it
-// works regardless of init ordering) - MINI/AIO only populate the green LED,
-// which per the schematic shares the same "Buz-" net as the buzzer transistor.
-// V2 has both LEDs but this still works there too (green blinks in sync).
-// Signature: 300ms SOLID ON "attention" flash + 300ms gap, then `count` SLOW
-// blinks (300ms on/300ms off - much slower than EmuFlight's own
-// indicateFailure pattern: 50ms fast preamble, 250ms code blinks). Ignore
-// anything fast/short or unpreceded by the attention flash.
-static IO_t debugBuzzerPin = IO_NONE;
-static void debugBootMarkerInit(void) {
-    debugBuzzerPin = IOGetByTag(IO_TAG(BEEPER_PIN));
-    IOInit(debugBuzzerPin, OWNER_SYSTEM, 0);
-    IOConfigGPIO(debugBuzzerPin, IOCFG_OUT_PP);
-}
-static void debugBootMarker(int count) {
-    IOHi(debugBuzzerPin);
-    delay(300);
-    IOLo(debugBuzzerPin);
-    delay(300);
-    for (int i = 0; i < count; i++) {
-        IOHi(debugBuzzerPin);
-        delay(300);
-        IOLo(debugBuzzerPin);
-        delay(300);
-    }
-    delay(1500);
-}
-
 void init(void) {
 #if defined(USE_ITCM_RAM) && !defined(STM32H7)
     /* Load functions into ITCM RAM */
@@ -264,7 +234,6 @@ void init(void) {
 #endif
     // initialize IO (needed for all IO operations)
     IOInitGlobal();
-    debugBootMarkerInit();   // TEMPORARY DIAGNOSTIC ONLY
 #ifdef USE_HARDWARE_REVISION_DETECTION
     detectHardwareRevision();
 #endif
@@ -401,11 +370,7 @@ void init(void) {
 #ifdef USE_SPI_DEVICE_4
     spiInit(SPIDEV_4);
 #endif
-    spiInitBusDMA();
-    // CHECKPOINT 1 marker removed: prior tests already confirmed this point is
-    // reached reliably, and blinking here would add delay directly in front of
-    // the timing-sensitive F301 handshake in sensorsAutodetect() below - a
-    // confound we don't want. Checkpoints 2/3 occur safely after that handshake.
+    spiInitBusDMA();   // TEMPORARY DIAGNOSTIC ONLY - SPI1 skipped, see bus_spi.c
 #endif // USE_SPI
 #if defined(USE_SDCARD_SDIO) && !defined(CONFIG_IN_SDCARD) && defined(STM32H7)
     sdioPinConfigure();
@@ -478,7 +443,6 @@ void init(void) {
         indicateFailure(FAILURE_MISSING_ACC, 2);
         setArmingDisabled(ARMING_DISABLED_NO_GYRO);
     }
-    debugBootMarker(2);   // CHECKPOINT 2: sensorsAutodetect() returned
     systemState |= SYSTEM_STATE_SENSORS_READY;
     // gyro.targetLooptime set in sensorsAutodetect(),
     // so we are ready to call validateAndFixGyroConfig(), pidInit(), and setAccelerationFilter()
@@ -527,7 +491,6 @@ void init(void) {
     imuInit();
     mspInit();
     mspSerialInit();
-    debugBootMarker(3);   // CHECKPOINT 3: mspSerialInit() returned
 #ifdef USE_CLI
     cliInit(serialConfig());
 #endif
