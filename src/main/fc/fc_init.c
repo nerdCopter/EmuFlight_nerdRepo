@@ -198,6 +198,28 @@ void busSwitchInit(void) {
 }
 #endif
 
+// TEMPORARY DIAGNOSTIC ONLY - not part of the migration, never commit to the
+// real refactor branch (lives in debug/imuf9001-boot-checkpoints only).
+// Uses LED0 (the only software-controllable LED HELIOSPRING/STRIXF10/MODE2FLUX
+// define - LED1/LED2 macros are NOOP on these targets, PB7 is the only real pin).
+// Signature: 300ms SOLID ON "attention" flash + 300ms gap, then `count` SLOW
+// blinks (300ms on/300ms off - much slower than EmuFlight's own indicateFailure
+// pattern: 50ms fast preamble, 250ms code blinks). Ignore anything fast/short
+// or unpreceded by the attention flash.
+static void debugBootMarker(int count) {
+    LED0_ON;
+    delay(300);
+    LED0_OFF;
+    delay(300);
+    for (int i = 0; i < count; i++) {
+        LED0_ON;
+        delay(300);
+        LED0_OFF;
+        delay(300);
+    }
+    delay(1500);
+}
+
 void init(void) {
 #if defined(USE_ITCM_RAM) && !defined(STM32H7)
     /* Load functions into ITCM RAM */
@@ -443,6 +465,7 @@ void init(void) {
         indicateFailure(FAILURE_MISSING_ACC, 2);
         setArmingDisabled(ARMING_DISABLED_NO_GYRO);
     }
+    debugBootMarker(2);   // CHECKPOINT 2: sensorsAutodetect() returned
     systemState |= SYSTEM_STATE_SENSORS_READY;
     // gyro.targetLooptime set in sensorsAutodetect(),
     // so we are ready to call validateAndFixGyroConfig(), pidInit(), and setAccelerationFilter()
@@ -491,6 +514,7 @@ void init(void) {
     imuInit();
     mspInit();
     mspSerialInit();
+    debugBootMarker(3);   // CHECKPOINT 3: mspSerialInit() returned
 #ifdef USE_CLI
     cliInit(serialConfig());
 #endif
