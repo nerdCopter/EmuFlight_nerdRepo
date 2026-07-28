@@ -322,11 +322,6 @@ void spiInitBusDMA(void)
         if (bus->busType != BUS_TYPE_SPI) {
             continue;
         }
-        // TEMPORARY DIAGNOSTIC ONLY - skip SPI1 (IMUF9001 F301 link) to isolate
-        // whether spiInitBusDMA's one-time setup on this bus breaks gyro detection.
-        if (device == SPIDEV_1) {
-            continue;
-        }
 
         dmaIdentifier_e dmaTxIdentifier = DMA_NONE;
         dmaIdentifier_e dmaRxIdentifier = DMA_NONE;
