@@ -200,23 +200,32 @@ void busSwitchInit(void) {
 
 // TEMPORARY DIAGNOSTIC ONLY - not part of the migration, never commit to the
 // real refactor branch (lives in debug/imuf9001-boot-checkpoints only).
-// Signature: 1s SOLID ON (unmistakable "attention" flash - nothing else in
-// the firmware holds LED0 solidly on for a full second), then a 1s dark gap,
-// then `count` SLOW blinks (500ms on/500ms off - much slower than EmuFlight's
-// own indicateFailure pattern, which uses 50ms and 250ms). Ignore anything
-// fast/short - only count slow blinks that come right after the long flash.
+// Drives BEEPER_PIN directly (raw IO, bypasses beeperInit()/systemBeep() so it
+// works regardless of init ordering) - MINI/AIO only populate the green LED,
+// which per the schematic shares the same "Buz-" net as the buzzer transistor.
+// V2 has both LEDs but this still works there too (green blinks in sync).
+// Signature: 300ms SOLID ON "attention" flash + 300ms gap, then `count` SLOW
+// blinks (300ms on/300ms off - much slower than EmuFlight's own
+// indicateFailure pattern: 50ms fast preamble, 250ms code blinks). Ignore
+// anything fast/short or unpreceded by the attention flash.
+static IO_t debugBuzzerPin = IO_NONE;
+static void debugBootMarkerInit(void) {
+    debugBuzzerPin = IOGetByTag(IO_TAG(BEEPER_PIN));
+    IOInit(debugBuzzerPin, OWNER_SYSTEM, 0);
+    IOConfigGPIO(debugBuzzerPin, IOCFG_OUT_PP);
+}
 static void debugBootMarker(int count) {
-    LED0_ON;
-    delay(1000);
-    LED0_OFF;
-    delay(1000);
+    IOHi(debugBuzzerPin);
+    delay(300);
+    IOLo(debugBuzzerPin);
+    delay(300);
     for (int i = 0; i < count; i++) {
-        LED0_ON;
-        delay(500);
-        LED0_OFF;
-        delay(500);
+        IOHi(debugBuzzerPin);
+        delay(300);
+        IOLo(debugBuzzerPin);
+        delay(300);
     }
-    delay(2000);
+    delay(1500);
 }
 
 void init(void) {
@@ -255,6 +264,7 @@ void init(void) {
 #endif
     // initialize IO (needed for all IO operations)
     IOInitGlobal();
+    debugBootMarkerInit();   // TEMPORARY DIAGNOSTIC ONLY
 #ifdef USE_HARDWARE_REVISION_DETECTION
     detectHardwareRevision();
 #endif
@@ -392,7 +402,10 @@ void init(void) {
     spiInit(SPIDEV_4);
 #endif
     spiInitBusDMA();
-    debugBootMarker(1);   // CHECKPOINT 1: spiInitBusDMA() returned (SPI1 skipped this run)
+    // CHECKPOINT 1 marker removed: prior tests already confirmed this point is
+    // reached reliably, and blinking here would add delay directly in front of
+    // the timing-sensitive F301 handshake in sensorsAutodetect() below - a
+    // confound we don't want. Checkpoints 2/3 occur safely after that handshake.
 #endif // USE_SPI
 #if defined(USE_SDCARD_SDIO) && !defined(CONFIG_IN_SDCARD) && defined(STM32H7)
     sdioPinConfigure();
