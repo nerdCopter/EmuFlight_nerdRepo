@@ -3687,12 +3687,7 @@ static void cliRcSmoothing(char *cmdline) {
         }
         cliPrint("# Input filter type: ");
         cliPrintLinef(lookupTables[TABLE_RC_SMOOTHING_INPUT_TYPE].values[rxConfig()->rc_smoothing_input_type]);
-        cliPrintf("# Active input cutoff: %dhz ", rcSmoothingGetValue(RC_SMOOTHING_VALUE_INPUT_ACTIVE));
-        if (rxConfig()->rc_smoothing_input_cutoff == 0) {
-            cliPrintLine("(auto)");
-        } else {
-            cliPrintLine("(manual)");
-        }
+        cliPrintLinef("# Active input cutoff: %dhz (auto)", rcSmoothingGetValue(RC_SMOOTHING_VALUE_INPUT_ACTIVE));
     } else {
         cliPrintLine("INTERPOLATION");
     }

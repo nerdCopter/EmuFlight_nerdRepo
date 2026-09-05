@@ -124,3 +124,34 @@ float alphaBetaGammaApply(alphaBetaGammaFilter_t *filter, float input);
 void ptnFilterInit(ptnFilter_t *filter, uint8_t order, uint16_t f_cut, float dT);
 void ptnFilterUpdate(ptnFilter_t *filter, float f_cut, float ScaleF, float dt);
 float ptnFilterApply(ptnFilter_t *filter, float input);
+
+// 1€ filter (Casiez et al.) with an optional second (fixed low-pass) stage. Backs both the
+// RC_SMOOTHING_INPUT_1EURO (single-stage) and RC_SMOOTHING_INPUT_2EURO (dual-stage) CLI
+// selections — they are independent peer choices, not a toggle; stage2Enabled is set once at
+// init/update time based on which enum value is active (see rcSmoothingSetFilterCutoffs()).
+// Stage 1 (x_filter) is the original 1€ adaptive PT1: cutoff rises with signal velocity,
+// transparent at full stick, tight at rest. Stage 2 (x_filter_fixed), when enabled, is a static
+// PT1 at a fixed cutoff (fc_fixed = 2 × fc_min) cascaded after stage 1 — an always-on
+// quantization floor that stage 1 alone cannot provide, since stage 1's own cutoff opens during
+// fast input precisely when a fixed floor is most needed to suppress RC-frame steps.
+typedef struct oneEuroFilter_s {
+    pt1Filter_t x_filter;        // main signal PT1 stage 1 (1€ adaptive cutoff)
+    pt1Filter_t x_filter_fixed;  // main signal PT1 stage 2 (fixed cutoff fc_fixed — always-on step floor)
+    pt1Filter_t d_filter;        // derivative estimator PT1 (fixed cutoff fc_d)
+    float fc_min;                // minimum cutoff frequency (Hz)
+    float fc_max;                // maximum cutoff frequency Hz; 0 = no cap
+    float beta;                  // speed coefficient
+    float fc_d;                  // derivative filter cutoff (Hz)
+    float fc_fixed;              // fixed cutoff for stage 2 (Hz) — 2× fc_min; ~1 RC-frame group delay per stage
+    float dT_inv;                // 1/rc_dT — for dx velocity estimate and d_filter k (d_filter runs once per RC frame)
+    float pid_dT_inv;            // 1/pid_dT — for x_filter and x_filter_fixed k (applied every PID loop)
+    float lastCutoff;            // last computed adaptive cutoff Hz (for blackbox debug)
+    bool stage2Enabled;          // false = bypass x_filter_fixed entirely (single-stage adaptive-only)
+} oneEuroFilter_t;
+
+void oneEuroFilterInit(oneEuroFilter_t *filter, float fc_min, float fc_max, float beta, float fc_d, float fc_fixed, float rc_dT, float pid_dT, bool stage2Enabled);
+void oneEuroFilterUpdate(oneEuroFilter_t *filter, float fc_min, float fc_max, float beta, float fc_d, float fc_fixed, float rc_dT, float pid_dT, bool stage2Enabled);
+// newSample: true exactly once per genuine new RX frame (not once per PID loop, not on raw-value
+// change). Derivative/cutoff recompute is gated on this, not on input != previous input — see
+// oneEuroFilterApply() for why value-based gating lets the adaptive cutoff freeze indefinitely.
+float oneEuroFilterApply(oneEuroFilter_t *filter, float input, bool newSample);

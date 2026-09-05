@@ -67,11 +67,11 @@ typedef enum {
 } rcSmoothingType_e;
 
 typedef enum {
-    RC_SMOOTHING_INPUT_PT1,
-    RC_SMOOTHING_INPUT_BIQUAD,
-    RC_SMOOTHING_INPUT_PT2,
-    RC_SMOOTHING_INPUT_PT3,
-    RC_SMOOTHING_INPUT_PT4
+    RC_SMOOTHING_INPUT_1EURO,  // 0 — adaptive, single-stage (default fallback)
+    RC_SMOOTHING_INPUT_2EURO,  // 1 — adaptive, dual-stage
+    // PT1/PT2/PT3/BIQUAD/PT4 all dropped — 1EURO/2EURO are the only rc_smoothing_input_type
+    // selections on this branch. Fixed-cutoff filtering is not offered as an input-filter choice
+    // here; rc_smoothing_type still offers INTERPOLATION as the non-FILTER alternative.
 } rcSmoothingInputFilter_e;
 
 typedef enum {
@@ -112,8 +112,8 @@ typedef struct rcSmoothingFilterTraining_s {
 
 typedef union rcSmoothingFilterTypes_u {
     pt1Filter_t pt1Filter;
-    biquadFilter_t biquadFilter;
     ptnFilter_t ptnFilter;
+    oneEuroFilter_t oneEuroFilter;
 } rcSmoothingFilterTypes_t;
 
 typedef struct rcSmoothingFilter_s {
