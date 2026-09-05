@@ -143,7 +143,7 @@ void targetConfiguration(void) {
     gyroConfigMutable()->yaw_spin_threshold = 1400;
     rxConfigMutable()->mincheck = 1004;
     rxConfigMutable()->maxcheck = 2000;
-    rxConfigMutable()->rc_smoothing_type = RC_SMOOTHING_TYPE_FILTER;
+    rxConfigMutable()->rc_smoothing_type = RC_SMOOTHING_TYPE_2EURO; // was RC_SMOOTHING_TYPE_FILTER (PT2 default) pre-unification — confirmed 2EURO for these whoop targets
     rxConfigMutable()->fpvCamAngleDegrees = 12;
     motorConfigMutable()->digitalIdleOffsetValue = 1000;
     motorConfigMutable()->dev.motorPwmProtocol = PWM_TYPE_DSHOT600;

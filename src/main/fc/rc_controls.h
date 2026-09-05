@@ -62,17 +62,12 @@ typedef enum {
 } rcSmoothing_t;
 
 typedef enum {
-    RC_SMOOTHING_TYPE_INTERPOLATION,
-    RC_SMOOTHING_TYPE_FILTER
+    RC_SMOOTHING_TYPE_INTERPOLATION,  // 0
+    RC_SMOOTHING_TYPE_1EURO,          // 1 — adaptive, single-stage (was a separate rc_smoothing_input_type value)
+    RC_SMOOTHING_TYPE_2EURO,          // 2 — adaptive, dual-stage (was a separate rc_smoothing_input_type value)
+    // rc_smoothing_type and rc_smoothing_input_type are unified into this single setting —
+    // PT1/PT2/PT3/BIQUAD/PT4 and the old two-field FILTER+input_type split are all gone.
 } rcSmoothingType_e;
-
-typedef enum {
-    RC_SMOOTHING_INPUT_PT1,
-    RC_SMOOTHING_INPUT_BIQUAD,
-    RC_SMOOTHING_INPUT_PT2,
-    RC_SMOOTHING_INPUT_PT3,
-    RC_SMOOTHING_INPUT_PT4
-} rcSmoothingInputFilter_e;
 
 typedef enum {
     RC_SMOOTHING_VALUE_INPUT_ACTIVE,
@@ -112,8 +107,8 @@ typedef struct rcSmoothingFilterTraining_s {
 
 typedef union rcSmoothingFilterTypes_u {
     pt1Filter_t pt1Filter;
-    biquadFilter_t biquadFilter;
     ptnFilter_t ptnFilter;
+    oneEuroFilter_t oneEuroFilter;
 } rcSmoothingFilterTypes_t;
 
 typedef struct rcSmoothingFilter_s {

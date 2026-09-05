@@ -180,10 +180,8 @@ their own dedicated table instead (`cmdTable[]`, PG-backed) are both covered her
 | `rc_interp` | uint8 | master | `OFF`, `PRESET`, `AUTO`, `MANUAL` |  |
 | `rc_interp_ch` | uint8 | master | `RP`, `RPY`, `RPYT`, `T`, `RPT` |  |
 | `rc_interp_int` | uint8 | master | `1` – `50` |  |
-| `rc_smoothing_type` | uint8 | master | `INTERPOLATION`, `FILTER` | `USE_RC_SMOOTHING_FILTER` |
-| `rc_smoothing_input_hz` | uint8 | master | `0` – `UINT8_MAX` | `USE_RC_SMOOTHING_FILTER` |
+| `rc_smoothing_type` | uint8 | master | `INTERPOLATION`, `1EURO`, `2EURO` | `USE_RC_SMOOTHING_FILTER` |
 | `rc_smoothing_debug_axis` | uint8 | master | `ROLL`, `PITCH`, `YAW`, `THROTTLE` | `USE_RC_SMOOTHING_FILTER` |
-| `rc_smoothing_input_type` | uint8 | master | `PT1`, `BIQUAD`, `PT2`, `PT3`, `PT4` | `USE_RC_SMOOTHING_FILTER` |
 | `fpv_mix_degrees` | uint8 | master | `0` – `90` |  |
 | `cinematic_yaw` | uint8 | master | `OFF`, `ON` |  |
 | `max_aux_channels` | uint8 | master | `0` – `MAX_AUX_CHANNEL_COUNT` |  |
@@ -470,6 +468,12 @@ their own dedicated table instead (`cmdTable[]`, PG-backed) are both covered her
 | Parameter | Type | Scope | Range / Values | Requires |
 |-----------|------|-------|----------------|----------|
 | `altitude_limit` | uint16 | master | `0` – `10000` | `USE_BARO`, `USE_GPS` |
+
+## Position Config
+
+| Parameter | Type | Scope | Range / Values |
+|-----------|------|-------|----------------|
+| `altitude_limit` | uint16 | master | `0` – `10000` |
 
 ## RC Controls Config
 
