@@ -34,7 +34,13 @@
 #include "rx/rx.h"
 #include "rx/rx_spi.h"
 
-PG_REGISTER_WITH_RESET_FN(rxConfig_t, rxConfig, PG_RX_CONFIG, 2);
+// PG stays at 3 (not bumped further): removing rc_smoothing_1euro_beta/fc_min/fc_max/deriv_hz
+// (now fully internal) makes this branch's rxConfig_t byte-identical to feat/2euro's and
+// feat/1euro-single's current layout (verified via diff — only the enum's compile-time display
+// string differs, not stored data). Sharing version 3 across all three is correct: pgLoad() only
+// needs version to differ when the byte layout differs (see pg.c). feat/1euro-stage2 genuinely
+// differs (one extra field) and correctly uses a different version (4).
+PG_REGISTER_WITH_RESET_FN(rxConfig_t, rxConfig, PG_RX_CONFIG, 3);
 void pgResetFn_rxConfig(rxConfig_t *rxConfig) {
     RESET_CONFIG_2(rxConfig_t, rxConfig,
                    .halfDuplex = 0,
@@ -61,10 +67,14 @@ void pgResetFn_rxConfig(rxConfig_t *rxConfig) {
                    .cinematicYaw = 0,
                    .airModeActivateThreshold = 32,
                    .max_aux_channel = DEFAULT_AUX_CHANNEL_COUNT,
-                   .rc_smoothing_type = RC_SMOOTHING_TYPE_INTERPOLATION,
+                   // TESTING DEFAULT — DO NOT MERGE: rc_smoothing_type/input_type below are set for
+                   // 1EURO flight validation on this design-variant branch. Mergeable defaults are
+                   // rc_smoothing_type = RC_SMOOTHING_TYPE_INTERPOLATION and
+                   // rc_smoothing_input_type = RC_SMOOTHING_INPUT_PT2 (see CONTEXT_1euro.md).
+                   .rc_smoothing_type = RC_SMOOTHING_TYPE_FILTER,
                    .rc_smoothing_input_cutoff = 50,      // automatically calculate the cutoff by default
                    .rc_smoothing_debug_axis = ROLL,     // default to debug logging for the roll axis
-                   .rc_smoothing_input_type = RC_SMOOTHING_INPUT_PT2,
+                   .rc_smoothing_input_type = RC_SMOOTHING_INPUT_1EURO,
                    .showAlteredRc = 0,
                    .sbus_baud_fast = false,
                   );
