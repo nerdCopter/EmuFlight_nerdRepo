@@ -1,10 +1,11 @@
 # CLI Reference
 
 > **Auto-generated** — do not edit manually.
-> Source: `src/main/interface/settings.c`, `src/main/interface/cli.c` | Generated: 2026-08-25 | Commit: `656865145` | Firmware: `0.4.3` | MSP: `0.1.54`
+> Source: `src/main/interface/settings.c`, `src/main/interface/cli.c` | Generated: 2026-09-05 | Commit: `07c2f69a0` | Firmware: `0.4.3` | MSP: `0.1.54`
 
 Settings parameters (`valueTable[]`) and CLI commands that persist config through
 their own dedicated table instead (`cmdTable[]`, PG-backed) are both covered here.
+
 ---
 
 ## Table of Contents
@@ -44,7 +45,6 @@ their own dedicated table instead (`cmdTable[]`, PG-backed) are both covered her
 - [PID Profile](#pid-profile)
 - [Telemetry Config](#telemetry-config)
 - [LED Strip Config](#led-strip-config)
-- [SDCARD Config](#sdcard-config)
 - [SDIO Config](#sdio-config)
 - [OSD Config](#osd-config)
 - [System Config](#system-config)
@@ -183,6 +183,7 @@ their own dedicated table instead (`cmdTable[]`, PG-backed) are both covered her
 | `rc_smoothing_input_hz` | uint8 | master | `0` – `UINT8_MAX` | `USE_RC_SMOOTHING_FILTER` |
 | `rc_smoothing_debug_axis` | uint8 | master | `ROLL`, `PITCH`, `YAW`, `THROTTLE` | `USE_RC_SMOOTHING_FILTER` |
 | `rc_smoothing_input_type` | uint8 | master | `PT1`, `1EURO`, `PT2`, `PT3` | `USE_RC_SMOOTHING_FILTER` |
+| `rc_smoothing_1euro_stage2` | uint8 | master | `OFF`, `ON` | `USE_RC_SMOOTHING_FILTER` |
 | `fpv_mix_degrees` | uint8 | master | `0` – `90` |  |
 | `cinematic_yaw` | uint8 | master | `OFF`, `ON` |  |
 | `max_aux_channels` | uint8 | master | `0` – `MAX_AUX_CHANNEL_COUNT` |  |
@@ -196,6 +197,7 @@ their own dedicated table instead (`cmdTable[]`, PG-backed) are both covered her
 | `rx_max_usec` | uint16 | master | `PWM_PULSE_MIN` – `PWM_PULSE_MAX` |  |
 | `serialrx_halfduplex` | uint8 | master | `OFF`, `ON` |  |
 | `show_altered_rc` | uint8 | master | `OFF`, `ON` |  |
+
 ## RX SPI Config
 
 | Parameter | Type | Scope | Range / Values | Requires |
@@ -469,12 +471,6 @@ their own dedicated table instead (`cmdTable[]`, PG-backed) are both covered her
 |-----------|------|-------|----------------|----------|
 | `altitude_limit` | uint16 | master | `0` – `10000` | `USE_BARO`, `USE_GPS` |
 
-## Position Config
-
-| Parameter | Type | Scope | Range / Values |
-|-----------|------|-------|----------------|
-| `altitude_limit` | uint16 | master | `0` – `10000` |
-
 ## RC Controls Config
 
 | Parameter | Type | Scope | Range / Values |
@@ -605,12 +601,6 @@ their own dedicated table instead (`cmdTable[]`, PG-backed) are both covered her
 |-----------|------|-------|----------------|----------|
 | `ledstrip_visual_beeper` | uint8 | master | `OFF`, `ON` | `USE_LED_STRIP` |
 | `ledstrip_grb_rgb` | uint8 | master | `GRB`, `RGB` | `USE_LED_STRIP` |
-
-## SDCARD Config
-
-| Parameter | Type | Scope | Range / Values | Requires |
-|-----------|------|-------|----------------|----------|
-| `sdcard_dma` | uint8 | master | `OFF`, `ON` | `USE_SDCARD` |
 
 ## SDIO Config
 
@@ -872,7 +862,7 @@ handler instead of `valueTable[]`.
 | `rxfail` | show/set rx failsafe settings |  |  |
 | `rxrange` | configure rx channel ranges |  |  |
 | `serial` | configure serial ports |  |  |
-| `smix` | servo mixer | `<rule> <servo> <source> <rate> <speed> <min> <max> <box> reset load <mixer> reverse <servo> <source> r\|n` | `USE_SERVOS` |
+| `smix` | servo mixer | `<rule> <servo> <source> <rate> <speed> <min> <max> <box> reset reverse <servo> <source> r\|n` | `USE_SERVOS`, `USE_QUAD_MIXER_ONLY` |
 | `vtx` | vtx channels on switch | `<index> <aux_channel> <vtx_band> <vtx_channel> <vtx_power> <start_range> <end_range>` | `USE_VTX_CONTROL` |
 
 ---
