@@ -343,3 +343,89 @@ FAST_CODE float ptnFilterApply(ptnFilter_t *filter, float input) {
 
 	  return filter->state[filter->order];
 } // ptnFilterApply
+
+// 1€ filter — adaptive low-pass, with an optional second (fixed low-pass) stage
+// Reference: Géry Casiez et al. "1€ Filter: A Simple Speed-based Low-pass Filter for Noisy Input"
+void oneEuroFilterInit(oneEuroFilter_t *filter, float fc_min, float fc_max, float beta, float fc_d, float fc_fixed, float rc_dT, float pid_dT, bool stage2Enabled)
+{
+    filter->fc_min     = fc_min;
+    filter->fc_max     = fc_max;
+    filter->beta       = beta;
+    filter->fc_d       = fc_d;
+    filter->fc_fixed   = fc_fixed;
+    filter->stage2Enabled = stage2Enabled;
+    // rc_dT: for dx velocity estimate and d_filter k (d_filter called once per RC frame)
+    filter->dT_inv     = (rc_dT > 0.0f) ? 1.0f / rc_dT : 0.0f;
+    // pid_dT: for x_filter and x_filter_fixed k (applied every PID loop)
+    filter->pid_dT_inv = (pid_dT > 0.0f) ? 1.0f / pid_dT : 0.0f;
+    filter->lastCutoff = fc_min;
+    const float two_pi_fc_d  = 2.0f * M_PIf * fc_d;
+    pt1FilterInit(&filter->d_filter, two_pi_fc_d / (two_pi_fc_d + filter->dT_inv));
+    const float two_pi_fc_min = 2.0f * M_PIf * fc_min;
+    const float k_adaptive = two_pi_fc_min / (two_pi_fc_min + filter->pid_dT_inv);
+    pt1FilterInit(&filter->x_filter, k_adaptive);
+    const float two_pi_fc_fixed = 2.0f * M_PIf * fc_fixed;
+    const float k_fixed = two_pi_fc_fixed / (two_pi_fc_fixed + filter->pid_dT_inv);
+    pt1FilterInit(&filter->x_filter_fixed, k_fixed);
+}
+
+void oneEuroFilterUpdate(oneEuroFilter_t *filter, float fc_min, float fc_max, float beta, float fc_d, float fc_fixed, float rc_dT, float pid_dT, bool stage2Enabled)
+{
+    filter->fc_min     = fc_min;
+    filter->fc_max     = fc_max;
+    filter->beta       = beta;
+    filter->fc_d       = fc_d;
+    filter->fc_fixed   = fc_fixed;
+    filter->stage2Enabled = stage2Enabled;
+    filter->dT_inv     = (rc_dT > 0.0f) ? 1.0f / rc_dT : 0.0f;
+    filter->pid_dT_inv = (pid_dT > 0.0f) ? 1.0f / pid_dT : 0.0f;
+    const float two_pi_fc_d = 2.0f * M_PIf * fc_d;
+    pt1FilterUpdateCutoff(&filter->d_filter, two_pi_fc_d / (two_pi_fc_d + filter->dT_inv));
+    // fc_fixed scales with link rate; recompute k whenever dT changes
+    const float two_pi_fc_fixed = 2.0f * M_PIf * filter->fc_fixed;
+    pt1FilterUpdateCutoff(&filter->x_filter_fixed, two_pi_fc_fixed / (two_pi_fc_fixed + filter->pid_dT_inv));
+}
+
+FAST_CODE float oneEuroFilterApply(oneEuroFilter_t *filter, float input, bool newSample)
+{
+    if (filter->dT_inv <= 0.0f) {
+        return input;
+    }
+
+    // Recompute derivative and adaptive cutoff once per genuine new RX frame (newSample),
+    // not once per PID loop and not merely when the raw value changes. Gating on value-change
+    // (the prior approach) lets the adaptive cutoff freeze indefinitely: if the stick lands on
+    // a new value and then holds it with zero further jitter, d_filter never receives another
+    // sample to decay toward zero, so a post-flick elevated cutoff can stick open forever
+    // instead of settling back to fc_min at rest. Gating on newSample instead still avoids the
+    // original concern this replaces (recomputing every PID loop would sample x_filter's own
+    // convergence transient as if it were stick velocity) since newSample fires only once per
+    // RC frame, matching dT_inv's intended sampling rate — same as d_filter always did.
+    if (newSample) {
+        // Derivative estimate via PT1 at fc_d — dx in RC units/s (rate-normalised by dT_inv)
+        const float dx = (input - filter->x_filter.state) * filter->dT_inv;
+        const float dx_hat = pt1FilterApply(&filter->d_filter, dx);
+
+        // Adaptive cutoff: fc_min + beta*|dx_hat|, optionally capped by fc_max
+        float cutoff = filter->fc_min + filter->beta * fabsf(dx_hat);
+        if (filter->fc_max > 0.0f) {
+            cutoff = fminf(cutoff, filter->fc_max);
+        }
+        filter->lastCutoff = cutoff;
+
+        // Stage 1 (adaptive): cutoff follows stick velocity — transparent at full stick,
+        // fc_min at rest. Stage 2 (fixed) at fc_fixed provides a constant quantization
+        // floor regardless of how open stage 1 becomes.
+        // x_filter is applied every PID loop, so k uses pid_dT_inv (not rc dT_inv)
+        const float two_pi_fc = 2.0f * M_PIf * cutoff;
+        const float k = two_pi_fc / (two_pi_fc + filter->pid_dT_inv);
+        pt1FilterUpdateCutoff(&filter->x_filter, k);
+        // x_filter_fixed k is maintained by oneEuroFilterUpdate; no per-sample update needed
+    }
+
+    const float stage1Output = pt1FilterApply(&filter->x_filter, input);
+    if (!filter->stage2Enabled) {
+        return stage1Output;
+    }
+    return pt1FilterApply(&filter->x_filter_fixed, stage1Output);
+}
