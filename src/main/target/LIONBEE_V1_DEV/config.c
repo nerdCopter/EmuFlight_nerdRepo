@@ -57,6 +57,10 @@ void targetConfiguration(void)
     // Maximum power while armed, lowest power while disarmed.
     vtxSettingsConfigMutable()->power = VTX_RTC6705_POWER_COUNT - 1;
     vtxSettingsConfigMutable()->lowPowerDisarm = 1;
+    // Factory band F, channel 4 (5800 MHz).
+    vtxSettingsConfigMutable()->band = 4;
+    vtxSettingsConfigMutable()->channel = 4;
+    vtxSettingsConfigMutable()->freq = 5800;
 #endif
     // Not supported: the reference VTX table (5 bands, 8 channels). EF has no VTX table.
 }
