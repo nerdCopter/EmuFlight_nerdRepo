@@ -28,6 +28,9 @@
 #include "io/gps.h"
 #include "io/ledstrip.h"
 #include "io/serial.h"
+#include "io/vtx.h"
+
+#include "drivers/vtx_rtc6705.h"
 
 #include "config_helper.h"
 
@@ -50,7 +53,11 @@ void targetConfiguration(void)
     gpsConfigMutable()->provider = GPS_UBLOX;
     gpsConfigMutable()->gps_ublox_use_galileo = true;
 #endif
-    // Not supported: the reference seeds a VTX table (5 bands, 8 channels, power values 0, 1, 2 = RTC6705 external codes 00, 01, 10)
-    // and sets vtxSettingsConfigMutable()->power = 3 and lowPowerDisarm = VTX_LOW_POWER_DISARM_ALWAYS. EF has no VTX table.
+#ifdef USE_VTX_RTC6705
+    // Maximum power while armed, lowest power while disarmed.
+    vtxSettingsConfigMutable()->power = VTX_RTC6705_POWER_COUNT - 1;
+    vtxSettingsConfigMutable()->lowPowerDisarm = 1;
+#endif
+    // Not supported: the reference VTX table (5 bands, 8 channels). EF has no VTX table.
 }
 #endif
