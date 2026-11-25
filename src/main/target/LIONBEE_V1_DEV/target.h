@@ -189,13 +189,14 @@
 // config.c seeds the GPS function on UART5, the u-blox provider, Galileo and the LED strip layout.
 #define USE_TARGET_CONFIG
 
-// --- Motors and LED strip timers. Unproven: the reference marks this mapping untested on a flashed build.
+// --- Motors and LED strip timers.
+// LED strip on DMA1 Ch1 (option 0); motors on DMA2 Ch2 to Ch5 (options 8 to 11) so they do not take the LED stream.
 #define TIMER_PIN_MAPPING \
     TIMER_PIN_MAP( 0, LED_STRIP_PIN , 2,  0) \
-    TIMER_PIN_MAP( 1, PA1 , 1,  0) /* motor 1 */ \
-    TIMER_PIN_MAP( 2, PA0 , 1,  0) /* motor 2 */ \
-    TIMER_PIN_MAP( 3, PA9 , 1,  0) /* motor 3 */ \
-    TIMER_PIN_MAP( 4, PA10, 1,  0) /* motor 4 */
+    TIMER_PIN_MAP( 1, PA1 , 1,  8) /* motor 1 */ \
+    TIMER_PIN_MAP( 2, PA0 , 1,  9) /* motor 2 */ \
+    TIMER_PIN_MAP( 3, PA9 , 1, 10) /* motor 3 */ \
+    TIMER_PIN_MAP( 4, PA10, 1, 11) /* motor 4 */
 #define MOTOR1_PIN           PA1
 #define MOTOR2_PIN           PA0
 #define MOTOR3_PIN           PA9
