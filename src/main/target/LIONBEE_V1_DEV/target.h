@@ -167,8 +167,7 @@
 #define UART5_TX_PIN         PB6
 #define UART5_RX_PIN         PB5
 #define SERIAL_PORT_COUNT    2
-// Not supported: GPS_UART (default serial function for the GPS port; EF sets none). Set the GPS function on UART5 in the Configurator.
-// #define GPS_UART             SERIAL_PORT_UART5
+// The reference sets GPS_UART (default GPS function on UART5); EF sets it in config.c with targetSerialPortFunctionConfig.
 
 // --- ADC
 #define ADC_INSTANCE         ADC1
@@ -187,7 +186,7 @@
 // #define DEFAULT_OSD_DISPLAYPORT_DEVICE  OSD_DISPLAYPORT_DEVICE_AUTO
 // Not supported: SYSTEM_HSE_MHZ is read by STM32 system files only; the reference sets 8.
 // #define SYSTEM_HSE_MHZ                  8
-// config.c seeds the default LED strip layout and the GNSS setting.
+// config.c seeds the GPS function on UART5, the u-blox provider, Galileo and the LED strip layout.
 #define USE_TARGET_CONFIG
 
 // --- Motors and LED strip timers. Unproven: the reference marks this mapping untested on a flashed build.

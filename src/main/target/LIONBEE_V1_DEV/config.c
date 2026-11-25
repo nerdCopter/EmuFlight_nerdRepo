@@ -27,10 +27,18 @@
 
 #include "io/gps.h"
 #include "io/ledstrip.h"
+#include "io/serial.h"
+
+#include "config_helper.h"
+
+static targetSerialPortFunction_t targetSerialPortFunction[] = {
+    { SERIAL_PORT_UART5, FUNCTION_GPS },
+};
 
 // Source: betaflight/config configs/NEBD/LIONBEE_V1_DEV/config.c. Runs on a config reset only.
 void targetConfiguration(void)
 {
+    targetSerialPortFunctionConfig(targetSerialPortFunction, ARRAYLEN(targetSerialPortFunction));
 #ifdef USE_LED_STRIP
     // Four GPS-status LEDs on one row.
     parseLedStripConfig(0, "0,0::G:0");
@@ -39,6 +47,7 @@ void targetConfiguration(void)
     parseLedStripConfig(3, "3,0::G:0");
 #endif
 #ifdef USE_GPS
+    gpsConfigMutable()->provider = GPS_UBLOX;
     gpsConfigMutable()->gps_ublox_use_galileo = true;
 #endif
     // Not supported: the reference seeds a VTX table (5 bands, 8 channels, power values 0, 1, 2 = RTC6705 external codes 00, 01, 10)
