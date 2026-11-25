@@ -100,6 +100,7 @@
 // RTC6705 external power code: PA14 = bit 0, PB7 = bit 1; 00 = lowest (boot default), 01 = mid, 10 = max, 11 is undefined and unsafe.
 // Schematic: PA14 and PB7 feed the OSD MCU (VTX_CTRL_A0/A1), not the RTC6705; the power path and output per code are unmeasured.
 // Schematic: Q4 on VUSB pulls the VTX regulator enable low, so the VTX is probably off on USB power (unconfirmed).
+#define ENABLE_RTC6705_DYNAMIC_POWER_CTRL 1
 #define RTC6705_EX_POWER_1_PIN PA14
 #define RTC6705_EX_POWER_2_PIN PB7
 #define USE_VTX_RTC6705
