@@ -97,16 +97,15 @@
 #define LED_STRIP_PIN        PB1
 
 // --- VTX: RTC6705 on shared SPI3, chip select PB2, external power code pins
-// Not supported: RTC6705 power code. Reference: PA14 = bit 0, PB7 = bit 1; 00 = 25 mW, 01 = 100 mW, 10 = MAX, 11 undefined and unsafe.
-// Not supported: ENABLE_RTC6705_DYNAMIC_POWER_CTRL, RTC6705_EX_POWER_1_PIN, RTC6705_EX_POWER_2_PIN.
-// PINIO drives both pins low at init (code 00, lowest power) until the feature is ported.
-#define PINIO1_PIN           PA14
-#define PINIO2_PIN           PB7
+// RTC6705 external power code: PA14 = bit 0, PB7 = bit 1; 00 = lowest (boot default), 01 = mid, 10 = max, 11 is undefined and unsafe.
+// Unproven: output power per code is from the vendor and not measured.
+#define RTC6705_EX_POWER_1_PIN PA14
+#define RTC6705_EX_POWER_2_PIN PB7
 #define USE_VTX_RTC6705
 #define RTC6705_CS_PIN       PB2
 #define RTC6705_SPI_INSTANCE SPI3
-// Not supported: SPI_SHARED_MAX7456_AND_RTC6705 handled by the reference driver only.
-// #define SPI_SHARED_MAX7456_AND_RTC6705
+// Unproven: taken from the reference config; its effect is not tested.
+#define SPI_SHARED_MAX7456_AND_RTC6705
 
 // --- SPI
 #define USE_SPI
