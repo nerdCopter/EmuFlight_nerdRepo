@@ -1,7 +1,7 @@
 # CLI Reference
 
 > **Auto-generated** — do not edit manually.
-> Source: `src/main/interface/settings.c`, `src/main/interface/cli.c` | Generated: 2026-10-30 | Commit: `e112aae36` | Firmware: `0.5.0` | MSP: `0.1.55`
+> Source: `src/main/interface/settings.c`, `src/main/interface/cli.c` | Generated: 2026-11-26 | Commit: `399216701` | Firmware: `0.5.0` | MSP: `0.1.55`
 
 Settings parameters (`valueTable[]`) and CLI commands that persist config through
 their own dedicated table instead (`cmdTable[]`, PG-backed) are both covered here.
@@ -187,8 +187,8 @@ their own dedicated table instead (`cmdTable[]`, PG-backed) are both covered her
 | `fpv_mix_degrees` | uint8 | master | `0` – `90` |  |
 | `cinematic_yaw` | uint8 | master | `OFF`, `ON` |  |
 | `max_aux_channels` | uint8 | master | `0` – `MAX_AUX_CHANNEL_COUNT` |  |
-| `serialrx_provider` | uint8 | master | `SPEK1024`, `SPEK2048`, `SBUS`, `SUMD`, `SUMH`, `XB-B`, `XB-B-RJ01`, `IBUS`, `JETIEXBUS`, `CRSF`, `SRXL`, `CUSTOM`, `FPORT`, `GHST` | `USE_SERIAL_RX` |
-| `serialrx_inverted` | uint8 | master | `OFF`, `ON` | `USE_SERIAL_RX` |
+| `serialrx_provider` | uint8 | master | `SPEK1024`, `SPEK2048`, `SBUS`, `SUMD`, `SUMH`, `XB-B`, `XB-B-RJ01`, `IBUS`, `JETIEXBUS`, `CRSF`, `SRXL`, `CUSTOM`, `FPORT`, `GHST` | `USE_SERIALRX` |
+| `serialrx_inverted` | uint8 | master | `OFF`, `ON` | `USE_SERIALRX` |
 | `spektrum_sat_bind` | uint8 | master | `SPEKTRUM_SAT_BIND_DISABLED` – `SPEKTRUM_SAT_BIND_MAX` | `USE_SPEKTRUM_BIND` |
 | `spektrum_sat_bind_autoreset` | uint8 | master | `OFF`, `ON` | `USE_SPEKTRUM_BIND` |
 | `sbus_baud_fast` | uint8 | master | `OFF`, `ON` | `USE_SERIALRX_SBUS` |
