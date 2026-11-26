@@ -82,9 +82,9 @@
 #define RX_SCK_PIN                      SPI2_SCK_PIN
 #define RX_MISO_PIN                     SPI2_MISO_PIN
 #define RX_MOSI_PIN                     SPI2_MOSI_PIN
-#define RX_NSS_PIN                      SPI2_NSS_PIN
-#define RX_CC2500_SPI_GDO_0_PIN         PB2
-#define RX_CC2500_SPI_LED_PIN           PA13
+#define RX_SPI_CS_PIN                   SPI2_NSS_PIN
+#define RX_SPI_EXTI_PIN                 PB2
+#define RX_SPI_LED_PIN                  PA13
 #define RX_CC2500_SPI_TX_EN_PIN         PB10
 #define RX_CC2500_SPI_ANT_SEL_PIN       PA7
 #define BINDPLUG_PIN                    PC15

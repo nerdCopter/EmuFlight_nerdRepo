@@ -147,7 +147,7 @@ ioTag_t preinitIPUList[SPI_PREINIT_IPU_COUNT] = {
     IO_TAG(FLASH_CS_PIN),
 #endif
 #if defined(USE_RX_SPI) && !defined(USE_RX_SOFTSPI)
-    IO_TAG(RX_NSS_PIN),
+    IO_TAG(RX_SPI_CS_PIN),
 #endif
 #if defined(MAX7456_SPI_CS_PIN)
     IO_TAG(MAX7456_SPI_CS_PIN),

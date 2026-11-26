@@ -100,7 +100,7 @@
 #undef USE_ESCSERIAL // driver excluded from SITL build (MCU_EXCLUDES), no real timer/serial hardware to pass through
 #undef USE_PPM
 #undef USE_PWM
-#undef USE_SERIAL_RX
+#undef USE_SERIALRX
 #undef USE_SERIALRX_CRSF
 #undef USE_SERIALRX_IBUS
 #undef USE_SERIALRX_SBUS

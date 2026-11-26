@@ -206,8 +206,8 @@ bool NRF24L01_ReadPayloadIfAvailable(uint8_t *data, uint8_t length) {
 }
 
 #ifndef UNIT_TEST
-#define DISABLE_RX()    {IOHi(DEFIO_IO(RX_NSS_PIN));}
-#define ENABLE_RX()     {IOLo(DEFIO_IO(RX_NSS_PIN));}
+#define DISABLE_RX()    {IOHi(DEFIO_IO(RX_SPI_CS_PIN));}
+#define ENABLE_RX()     {IOLo(DEFIO_IO(RX_SPI_CS_PIN));}
 /*
  * Fast read of payload, for use in interrupt service routine
  */

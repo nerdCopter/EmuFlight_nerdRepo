@@ -116,7 +116,7 @@ void cc2500TxDisable(void) {
 #endif
 
 void cc2500LedOn(void) {
-#if defined(RX_CC2500_SPI_LED_PIN_INVERTED)
+#if defined(RX_SPI_LED_INVERTED)
     IOLo(cc2500LedPin);
 #else
     IOHi(cc2500LedPin);
@@ -124,7 +124,7 @@ void cc2500LedOn(void) {
 }
 
 void cc2500LedOff(void) {
-#if defined(RX_CC2500_SPI_LED_PIN_INVERTED)
+#if defined(RX_SPI_LED_INVERTED)
     IOHi(cc2500LedPin);
 #else
     IOLo(cc2500LedPin);
@@ -171,10 +171,10 @@ bool cc2500SpiInit(void) {
         rssiSource = RSSI_SOURCE_RX_PROTOCOL;
     }
     // gpio init here
-    gdoPin = IOGetByTag(IO_TAG(RX_CC2500_SPI_GDO_0_PIN));
+    gdoPin = IOGetByTag(IO_TAG(RX_SPI_EXTI_PIN));
     IOInit(gdoPin, OWNER_RX_SPI, 0);
     IOConfigGPIO(gdoPin, IOCFG_IN_FLOATING);
-    cc2500LedPin = IOGetByTag(IO_TAG(RX_CC2500_SPI_LED_PIN));
+    cc2500LedPin = IOGetByTag(IO_TAG(RX_SPI_LED_PIN));
     IOInit(cc2500LedPin, OWNER_LED, 0);
     IOConfigGPIO(cc2500LedPin, IOCFG_OUT_PP);
 #if defined(USE_RX_CC2500_SPI_PA_LNA)

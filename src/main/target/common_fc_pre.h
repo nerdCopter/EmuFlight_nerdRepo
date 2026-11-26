@@ -211,7 +211,7 @@
 #define USE_PPM
 #define USE_PWM
 #endif
-#define USE_SERIAL_RX
+#define USE_SERIALRX
 #define USE_SERIALRX_CRSF       // Team Black Sheep Crossfire protocol
 #define USE_SERIALRX_GHST       // ImmersionRC Ghost Protocol
 #define USE_SERIALRX_IBUS       // FlySky and Turnigy receivers

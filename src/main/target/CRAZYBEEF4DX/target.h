@@ -104,7 +104,7 @@
 #define RX_SCK_PIN              SPI3_SCK_PIN
 #define RX_MISO_PIN             SPI3_MISO_PIN
 #define RX_MOSI_PIN             SPI3_MOSI_PIN
-#define RX_NSS_PIN              SPI3_NSS_PIN
+#define RX_SPI_CS_PIN           SPI3_NSS_PIN
 
 #define RX_NSS_GPIO_CLK_PERIPHERAL   RCC_APB2Periph_GPIOA
 

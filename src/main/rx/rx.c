@@ -168,7 +168,7 @@ STATIC_UNIT_TESTED bool isPulseValid(uint16_t pulseDuration) {
             pulseDuration <= rxConfig()->rx_max_usec;
 }
 
-#ifdef USE_SERIAL_RX
+#ifdef USE_SERIALRX
 bool serialRxInit(const rxConfig_t *rxConfig, rxRuntimeConfig_t *rxRuntimeConfig) {
     bool enabled = false;
     switch (rxConfig->serialrx_provider) {
@@ -266,7 +266,7 @@ void rxInit(void) {
             rcData[modeActivationCondition->auxChannelIndex + NON_AUX_CHANNEL_COUNT] = value;
         }
     }
-#ifdef USE_SERIAL_RX
+#ifdef USE_SERIALRX
     if (feature(FEATURE_RX_SERIAL)) {
         const bool enabled = serialRxInit(rxConfig(), &rxRuntimeConfig);
         if (!enabled) {

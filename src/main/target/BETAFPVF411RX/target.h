@@ -89,16 +89,16 @@
 #define SPI3_MISO_PIN           PB4
 #define SPI3_MOSI_PIN           PB5
 #define SPI3_NSS_PIN            PA15 //RX_SPI_CS
-#define RX_NSS_PIN              SPI3_NSS_PIN
+#define RX_SPI_CS_PIN           SPI3_NSS_PIN
 
 #define RX_NSS_GPIO_CLK_PERIPHERAL   RCC_APB2Periph_GPIOA
 
 #define USE_RX_SPI
 #define RX_SPI_INSTANCE         SPI3
 #define RX_CC2500_SPI_DISABLE_CHIP_DETECTION
-#define RX_CC2500_SPI_GDO_0_PIN     PC13 //RX_SPI_EXTI
-#define RX_CC2500_SPI_LED_PIN       PC15 //RX_SPI_led
-#define RX_CC2500_SPI_LED_PIN_INVERTED
+#define RX_SPI_EXTI_PIN             PC13 //RX_SPI_EXTI
+#define RX_SPI_LED_PIN              PC15 //RX_SPI_led
+#define RX_SPI_LED_INVERTED
 #define RX_FRSKY_SPI_LED_PIN_INVERTED
 #define USE_RX_CC2500_SPI_PA_LNA
 #define RX_CC2500_SPI_TX_EN_PIN      PB9 //RX_SPI_CC2500_TX_EN

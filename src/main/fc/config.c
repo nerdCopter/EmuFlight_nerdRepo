@@ -264,7 +264,7 @@ static void validateAndFixConfig(void) {
 #ifndef USE_PPM
     featureClear(FEATURE_RX_PPM);
 #endif
-#ifndef USE_SERIAL_RX
+#ifndef USE_SERIALRX
     featureClear(FEATURE_RX_SERIAL);
 #endif
 #if !defined(USE_SOFTSERIAL1) && !defined(USE_SOFTSERIAL2)

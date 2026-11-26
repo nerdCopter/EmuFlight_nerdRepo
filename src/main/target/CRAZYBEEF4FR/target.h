@@ -96,7 +96,7 @@
 #define RX_SCK_PIN              SPI3_SCK_PIN
 #define RX_MISO_PIN             SPI3_MISO_PIN
 #define RX_MOSI_PIN             SPI3_MOSI_PIN
-#define RX_NSS_PIN              SPI3_NSS_PIN
+#define RX_SPI_CS_PIN           SPI3_NSS_PIN
 
 #define RX_NSS_GPIO_CLK_PERIPHERAL   RCC_APB2Periph_GPIOA
 
@@ -105,8 +105,8 @@
 #define RX_SPI_INSTANCE         SPI3
 
 #define RX_CC2500_SPI_DISABLE_CHIP_DETECTION
-#define RX_CC2500_SPI_GDO_0_PIN     PC14
-#define RX_CC2500_SPI_LED_PIN       PB9
+#define RX_SPI_EXTI_PIN             PC14
+#define RX_SPI_LED_PIN              PB9
 
 #define BINDPLUG_PIN             PB2
 
